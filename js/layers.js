@@ -168,7 +168,6 @@ addLayer("f", {
         player.f.caeffect=tmp.f.effofca.pow(player.f.calevel)
         player.f.cmeffect=tmp.f.effofcm.pow(player.f.cmlevel).pow(0.75)
         if (player.devSpeed>1) player.points= new Decimal(0)
-        player.f.ticklen+=(diff)
         if(hasUpgrade("f",75)) player.f.isca=true
         if(inChallenge("f",21)) player.f.slog21time+=(4*diff)
         if(inChallenge("f",32)&&player.f.ftype==1) player.f.log12time+=((challengeCompletions("f",32)*8+8)*(diff*5))
