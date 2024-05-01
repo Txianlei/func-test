@@ -13,17 +13,24 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.6.6",
-	name: "Mini-update",
+	num: "0.7",
+	name: "stage 3",
 }
 
 let changelog = `
-	<h1><b>Current endgame: Have study 61.</h1><br><br>
+	<h1><b>Current endgame: Reach stage 3.</h1><br><br>
 	<h1>Changelog:</h1><br><br>
+	<h3>v0.7</h3><br>
+		-Added 10 studies.<br>
+		-Added 2 challenges.<br>
+		-Can reach stage 3.<br>
+		-Fixed some bugs.<br>
+		-Rebalanced minigame.<br>
+		-Added 5 achievements.<br><br>
 	<h4>v0.6.6</h4><br>
 		-Added 3 studies.<br>
 		-Added a minigame.<br>
-		-Fixed some bugs.<br>
+		-Fixed some bugs.<br><br>
 	<h3>v0.6</h3><br>
 		-Added 10 upgrades.<br>
 		-Added function study.<br>

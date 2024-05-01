@@ -28,10 +28,12 @@ addLayer("f", {
         isstud:false,
         slog21time: 0,
         log12time: 0,
+        log10_21time: 0,
         cfunc: "",
+        randtext:"",
         y:new Decimal(1000),
+        k:new Decimal(0.002),
     }},
-    studycolor:"rgb(250,200,0)",
     color: "#DDDDDD",
     requires: new Decimal(10), // Can be a function that takes requirement increases into account
     resource: "points", // Name of prestige currency
@@ -67,31 +69,6 @@ addLayer("f", {
                 ["display-text",
                     function() { return `SORRY FOR RESET!HERE'S A STAGE 2 GAME FILE:`},
                     { "color": "rgba(245,120,120)", "font-size": "50px", "font-family": "Bahnschrift", "text-shadow" : "0 0 15px rgb(200,100,120)" }],
-                ["display-text",
-                    function() { return `eyJ0YWIiOiJvcHRpb25zLXRhYiIsIm5hdlRhYiI6InRyZWUtdGFiIiwidGltZSI6MTcxNDIwNTQxNzA4Miwibm90aWZ5Ijp7fSwidmVyc2lvblR5cGUiOiJ1aXRmIiwidmVyc2lvbiI6IjAuNi42IiwidGltZVBsYXllZCI6MjU4Mz
-                    QuOTQ1NDU3ODQ5MDgsImtlZXBHb2luZyI6ZmFsc2UsImhhc05hTiI6dHJ1ZSwicG9pbnRzIjoiMSIsInN1YnRhYnMiOnsiY2hhbmdlbG9nLXRhYiI6e30sImYiOnsibWFpblRhYnMiOiJsb2cxMCh4KSJ9fSwibGFzdFNhZmVUYWIiOiJmIiwiaW5mb2JveGVzI
-                    jp7fSwiaW5mby10YWIiOnsidW5sb2NrZWQiOnRydWUsInRvdGFsIjoiMCIsImJlc3QiOiIwIiwicmVzZXRUaW1lIjoyNTgzNC45NDU0NTc4NDkwOCwiZm9yY2VUb29sdGlwIjpmYWxzZSwiYnV5YWJsZXMiOnt9LCJub1Jlc3BlY0NvbmZpcm0iOmZhbHNlLCJj
-                    bGlja2FibGVzIjp7fSwic3BlbnRPbkJ1eWFibGVzIjoiMCIsInVwZ3JhZGVzIjpbXSwibWlsZXN0b25lcyI6W10sImxhc3RNaWxlc3RvbmUiOm51bGwsImFjaGlldmVtZW50cyI6W10sImNoYWxsZW5nZXMiOnt9LCJncmlkIjp7fSwicHJldlRhYiI6IiJ9LCJ
-                    vcHRpb25zLXRhYiI6eyJ1bmxvY2tlZCI6dHJ1ZSwidG90YWwiOiIwIiwiYmVzdCI6IjAiLCJyZXNldFRpbWUiOjI1ODM0Ljk0NTQ1Nzg0OTA4LCJmb3JjZVRvb2x0aXAiOmZhbHNlLCJidXlhYmxlcyI6e30sIm5vUmVzcGVjQ29uZmlybSI6ZmFsc2UsImNsaW
-                    NrYWJsZXMiOnt9LCJzcGVudE9uQnV5YWJsZXMiOiIwIiwidXBncmFkZXMiOltdLCJtaWxlc3RvbmVzIjpbXSwibGFzdE1pbGVzdG9uZSI6bnVsbCwiYWNoaWV2ZW1lbnRzIjpbXSwiY2hhbGxlbmdlcyI6e30sImdyaWQiOnt9LCJwcmV2VGFiIjoiIn0sImNoY
-                    W5nZWxvZy10YWIiOnsidW5sb2NrZWQiOnRydWUsInRvdGFsIjoiMCIsImJlc3QiOiIwIiwicmVzZXRUaW1lIjoyNTgzNC45NDU0NTc4NDkwOCwiZm9yY2VUb29sdGlwIjpmYWxzZSwiYnV5YWJsZXMiOnt9LCJub1Jlc3BlY0NvbmZpcm0iOmZhbHNlLCJjbGlj
-                    a2FibGVzIjp7fSwic3BlbnRPbkJ1eWFibGVzIjoiMCIsInVwZ3JhZGVzIjpbXSwibWlsZXN0b25lcyI6W10sImxhc3RNaWxlc3RvbmUiOm51bGwsImFjaGlldmVtZW50cyI6W10sImNoYWxsZW5nZXMiOnt9LCJncmlkIjp7fSwicHJldlRhYiI6IiJ9LCJmIjp
-                    7InVubG9ja2VkIjp0cnVlLCJwb2ludHMiOiIxIiwiZnR5cGUiOjIsImFkZGVyIjoiMCIsIm11bHRpcGxpZXIiOiIxIiwidG90YWxtdWx0IjoiMSIsImV4cCI6IjEiLCJjYXJlcSI6IjEwLjk3IiwiY2FsZXZlbCI6IjAiLCJjYXBvaW50cyI6IjAiLCJjYWVmZm
-                    VjdCI6IjEiLCJjbXJlcSI6IjI0LjciLCJjbWxldmVsIjoiMCIsImNtcG9pbnRzIjoiMCIsImNtZWZmZWN0IjoiMSIsImZ1bmNwb3dlciI6IjIxIiwiY3ViZXJlcSI6IjIyOTQ2ODI1LjE4OTUxMjk1IiwiaXNTYWNyaWZpY2UiOnRydWUsInRvdGFscG93ZXIiO
-                    iIyMSIsImNoYWxsZW5nZWNoZWNrZXIiOiIyIiwiaXNjYSI6dHJ1ZSwiaXNjbSI6dHJ1ZSwiaXNzdHVkIjpmYWxzZSwic2xvZzIxdGltZSI6Nzg2LjQ1OTk5OTk5OTk5MzIsImxvZzEydGltZSI6MCwiY2Z1bmMiOiJsb2cxMCh4KSIsInkiOiIxMDAwIiwidG90
-                    YWwiOiIwIiwiYmVzdCI6IjAiLCJyZXNldFRpbWUiOjI1ODM0Ljk0NTQ1Nzg0OTA4LCJmb3JjZVRvb2x0aXAiOmZhbHNlLCJidXlhYmxlcyI6e30sIm5vUmVzcGVjQ29uZmlybSI6ZmFsc2UsImNsaWNrYWJsZXMiOnsiMTEiOiIiLCIxMiI6IiIsIjIxIjoiIiw
-                    iMjIiOiIiLCIzMSI6IiJ9LCJzcGVudE9uQnV5YWJsZXMiOiIwIiwidXBncmFkZXMiOltdLCJtaWxlc3RvbmVzIjpbXSwibGFzdE1pbGVzdG9uZSI6bnVsbCwiYWNoaWV2ZW1lbnRzIjpbXSwiY2hhbGxlbmdlcyI6eyIxMSI6MSwiMTIiOjEsIjIxIjoxLCIyMi
-                    I6MSwiMzEiOjAsIjMyIjowLCI0MSI6MSwiNDIiOjEsIjUxIjowfSwiZ3JpZCI6e30sInByZXZUYWIiOiIiLCJhY3RpdmVDaGFsbGVuZ2UiOm51bGx9LCJhIjp7InVubG9ja2VkIjp0cnVlLCJ0b3RhbCI6IjAiLCJiZXN0IjoiMCIsInJlc2V0VGltZSI6MjU4M
-                    zQuOTQ1NDU3ODQ5MDgsImZvcmNlVG9vbHRpcCI6ZmFsc2UsImJ1eWFibGVzIjp7fSwibm9SZXNwZWNDb25maXJtIjpmYWxzZSwiY2xpY2thYmxlcyI6e30sInNwZW50T25CdXlhYmxlcyI6IjAiLCJ1cGdyYWRlcyI6W10sIm1pbGVzdG9uZXMiOltdLCJsYXN0
-                    TWlsZXN0b25lIjpudWxsLCJhY2hpZXZlbWVudHMiOlsiMTEiLCIxMiIsIjEzIiwiMTQiLCIyMyIsIjIxIiwiMjIiLCIyNSIsIjE1IiwiMzEiLCIyNCIsIjMzIiwiMzIiLCIzNSIsIjQxIiwiNDIiLCI0MyIsIjQ0IiwiNDUiLCI1MSIsIjUyIiwiNTMiLCI1NCI
-                    sIjU1IiwiNjEiLCI2MiIsIjYzIiwiNjQiLCI2NSIsIjM0IiwiNzEiXSwiY2hhbGxlbmdlcyI6e30sImdyaWQiOnt9LCJwcmV2VGFiIjoiIn0sIm0iOnsidW5sb2NrZWQiOnRydWUsInBvaW50cyI6IjEiLCJ0b3RhbCI6IjAiLCJiZXN0IjoiZWVlZTE4LjAwNj
-                    cyODEwMTUyOTM1OCIsInJlc2V0VGltZSI6MjQ3NjYuODMxOTg0ODc5NDE2LCJmb3JjZVRvb2x0aXAiOmZhbHNlLCJidXlhYmxlcyI6eyIxMSI6IjAiLCIxMiI6IjAiLCIxMyI6IjAiLCIxNCI6IjAiLCIyMSI6IjAiLCIyMiI6IjAiLCIyMyI6IjAiLCIyNCI6Ij
-                    AiLCIzMSI6IjAiLCIzMiI6IjAiLCIzMyI6IjAiLCIzNCI6IjAifSwibm9SZXNwZWNDb25maXJtIjpmYWxzZSwiY2xpY2thYmxlcyI6eyIxMSI6IiIsIjEyIjoiIn0sInNwZW50T25CdXlhYmxlcyI6IjAiLCJ1cGdyYWRlcyI6W10sIm1pbGVzdG9uZXMiOltdLC
-                    JsYXN0TWlsZXN0b25lIjpudWxsLCJhY2hpZXZlbWVudHMiOltdLCJjaGFsbGVuZ2VzIjp7fSwiZ3JpZCI6e30sInByZXZUYWIiOiIiLCJQYXVzZWQiOnRydWUsImZyZWUiOiIwIn0sImJsYW5rIjp7InVubG9ja2VkIjp0cnVlLCJ0b3RhbCI6IjAiLCJiZXN0I
-                    joiMCIsInJlc2V0VGltZSI6MjU4MzQuMTcyNDU3ODQ5MDcsImZvcmNlVG9vbHRpcCI6ZmFsc2UsImJ1eWFibGVzIjp7fSwibm9SZXNwZWNDb25maXJtIjpmYWxzZSwiY2xpY2thYmxlcyI6e30sInNwZW50T25CdXlhYmxlcyI6IjAiLCJ1cGdyYWRlcyI6W10s
-                    Im1pbGVzdG9uZXMiOltdLCJsYXN0TWlsZXN0b25lIjpudWxsLCJhY2hpZXZlbWVudHMiOltdLCJjaGFsbGVuZ2VzIjp7fSwiZ3JpZCI6e30sInByZXZUYWIiOiIifSwidHJlZS10YWIiOnsidW5sb2NrZWQiOnRydWUsInRvdGFsIjoiMCIsImJlc3QiOiIwIiwi
-                    cmVzZXRUaW1lIjoyNTgzNC4xNzI0NTc4NDkwNywiZm9yY2VUb29sdGlwIjpmYWxzZSwiYnV5YWJsZXMiOnt9LCJub1Jlc3BlY0NvbmZpcm0iOmZhbHNlLCJjbGlja2FibGVzIjp7fSwic3BlbnRPbkJ1eWFibGVzIjoiMCIsInVwZ3JhZGVzIjpbXSwibWlsZXN
-                    0b25lcyI6W10sImxhc3RNaWxlc3RvbmUiOm51bGwsImFjaGlldmVtZW50cyI6W10sImNoYWxsZW5nZXMiOnt9LCJncmlkIjp7fSwicHJldlRhYiI6IiJ9fQ==`},],
             ],
             unlocked(){return player.f.ftype==0}
         },
@@ -134,15 +111,36 @@ addLayer("f", {
             ],
             unlocked(){return player.f.ftype==2}
         },
+        "x^k":{
+            content:[
+                ["display-text",
+                function() { return 'Your point gain is:' },
+                {"font-size":"25px"}],
+                ["display-text",
+                    function() { return player.f.cfunc+"="+format(getPointGen())+"/s" },
+                    { "color": "rgb(65,245,65)", "font-size": "50px", "font-family": "Bahnschrift", "text-shadow" : "0 0 15px rgb(65,245,65)" }],
+                ["display-text",
+                    function() { return "k="+format(player.f.k) },
+                    { "color": "rgb(65,245,65)", "font-size": "50px", "font-family": "Bahnschrift", "text-shadow" : "0 0 15px rgb(65,245,65)" }],
+                ["display-text",
+                    function() { return `You have ${format(player.points)} points.`},
+                { "color": "rgb(65,245,65)", "font-size": "50px", "font-family": "Bahnschrift", "text-shadow" : "0 0 15px rgb(65,245,65)" }],
+                "blank",
+                "blank",
+                "blank",
+                ["upgrades",[26,27]],
+            ],
+            unlocked(){return player.f.ftype==3}
+        },
         "Boosters":{
             content:[
                 ["display-text",
                 function() { return "Your function stage is " + player.f.ftype },
                 { "color": "red", "font-size": "25px", "text-shadow" : "0 0 10px red"},],
                 "blank",
-                "clickables"
+                ["clickables",[1,2]]
             ],
-            unlocked(){return tmp.f.clickables[11].unlocked}
+            unlocked(){return tmp.f.clickables[11].unlocked||player.f.ftype>=1}
         }, 
         "Challenges":{
             content:[
@@ -156,7 +154,8 @@ addLayer("f", {
                 ["display-text",function() { return `Next at <h2 style="color:rgb(255,180,0);text-shadow:0 0 5px yellow">${format(player.f.cubereq)}</h2> points`}],
                 "blank",
                 "blank",
-                ["upgrades",[13,14,15,16,17,18]]
+                ["clickables",[3]],
+                ["upgrades",[13,14,15,16,17,18,19,20,21,22,23,24]]
             ],
             unlocked(){return hasUpgrade("f",125)||player.f.isstud}
         },
@@ -169,15 +168,32 @@ addLayer("f", {
         player.f.caeffect=tmp.f.effofca.pow(player.f.calevel)
         player.f.cmeffect=tmp.f.effofcm.pow(player.f.cmlevel).pow(0.75)
         if (player.devSpeed>1) player.points= new Decimal(0)
-        if(challengeCompletions("f",31)>3) player.f.challenges[31]=3
+        player.f.ticklen+=(diff)
         if(hasUpgrade("f",75)) player.f.isca=true
         if(inChallenge("f",21)) player.f.slog21time+=(4*diff)
         if(inChallenge("f",32)&&player.f.ftype==1) player.f.log12time+=((challengeCompletions("f",32)*8+8)*(diff*5))
+        if(inChallenge("f",61)) player.f.log10_21time+=(diff)
         if(inChallenge("f",22)) player.points=player.points.min(5000)
         if(inChallenge("f",42)) player.points=player.points.min(20240)
         if(player.f.ftype==0) player.f.cfunc="slog"+(player.f.exp.eq(1)?"":"(")+(player.f.multiplier.neq(1)?"(":"")+"(x"+(player.f.adder.eq(0)?")":"+"+(`${format(player.f.adder)})`))+(player.f.multiplier.neq(1)?"*"+(`${format(player.f.multiplier)}`)+")":"")+(player.f.exp.eq(1)?"":"^"+(`${format(player.f.exp)}`)+")")+(hasUpgrade("f",42)?"*"+format(upgradeEffect("f",42)):"")
         if(player.f.ftype==1) player.f.cfunc="logᵧ"+(player.f.exp.eq(1)?"":"(")+(player.f.multiplier.neq(1)?"(":"")+"(x"+(player.f.adder.eq(0)?")":"+"+(`${format(player.f.adder)})`))+(player.f.multiplier.neq(1)?"*"+(`${format(player.f.multiplier)}`)+")":"")+(player.f.exp.eq(1)?"":"^"+(`${format(player.f.exp)}`)+")")+(inChallenge("f",31)?"/"+format(player.f.y.pow(((challengeCompletions("f",31)+1)*0.25))):"")
         if(player.f.ftype==2) player.f.cfunc="log10"+(player.f.exp.eq(1)?"":"(")+(player.f.multiplier.neq(1)?"(":"")+"(x"+(player.f.adder.eq(0)?")":"+"+(`${format(player.f.adder)})`))+(player.f.multiplier.neq(1)?"*"+(`${format(player.f.multiplier)}`)+")":"")+(player.f.exp.eq(1)?"":"^"+(`${format(player.f.exp)}`)+")")+(tmp.f.calctmult.gt(1)?"*"+format(tmp.f.calctmult):"")
+        if(player.f.ftype==3) player.f.cfunc=(player.f.multiplier.neq(1)?"(":"")+"x"+(player.f.adder.eq(0)?"":"+"+(`${format(player.f.adder)})`))+(player.f.multiplier.neq(1)?"*"+(`${format(player.f.multiplier)}`)+")":"")+"^k"+(tmp.f.calctmult.gt(1)?"*"+format(tmp.f.calctmult):"")
+    },
+    randTextGen(){
+        let s1=String.fromCharCode(Math.floor(Math.random() * 66)+65)
+        let s2=String.fromCharCode(Math.floor(Math.random() * 66)+65)
+        let s3=String.fromCharCode(Math.floor(Math.random() * 66)+65)
+        let s4=String.fromCharCode(Math.floor(Math.random() * 66)+65)
+        let s5=String.fromCharCode(Math.floor(Math.random() * 66)+65)
+        let s6=String.fromCharCode(Math.floor(Math.random() * 66)+65)
+        let s7=String.fromCharCode(Math.floor(Math.random() * 66)+65)
+        let s8=String.fromCharCode(Math.floor(Math.random() * 66)+65)
+        let s9=String.fromCharCode(Math.floor(Math.random() * 66)+65)
+        let s10=String.fromCharCode(Math.floor(Math.random() * 66)+65)
+        let s11=String.fromCharCode(Math.floor(Math.random() * 66)+65)
+        let s12=String.fromCharCode(Math.floor(Math.random() * 66)+65)
+        player.f.randtext=s1+s2+s3+s4+s5+s7+s5+s6+s1+s11+s12+s8+s9+s10+s4+s11+s12+s1+s2+s5+s6+s7+s8+s9+s10+s2+s3+s4+"\n"+s10+s11+s12+s1+s2+s3+s3+s4+s5+s6+s7+s8+s9+s10+s6+s7+s8+s9+s11+s12
     },
     calcadder(){
         let add=new Decimal(0)
@@ -200,7 +216,8 @@ addLayer("f", {
         if(hasUpgrade("f",113)) add=add.plus(1)
         if(hasUpgrade("f",114)) add=add.plus(upgradeEffect("f",114))
         if(hasUpgrade("f",121)) add=add.plus(upgradeEffect("f",121))
-        if(hasUpgrade("f",131)) add=add.plus(15)
+        if(hasUpgrade("f",221)) add=add.plus(upgradeEffect("f",221))
+        if(hasUpgrade("f",131)) add=add.plus(player.f.log10_21time>35 ? new Decimal(0) : new Decimal(15).pow(new Decimal(1.3).pow(challengeCompletions("f",52))))
         //LOGY21 DEBUFF
         if(inChallenge("f",41)) add=new Decimal(1)
         //stage 0 *
@@ -215,10 +232,13 @@ addLayer("f", {
         //stage 2 *
         if(hasUpgrade("f",123)) add=add.times(upgradeEffect("f",123))
         if(hasUpgrade("f",181)) add=add.times(3)
+        if(hasUpgrade("f",202)) add=add.times(upgradeEffect("f",202))
         //stage 0 ^
         if(hasUpgrade("f",34)) add=add.pow(upgradeEffect("f",34))
         //stage 1 ^
         if(hasChallenge("f",41)&&player.f.ftype==1) add=add.pow(1.5)
+        //stage 2 ^
+        if(player.f.log10_21time>15&&inChallenge("f",61)) add=add.pow(0.6)
         return add
     },
     getCube(){
@@ -227,8 +247,11 @@ addLayer("f", {
             player.f.totalpower=player.f.totalpower.add(1)
         }
         let scal3=new Decimal(1.8)
+        let basereq=new Decimal(100)
+        if(player.f.ftype==3) basereq=new Decimal(2500)
         scal3=scal3.minus(challengeCompletions("f",51)*0.1)
-        player.f.cubereq=new Decimal(scal3).pow(player.f.totalpower).times(100)
+        if(hasUpgrade("f",231)) scal3=scal3.minus(0.075)
+        player.f.cubereq=new Decimal(scal3).pow(player.f.totalpower.div(hasUpgrade("f",211)?1.5:1)).times(basereq.minus(hasAchievement("a",85)?1:0)).div(hasUpgrade("f",232) ? upgradeEffect("f",232) : 1)
     },
     calctimer(){
         let mult=new Decimal(1)
@@ -242,8 +265,10 @@ addLayer("f", {
         if(hasUpgrade("f",81)) mult=mult.plus(upgradeEffect("f",81))
         //stage 2 +
         if(hasUpgrade("f",115)) mult=mult.plus(0.5)
-        if(hasUpgrade("f",122)) mult=mult.plus(upgradeEffect("f",122))
+        if(hasUpgrade("f",122)&&(player.f.log10_21time<=5)) mult=mult.plus(upgradeEffect("f",122))
         if(hasUpgrade("f",141)) mult=mult.plus(upgradeEffect("f",141))
+        if(hasUpgrade("f",191)) mult=mult.plus(25)
+        if(player.f.log10_21time>60) mult=mult.plus(upgradeEffect("f",202))
         if(hasAchievement("a",75)&&player.f.ftype==2) mult=mult.plus(1)
         //LOGY21 DEBUFF
         if(inChallenge("f",41)) mult=new Decimal(1)
@@ -258,7 +283,8 @@ addLayer("f", {
         //stage 2 *
         if(hasUpgrade("f",124)) mult=mult.times(upgradeEffect("f",124))
         if(hasUpgrade("f",151)) mult=mult.times(3)
-        if(hasUpgrade("f",153)) mult=mult.times(upgradeEffect("f",153))
+        if(hasUpgrade("f",153)||inChallenge("f",52)) mult=mult.times(upgradeEffect("f",153))
+        if(hasUpgrade("f",202)) mult=mult.times(upgradeEffect("f",202))
         //stage 0 ^
         if(hasUpgrade("f",33)) mult=mult.pow(upgradeEffect("f",33))
         if(inChallenge("f",11)) mult=mult.sqrt()
@@ -272,6 +298,10 @@ addLayer("f", {
         let tmult=new Decimal(1)
         if(hasUpgrade("f",112)) tmult=tmult.times(upgradeEffect("f",112))
         if(hasUpgrade("f",161)) tmult=tmult.times(2)
+        if(hasUpgrade("f",204)) tmult=tmult.times(1.3)
+        if(hasUpgrade("f",221)) tmult=tmult.times(2)
+        if(player.f.log10_21time>60) tmult=tmult.div(1.5)
+        if(player.f.log10_21time>85) tmult=tmult.times(0)
         return tmult
     },
     calcexponent(){
@@ -279,7 +309,8 @@ addLayer("f", {
         let expo22=new Decimal(1)
         //stage 2
         if(player.f.ftype==2){
-            expo=expo.plus(player.points.pow(0.2).add(1).log10().add(1).ln().pow(2).max(0))
+            if(hasUpgrade("f",201)) expo=expo.plus(player.points.pow(0.275).add(1).log10().add(1).ln().pow(2.2).max(0))
+            else expo=expo.plus(player.points.pow(0.2).add(1).log10().add(1).ln().pow(2).max(0))
         }
         //stage 1
         if(player.f.ftype==1){
@@ -332,6 +363,7 @@ addLayer("f", {
         let eff1=new Decimal(1.5)
         if(hasUpgrade("f",101)) eff1=eff1.plus(0.1)
         if(player.f.ftype>=2) eff1=eff1.plus(0.1)
+        if(hasUpgrade("f",203)) eff1=eff1.plus(0.2)
         if (inChallenge("f",42)) eff1=player.f.calevel.div(5-(player.f.calevel.div(5).min(3))).plus(1.5)
         return eff1
     },
@@ -340,6 +372,7 @@ addLayer("f", {
         let scal2=new Decimal(25)
         if(hasUpgrade("f",94)) scal2=scal2.minus(upgradeEffect("f",94))
         if(hasUpgrade("f",103)) scal2=scal2.minus(3)
+        if(hasUpgrade("f",192)) scal2=scal2.minus(8)
         if(progress.gte(1)){
             if(inChallenge("f",42)) player.points=new Decimal(0)
             player.f.cmlevel=player.f.cmlevel.plus(1)
@@ -352,6 +385,7 @@ addLayer("f", {
         let eff2=new Decimal(1.8)
         if(hasChallenge("f",41)) eff2=eff2.plus(0.1)
         if(player.f.ftype>=2) eff2=eff2.plus(0.1)
+        if(hasUpgrade("f",203)) eff2=eff2.plus(0.2)
         if(inChallenge("f",42)) eff2=player.f.cmlevel.div(7-(player.f.cmlevel.div(3).min(5))).plus(1.8)
         return eff2
     },
@@ -672,7 +706,7 @@ addLayer("f", {
         },
         73:{
             title:"VIII",
-            description(){return "Multiply the adder of x based on the factor of x."},
+            description(){return "Boost the adder of x based on the factor of x."},
             cost(){return new Decimal(37)},
             unlocked(){ 
                 return hasUpgrade("f",72)&&player.f.ftype==1
@@ -787,7 +821,7 @@ addLayer("f", {
         },
         93:{
             title:"XVIII",
-            description(){return "Upgrade VIII affects to the adder of x again."},
+            description(){return "Upgrade VIII affects the adder of x again."},
             cost(){return new Decimal(375)},
             unlocked(){ 
                 return hasUpgrade("f",92)&&player.f.ftype==1
@@ -881,7 +915,7 @@ addLayer("f", {
         },
         112:{
             title:"II",
-            description(){return "Point boost themselves."},
+            description(){return "Points boost themselves."},
             cost(){return new Decimal(1)},
             unlocked(){ 
                 return hasUpgrade("f",111)&&player.f.ftype==2
@@ -932,7 +966,7 @@ addLayer("f", {
             },
             canAfford(){return player.points.gte(25)},
             pay(){return player.points=player.points.minus(25)},
-            effect(){return player.points.add(1).log10()},
+            effect(){return player.f.log10_21time>5 ? new Decimal(0) : player.points.add(1).log10()},
             effectDisplay(){return `+${format(upgradeEffect("f",121))}`},
         },
         122:{
@@ -944,7 +978,7 @@ addLayer("f", {
             },
             canAfford(){return player.points.gte(50)},
             pay(){return player.points=player.points.minus(50)},
-            effect(){return player.points.add(1).log10().sqrt().add(1).ln()},
+            effect(){return player.f.log10_21time>5 ? new Decimal(0) : player.points.add(1).log10().sqrt().add(1).ln()},
             effectDisplay(){return `+${format(upgradeEffect("f",122))}`},
         },
         123:{
@@ -968,7 +1002,7 @@ addLayer("f", {
             },
             canAfford(){return player.points.gte(140)},
             pay(){return player.points=player.points.minus(140)},
-            effect(){return player.f.adder.plus(1).log(1500).add(1).times(hasUpgrade("f",142)?upgradeEffect("f",142):1)},
+            effect(){return player.f.adder.plus(1).log(1500).add(1).log(player.f.adder.pow(0.025).add(1)).add(1).times((hasUpgrade("f",142)||inChallenge("f",52))?upgradeEffect("f",142):1)},
             effectDisplay(){return `x${format(upgradeEffect("f",124))}`},
         },
         125:{
@@ -983,7 +1017,7 @@ addLayer("f", {
         },
         131:{
             title:"11",
-            description(){return "Add 15 to the base adder of x."},
+            description(){return `Add ${format(player.f.log10_21time>35 ? new Decimal(0) : new Decimal(15).pow(new Decimal(1.3).pow(challengeCompletions("f",52))))} to the base adder of x.`},
             cost(){return new Decimal(1)},
             currencyDisplayName:"cube",
             unlocked(){ 
@@ -993,11 +1027,13 @@ addLayer("f", {
         "color"(){
             let c="black"
             if(!hasUpgrade("f",131)&&canAffordUpgrade("f",131)) c="rgb(255,180,0)"
+            if(player.f.log10_21time>35) c="rgb(255,250,0)"
             return c
         },
         "background"(){
             let a=""
             if(!hasUpgrade("f",131)&&canAffordUpgrade("f",131)) a="radial-gradient(black 50%,rgb(255,180,0))"
+            if(player.f.log10_21time>35) a="radial-gradient(black 50%,rgb(255,250,0))"
             return a
         }},
             canAfford(){return player.f.funcpower.gte(1)},
@@ -1029,7 +1065,7 @@ addLayer("f", {
             cost(){return new Decimal(2)},
             currencyDisplayName:"cubes",
             unlocked(){ 
-                return hasUpgrade("f",125)||player.f.isstud
+                return (hasUpgrade("f",125)||player.f.isstud)&&player.f.ftype==2
             },
             style:{"height":"150px","width":"250px","border":"6px solid","border-color":"rgb(255,180,0)","font-size":"15px","margin-top":"25px",
         "color"(){
@@ -1054,22 +1090,26 @@ addLayer("f", {
             cost(){return new Decimal(3)},
             currencyDisplayName:"cubes",
             unlocked(){ 
-                return hasUpgrade("f",125)||player.f.isstud
+                return (hasUpgrade("f",125)||player.f.isstud)&&player.f.ftype==2
             },
             style:{"height":"150px","width":"250px","border":"6px solid","border-color":"rgb(255,180,0)","font-size":"15px","margin-top":"25px","margin-left":"25px",
-        "color"(){
-            let c="black"
-            if(!hasUpgrade("f",142)&&canAffordUpgrade("f",142)) c="rgb(255,180,0)"
-            return c
-        },
-        "background"(){
-            let a=""
-            if(!hasUpgrade("f",142)&&canAffordUpgrade("f",142)) a="radial-gradient(black 50%,rgb(255,180,0))"
-            return a
-        }},
+            "color"(){
+                let c="black"
+                if(!hasUpgrade("f",142)&&canAffordUpgrade("f",142)) c="rgb(255,180,0)"
+                if(inChallenge("f",52)) c="rgb(255,250,0)"
+                if(player.f.log10_21time>35) c="rgb(255,250,0)"
+                return c
+            },
+            "background"(){
+                let a=""
+                if(!hasUpgrade("f",142)&&canAffordUpgrade("f",142)) a="radial-gradient(black 50%,rgb(255,180,0))"
+                if(inChallenge("f",52)) a="radial-gradient(black 50%,rgb(255,250,0))"
+                if(player.f.log10_21time>35) a="radial-gradient(black 50%,rgb(255,250,0))"
+                return a
+            }},
             canAfford(){return player.f.funcpower.gte(3)&&hasUpgrade("f",131)},
             pay(){return player.f.funcpower=player.f.funcpower.minus(3)},
-            effect(){return player.f.totalpower.pow(2).div(5).add(1)},
+            effect(){return player.f.log10_21time>35 ? new Decimal(1) : inChallenge("f",52) ? new Decimal(1).div(player.f.totalpower.pow(2).div(5).add(1)) : player.f.totalpower.pow(2).div(5).add(1)},
             effectDisplay(){return `x${format(upgradeEffect("f",142))}`},
             branches:[131]
         },
@@ -1079,7 +1119,7 @@ addLayer("f", {
             cost(){return new Decimal(2)},
             currencyDisplayName:"cubes",
             unlocked(){ 
-                return hasUpgrade("f",125)||player.f.isstud
+                return (hasUpgrade("f",125)||player.f.isstud)&&player.f.ftype==2
             },
             style:{"height":"150px","width":"250px","border":"6px solid","border-color":"rgb(255,180,0)","font-size":"15px","margin-top":"25px",
         "color"(){
@@ -1102,7 +1142,7 @@ addLayer("f", {
             cost(){return new Decimal(4)},
             currencyDisplayName:"cubes",
             unlocked(){ 
-                return hasUpgrade("f",125)||player.f.isstud
+                return (hasUpgrade("f",125)||player.f.isstud)&&player.f.ftype==2
             },
             style:{"height":"150px","width":"250px","border":"6px solid","border-color":"rgb(255,180,0)","font-size":"15px","margin-top":"25px","margin-left":"25px",
         "color"(){
@@ -1125,23 +1165,27 @@ addLayer("f", {
             cost(){return new Decimal(1)},
             currencyDisplayName:"cube",
             unlocked(){ 
-                return hasUpgrade("f",125)||player.f.isstud
+                return (hasUpgrade("f",125)||player.f.isstud)&&player.f.ftype==2
             },
             style:{"height":"150px","width":"250px","border":"6px solid","border-color":"rgb(255,180,0)","font-size":"15px","margin-top":"25px","margin-left":"25px",
         "color"(){
             let c="black"
             if(!hasUpgrade("f",153)&&canAffordUpgrade("f",153)) c="rgb(255,180,0)"
+            if(player.f.log10_21time>35) c="rgb(255,250,0)"
+            if(inChallenge("f",52)) c="rgb(255,250,0)"
             return c
         },
         "background"(){
             let a=""
             if(!hasUpgrade("f",153)&&canAffordUpgrade("f",153)) a="radial-gradient(black 50%,rgb(255,180,0))"
+            if(inChallenge("f",52)) a="radial-gradient(black 50%,rgb(255,250,0))"
+            if(player.f.log10_21time>35) a="radial-gradient(black 50%,rgb(255,250,0))"
             return a
         }},
             canAfford(){return player.f.funcpower.gte(1)&&hasUpgrade("f",142)},
             pay(){return player.f.funcpower=player.f.funcpower.minus(1)},
             branches:[142],
-            effect(){return player.points.add(1).log10().times(1.2).max(1)},
+            effect(){return player.f.log10_21time>35 ? new Decimal(1) : inChallenge("f",52) ? new Decimal(1).div(player.points.add(1).log10().times(1.2).max(1)):player.points.add(1).log10().times(1.2).max(1)},
             effectDisplay(){return `x${format(upgradeEffect("f",153))}`},
         },
         161:{
@@ -1165,7 +1209,7 @@ addLayer("f", {
         }},
             canAfford(){return player.f.funcpower.gte(3)&&(hasUpgrade("f",151)||hasUpgrade("f",152)||hasUpgrade("f",153))},
             pay(){return player.f.funcpower=player.f.funcpower.minus(3)},
-            branches:[151,152,153],
+            branches(){return player.f.ftype==3 ? [131] : [151,152,153]},
         },
         171:{
             title:"51",
@@ -1219,23 +1263,287 @@ addLayer("f", {
             cost(){return new Decimal(6)},
             currencyDisplayName:"cubes",
             unlocked(){ 
-                return hasUpgrade("f",125)||player.f.isstud
+                return (hasUpgrade("f",125)||player.f.isstud)&&player.f.ftype==2
             },
             style:{"height":"150px","width":"250px","border":"6px solid","border-color":"rgb(255,180,0)","font-size":"15px","margin-top":"25px","margin-left":"25px",
         "color"(){
             let c="black"
-            if(!hasUpgrade("f",172)&&canAffordUpgrade("f",172)) c="rgb(255,180,0)"
+            if(!hasUpgrade("f",181)&&canAffordUpgrade("f",181)) c="rgb(255,180,0)"
             return c
         },
         "background"(){
             let a=""
-            if(!hasUpgrade("f",172)&&canAffordUpgrade("f",172)) a="radial-gradient(black 50%,rgb(255,180,0))"
+            if(!hasUpgrade("f",181)&&canAffordUpgrade("f",181)) a="radial-gradient(black 50%,rgb(255,180,0))"
             return a
         }},
             canAfford(){return player.f.funcpower.gte(6)&&(hasUpgrade("f",171)||hasUpgrade("f",172))},
             pay(){return player.f.funcpower=player.f.funcpower.minus(6)},
             branches:[171,172],
-        }
+        },
+        191:{
+            title:"71",
+            description(){return "Add 25 to the base multiplier of x."},
+            cost(){return new Decimal(3)},
+            currencyDisplayName:"cubes",
+            unlocked(){ 
+                return hasUpgrade("f",125)||player.f.isstud
+            },
+            style:{"height":"150px","width":"250px","border":"6px solid","border-color":"rgb(255,180,0)","font-size":"15px","margin-top":"25px","margin-left":"25px",
+        "color"(){
+            let c="black"
+            if(!hasUpgrade("f",191)&&canAffordUpgrade("f",191)) c="rgb(255,180,0)"
+            return c
+        },
+        "background"(){
+            let a=""
+            if(!hasUpgrade("f",191)&&canAffordUpgrade("f",191)) a="radial-gradient(black 50%,rgb(255,180,0))"
+            return a
+        }},
+            canAfford(){return player.f.funcpower.gte(3)&&hasUpgrade("f",181)},
+            pay(){return player.f.funcpower=player.f.funcpower.minus(3)},
+            branches(){return player.f.ftype==3 ? [171,172] : [181]},
+        },
+        192:{
+            title:"72",
+            description(){return "Reduce the cost exp. of charging factor by 8."},
+            cost(){return new Decimal(5)},
+            currencyDisplayName:"cubes",
+            unlocked(){ 
+                return hasUpgrade("f",125)||player.f.isstud
+            },
+            style:{"height":"150px","width":"250px","border":"6px solid","border-color":"rgb(255,180,0)","font-size":"15px","margin-top":"25px","margin-left":"25px",
+        "color"(){
+            let c="black"
+            if(!hasUpgrade("f",192)&&canAffordUpgrade("f",192)) c="rgb(255,180,0)"
+            return c
+        },
+        "background"(){
+            let a=""
+            if(!hasUpgrade("f",192)&&canAffordUpgrade("f",192)) a="radial-gradient(black 50%,rgb(255,180,0))"
+            return a
+        }},
+            canAfford(){return player.f.funcpower.gte(5)&&hasUpgrade("f",181)},
+            pay(){return player.f.funcpower=player.f.funcpower.minus(5)},
+            branches(){return player.f.ftype==3 ? [171,172] : [181]},
+        },
+        201:{
+            title:"81",
+            description(){return "Sacrifice formula is better."},
+            cost(){return new Decimal(4)},
+            currencyDisplayName:"cubes",
+            unlocked(){ 
+                return (hasUpgrade("f",125)||player.f.isstud)&&player.f.ftype==2
+            },
+            style:{"height":"150px","width":"250px","border":"6px solid","border-color":"rgb(255,180,0)","font-size":"15px","margin-top":"25px","margin-left":"25px",
+        "color"(){
+            let c="black"
+            if(!hasUpgrade("f",201)&&canAffordUpgrade("f",201)) c="rgb(255,180,0)"
+            return c
+        },
+        "background"(){
+            let a=""
+            if(!hasUpgrade("f",201)&&canAffordUpgrade("f",201)) a="radial-gradient(black 50%,rgb(255,180,0))"
+            return a
+        }},
+            canAfford(){return player.f.funcpower.gte(4)&&(hasUpgrade("f",191))},
+            pay(){return player.f.funcpower=player.f.funcpower.minus(4)},
+            branches:[191],
+        }, 
+        202:{
+            title:"82",
+            description(){return "Boost the adder and the factor of x based on the exponent of x."},
+            cost(){return new Decimal(4)},
+            currencyDisplayName:"cubes",
+            unlocked(){ 
+                return (hasUpgrade("f",125)||player.f.isstud)&&player.f.ftype==2
+            },
+            style:{"height":"150px","width":"250px","border":"6px solid","border-color":"rgb(255,180,0)","font-size":"15px","margin-top":"25px","margin-left":"25px",
+        "color"(){
+            let c="black"
+            if(!hasUpgrade("f",202)&&canAffordUpgrade("f",202)) c="rgb(255,180,0)"
+            return c
+        },
+        "background"(){
+            let a=""
+            if(!hasUpgrade("f",202)&&canAffordUpgrade("f",202)) a="radial-gradient(black 50%,rgb(255,180,0))"
+            return a
+        }},
+            canAfford(){return player.f.funcpower.gte(4)&&(hasUpgrade("f",191))},
+            pay(){return player.f.funcpower=player.f.funcpower.minus(4)},
+            branches:[191],
+            effect(){return new Decimal(player.f.exp).pow(player.f.exp).add(1).pow(2.75)},
+            effectDisplay(){return `x${format(upgradeEffect("f",202))}`},
+        },
+        203:{
+            title:"83",
+            description(){return "Add 0.2 to the effect exp. of charging adder and factor."},
+            cost(){return new Decimal(5)},
+            currencyDisplayName:"cubes",
+            unlocked(){ 
+                return (hasUpgrade("f",125)||player.f.isstud)&&player.f.ftype==2
+            },
+            style:{"height":"150px","width":"250px","border":"6px solid","border-color":"rgb(255,180,0)","font-size":"15px","margin-top":"25px","margin-left":"25px",
+        "color"(){
+            let c="black"
+            if(!hasUpgrade("f",203)&&canAffordUpgrade("f",203)) c="rgb(255,180,0)"
+            return c
+        },
+        "background"(){
+            let a=""
+            if(!hasUpgrade("f",203)&&canAffordUpgrade("f",203)) a="radial-gradient(black 50%,rgb(255,180,0))"
+            return a
+        }},
+            canAfford(){return player.f.funcpower.gte(5)&&(hasUpgrade("f",192))},
+            pay(){return player.f.funcpower=player.f.funcpower.minus(5)},
+            branches:[192]
+        },
+        204:{
+            title:"84",
+            description(){return "1.3x point gain."},
+            cost(){return new Decimal(8)},
+            currencyDisplayName:"cubes",
+            unlocked(){ 
+                return hasUpgrade("f",125)||player.f.isstud
+            },
+            style:{"height":"150px","width":"250px","border":"6px solid","border-color":"rgb(255,180,0)","font-size":"15px","margin-top":"25px","margin-left":"25px",
+        "color"(){
+            let c="black"
+            if(!hasUpgrade("f",204)&&canAffordUpgrade("f",204)) c="rgb(255,180,0)"
+            return c
+        },
+        "background"(){
+            let a=""
+            if(!hasUpgrade("f",204)&&canAffordUpgrade("f",204)) a="radial-gradient(black 50%,rgb(255,180,0))"
+            return a
+        }},
+            canAfford(){return player.f.funcpower.gte(8)&&(hasUpgrade("f",192))},
+            pay(){return player.f.funcpower=player.f.funcpower.minus(8)},
+            branches:[192]
+        },
+        211:{
+            title:"91",
+            description(){return "1.5 cubes count as one in cube price formula."},
+            cost(){return new Decimal(9)},
+            currencyDisplayName:"cubes",
+            unlocked(){ 
+                return (hasUpgrade("f",125)||player.f.isstud)&&player.f.ftype==2
+            },
+            style:{"height":"150px","width":"250px","border":"6px solid","border-color":"rgb(255,180,0)","font-size":"15px","margin-top":"25px","margin-left":"25px",
+        "color"(){
+            let c="black"
+            if(!hasUpgrade("f",211)&&canAffordUpgrade("f",211)) c="rgb(255,180,0)"
+            return c
+        },
+        "background"(){
+            let a=""
+            if(!hasUpgrade("f",211)&&canAffordUpgrade("f",211)) a="radial-gradient(black 50%,rgb(255,180,0))"
+            return a
+        }},
+            canAfford(){return player.f.funcpower.gte(9)&&(hasUpgrade("f",201)||hasUpgrade("f",202)||hasUpgrade("f",203)||hasUpgrade("f",204))},
+            pay(){return player.f.funcpower=player.f.funcpower.minus(9)},
+            branches:[201,202,203,204]
+        },
+        221:{
+            title:"101",
+            description(){return hasChallenge("f",61) ? `Add a number to x based on the level of factor charger and double point gain.`:player.f.randtext},
+            cost(){return new Decimal(6)},
+            currencyDisplayName:"cubes",
+            unlocked(){ 
+                return (hasUpgrade("f",125)||player.f.isstud)&&player.f.ftype==2
+            },
+            style:{"height":"150px","width":"250px","border":"6px solid","border-color":"rgb(255,180,0)","font-size":"15px","margin-top":"25px","margin-left":"25px",
+        "color"(){
+            let c="black"
+            if(!hasUpgrade("f",221)&&canAffordUpgrade("f",221)) c="rgb(255,180,0)"
+            return c
+        },
+        "background"(){
+            let a=""
+            if(!hasUpgrade("f",221)&&canAffordUpgrade("f",221)) a="radial-gradient(black 50%,rgb(255,180,0))"
+            return a
+        },
+        "background-color"(){
+            let b=""
+            if(!hasChallenge("f",61)) b="#ad0000"
+            return b
+        }},
+            canAfford(){return player.f.funcpower.gte(6)&&hasUpgrade("f",211)},
+            pay(){return player.f.funcpower=player.f.funcpower.minus(6)},
+            effect(){return new Decimal(player.f.cmlevel).pow(3).add(1).log10().pow(5)},
+            effectDisplay(){return `+${format(upgradeEffect("f",221))}`},
+            branches:[211]
+        },
+        231:{
+            title:"111",
+            description(){return `Reduce the cost scaling of cubes by 0.075`},
+            cost(){return new Decimal(10)},
+            currencyDisplayName:"cubes",
+            unlocked(){ 
+                return (hasUpgrade("f",125)||player.f.isstud)&&player.f.ftype==2
+            },
+            style:{"height":"150px","width":"250px","border":"6px solid","border-color":"rgb(255,180,0)","font-size":"15px","margin-top":"25px","margin-left":"25px",
+        "color"(){
+            let c="black"
+            if(!hasUpgrade("f",231)&&canAffordUpgrade("f",231)) c="rgb(255,180,0)"
+            return c
+        },
+        "background"(){
+            let a=""
+            if(!hasUpgrade("f",231)&&canAffordUpgrade("f",231)) a="radial-gradient(black 50%,rgb(255,180,0))"
+            return a
+        }},
+            canAfford(){return player.f.funcpower.gte(10)&&hasUpgrade("f",221)},
+            pay(){return player.f.funcpower=player.f.funcpower.minus(10)},
+            branches:[221]
+        },
+        232:{
+            title:"112",
+            description(){return `Divide the cost of cubes based on unspent cubes.`},
+            cost(){return new Decimal(44)},
+            currencyDisplayName:"cubes",
+            unlocked(){ 
+                return (hasUpgrade("f",125)||player.f.isstud)&&player.f.ftype==2
+            },
+            style:{"height":"150px","width":"250px","border":"6px solid","border-color":"rgb(255,180,0)","font-size":"15px","margin-top":"25px","margin-left":"25px",
+        "color"(){
+            let c="black"
+            if(!hasUpgrade("f",232)&&canAffordUpgrade("f",232)) c="rgb(255,180,0)"
+            return c
+        },
+        "background"(){
+            let a=""
+            if(!hasUpgrade("f",232)&&canAffordUpgrade("f",232)) a="radial-gradient(black 50%,rgb(255,180,0))"
+            return a
+        }},
+            canAfford(){return player.f.funcpower.gte(44)&&hasUpgrade("f",221)},
+            pay(){return player.f.funcpower=player.f.funcpower.minus(44)},
+            effect(){return player.f.funcpower.times(5).pow(0.7).add(1)},
+            effectDisplay(){return `/${format(upgradeEffect("f",232))}`},
+            branches:[221]
+        },
+        241:{
+            title:"121",
+            description(){return `You can upgrade your function.`},
+            cost(){return new Decimal(100)},
+            currencyDisplayName:"cubes",
+            unlocked(){ 
+                return (hasUpgrade("f",125)||player.f.isstud)&&player.f.ftype==2
+            },
+            style:{"height":"150px","width":"250px","border":"6px solid","border-color":"rgb(255,255,255)","font-size":"15px","margin-top":"25px","margin-left":"25px",
+        "color"(){
+            let c="black"
+            if(!hasUpgrade("f",241)&&canAffordUpgrade("f",241)) c="rgb(255,255,255)"
+            return c
+        },
+        "background"(){
+            let a=""
+            if(!hasUpgrade("f",241)&&canAffordUpgrade("f",241)) a="radial-gradient(black 50%,rgb(255,255,255))"
+            return a
+        }},
+            canAfford(){return player.f.funcpower.gte(100)&&(hasUpgrade("f",231)||hasUpgrade("f",232))},
+            pay(){return player.f.funcpower=player.f.funcpower.minus(100)},
+            branches:[231,232]
+        },
     },
     clickables:{
         11:{
@@ -1246,7 +1554,7 @@ addLayer("f", {
                              currently:+^${format(tmp.f.calcexponent.minus(player.f.exp).max(0))}
                              total boost:+^${format(player.f.exp.minus(1))}`},
             style:{"height":"300px","width":"300px","background-color":"#000000","border-radius":"0%","border":"6px solid","border-color":"rgb(205,125,105)","color":"rgb(205,125,105)","text-shadow":"0 0 15px rgb(205,125,105)","font-size":"15px"},
-            unlocked(){return hasUpgrade("f",23)||player.f.isSacrifice},
+            unlocked(){return (hasUpgrade("f",23)||player.f.isSacrifice)&&player.f.ftype<3},
             onClick(){
                 player.f.isSacrifice=true
                 player.f.exp=player.f.exp.max(tmp.f.calcexponent)
@@ -1258,6 +1566,18 @@ addLayer("f", {
             canClick(){return(hasUpgrade("f",23)||player.f.isSacrifice)&&!inChallenge("f",42)}
         },
         12:{
+            title(){return "Expand your function"},
+            display(){return player.f.exp.gt(tmp.f.calcexponent) ? `Maybe not now..... but it's still clickable!
+                currently:xcoming soon}
+                total boost:xcoming soon`:
+                `Sacrifice all the points and upgrades to grow k.
+                currently:xcoming soon
+                total boost:xcoming soon`},
+            style:{"height":"300px","width":"300px","background-color":"#000000","border-radius":"0%","border":"6px solid","border-color":"rgb(65,245,65)","color":"rgb(65,245,65)","text-shadow":"0 0 15px rgb(65,245,65)","font-size":"15px"},
+            unlocked(){return player.f.ftype>=3},
+            canClick(){return false}
+        },
+        13:{
             title(){return "Upgrade your function"},
             display(){
                 if (player.f.ftype==0){
@@ -1276,6 +1596,16 @@ addLayer("f", {
                     Sacrifice resets nothing.
                     `
                 }
+                if (player.f.ftype==2){
+                    return `Reset all the progress but level up the function by 1.
+                    All upgrades will be removed.
+                    Studies expect 11,41,51,52,71,72,84 will be removed
+                    The formula of point gain will be x^k(k<1).
+                    Base cube req is 2500
+                    Remove log10 challenges.
+                    Sacrifice is re-designed.
+                    `
+                }
             },
             style:{"height":"300px","width":"300px","background-color":"#000000","border-radius":"0%","border-color":"white","border":"6px solid","color":"white","text-shadow":"0 0 15px white","font-size":"15px","font-family":""},
             unlocked(){
@@ -1284,6 +1614,9 @@ addLayer("f", {
                 }
                 if(player.f.ftype==1){
                     return hasChallenge("f",42)
+                }
+                if(player.f.ftype==2){
+                    return hasUpgrade("f",241)
                 }
             },
             onClick(){
@@ -1302,6 +1635,8 @@ addLayer("f", {
                 player.f.funcpower=new Decimal(0)
                 player.f.totalpower=new Decimal(0)
                 player.f.cubereq=new Decimal(100)
+                player.f.challenges[51]=0
+                player.f.challenges[52]=0
             },
             canClick(){return true}
         },
@@ -1342,7 +1677,7 @@ addLayer("f", {
             style:{"height":"30px","width":"500px","background-color":"#000000","border-radius":"0%","border":"2px solid","border-color":"rgb(255,180,0)","color":"rgb(255,180,0)","text-shadow":"0 0 15px orange","font-size":"15px"},
             unlocked(){return player.f.isstud},
             onClick(){
-                player.f.upgrades = player.f.upgrades.filter(n => n<126 || n>200)
+                player.f.upgrades = player.f.upgrades.filter(n => n<126 || n>255)
                 player.f.funcpower=player.f.totalpower
             },
             canClick(){return player.f.isstud}
@@ -1473,7 +1808,7 @@ addLayer("f", {
         },
         41:{
             name() {return`logγ 21`},
-            challengeDescription() {return`The base adder and factor of x is always 1. Next challenge unlocks at 3 completions of logγ11 and this challenge completed.`},
+            challengeDescription() {return`The base adder and factor of x are always 1. Next challenge unlocks at 3 completions of logγ11 and this challenge completed.`},
             unlocked(){return hasUpgrade("f",105)||hasChallenge("f",41)},
             goalDescription(){return  `500 points`},
             style:{"border-radius":"2%","border-color":"orange","font-size":"16px"},
@@ -1492,7 +1827,7 @@ addLayer("f", {
         },
         42:{
             name() {return`logγ final`},
-            challengeDescription() {return`Run "logγ 21".Charging adder or factor will reset your points but their effect are growing exponentally and their prices are reduced,too.(Entering or exiting this will reset the level of chargers,sacrifice is disabled.)`},
+            challengeDescription() {return`Run "logγ 21".Charging adder or factor will reset your points but their effects are growing exponentially and their prices are reduced,too.(Entering or exiting this will reset the level of chargers,sacrifice is disabled.)`},
             unlocked(){return (hasChallenge("f",41)&&challengeCompletions("f",31)==3)||hasChallenge("f",42)},
             goalDescription(){return  `20,240 points(Most points you can get in this Challenge)`},
             style:{"border-radius":"2%","border-color":"orange","font-size":"16px","background":"radial-gradient(rgba(255,0,0,0.7),rgba(255,165,0,0.7),rgba(255,255,0,0.7),rgba(0,255,0,0.7),rgba(0,255,255,0.7),rgba(0,0,255,0.7),rgba(140,0,255,0.7))","color":"rgb(0,0,0)"},
@@ -1523,14 +1858,36 @@ addLayer("f", {
             countsAs:[41]
         },
         51:{
-            name() {return`log10 11 (${challengeCompletions("f",51)}/5)`},
-            challengeDescription() {return`The effect of adder charger and factor charger is alway 1.Complete this challenge for the first time to unlock it permantly!`},
-            unlocked(){return hasUpgrade("f",153)||challengeCompletions("f",51)>0},
-            goalDescription(){return  `${format(new Decimal((challengeCompletions("f",51)+1)*1000).times(0.5-(challengeCompletions("f",51)*0.09)).pow(1.15+(challengeCompletions("f",51)*0.025)).times((challengeCompletions("f",51)>=4 ? 2 : 1)))} points`},
+            name() {return`log10 11 (${challengeCompletions("f",51)}/6)`},
+            challengeDescription() {return`The effects of adder charger and factor charger are alway 1.Complete this challenge for the first time to unlock it permantly!`},
+            unlocked(){return (hasUpgrade("f",153)||challengeCompletions("f",51)>0)&&player.f.ftype==2},
+            goalDescription(){return  `${format(new Decimal(500).times(Decimal.pow(1.6,challengeCompletions("f",51))))} points`},
             style:{"border-radius":"2%","border-color":"yellow","font-size":"17px"},
             rewardDescription:"Reduce the cost scaling of cube by 0.1 for each completions.",
-            canComplete(){return player.points.gte(new Decimal((challengeCompletions("f",51)+1)*1000).times(0.5-(challengeCompletions("f",51)*0.09)).pow(1.15+(challengeCompletions("f",51)*0.025)).times((challengeCompletions("f",51)>=4 ? 2 : 1)))},
-            marked(){return challengeCompletions("f",51)==5},
+            canComplete(){return player.points.gte(new Decimal(500).times(Decimal.pow(1.6,challengeCompletions("f",51))))},
+            marked(){return challengeCompletions("f",51)==6},
+            onEnter(){
+                player.points=new Decimal(1)
+            },            
+            onExit(){
+                player.points=new Decimal(1)
+            },            
+            onComplete(){
+                player.points=new Decimal(1)
+            },
+            completionLimit:6 ,
+            rewardEffect(){return challengeCompletions("f",51)*0.1},
+            rewardDisplay(){return `-${format(this.rewardEffect())}`}
+        },   
+        52:{
+            name() {return`log10 12 (${challengeCompletions("f",52)}/5)`},
+            challengeDescription() {return`Study 22 and 33's effects are their multiplicative inverse and always affacts.Complete this challenge for the first time to unlock it permantly!`},
+            unlocked(){return (hasUpgrade("f",181)||challengeCompletions("f",52)>0)&&player.f.ftype==2},
+            goalDescription(){return  `${format(Decimal.pow(4,challengeCompletions("f",52)+1).times(challengeCompletions("f",52)>=4 ? 50 : 100))} points`},
+            style:{"border-radius":"2%","border-color":"yellow","font-size":"17px"},
+            rewardDescription:"Study 11's effect is raised to ^1.3 for each completions.",
+            canComplete(){return player.points.gte(new Decimal(Decimal.pow(4,challengeCompletions("f",52)+1).times(challengeCompletions("f",52)>=4 ? 50 : 100)))},
+            marked(){return challengeCompletions("f",52)==5},
             onEnter(){
                 player.points=new Decimal(1)
             },            
@@ -1541,12 +1898,39 @@ addLayer("f", {
                 player.points=new Decimal(1)
             },
             completionLimit:5,
-            rewardEffect(){return challengeCompletions("f",51)*0.1},
-            rewardDisplay(){return `-${format(this.rewardEffect())}`}
-        },   
+            rewardEffect(){return new Decimal(1.3).pow(challengeCompletions("f",52))},
+            rewardDisplay(){return `^${format(this.rewardEffect())}`}
+        }, 
+        61:{
+            name() {return`log10 21`},
+            challengeDescription(){return`Following things happens by time:<br>
+                                        5sec:The effect of upgrade VI and VII is 0<br>
+                                        15sec:The adder of x is raised to ^0.6<br>
+                                        35sec:The effect of study 11,22,33 is 0,1 and 1.<br>
+                                        60sec:Study 82's effect adds to the base factor of x but point gain is divided by 1.5<br>
+                                        85sec:Point gain is reduced to 0.<br>
+                                        (${format(player.f.log10_21time)}seconds passed in this challenge.)`},
+            unlocked(){return challengeCompletions("f",52)==5&&player.f.ftype==2},
+            goalDescription(){return  `12500 points`},
+            style:{"border-radius":"2%","border-color":"yellow","font-size":"17px","width":"600px"},
+            rewardDescription:"Allow you to buy study 101.",
+            canComplete(){return player.points.gte(12500)},
+            marked(){return hasChallenge("f",61)},
+            onEnter(){
+                player.points=new Decimal(1)
+                player.f.log10_21time=0
+            },            
+            onExit(){
+                player.points=new Decimal(1)
+                player.f.log10_21time=0
+            },            
+            onComplete(){
+                player.points=new Decimal(1)
+                player.f.log10_21time=0
+            },
+        }, 
     },
-
-})
+}),
 addLayer("a", {
     startData() { return {
         unlocked: true,
@@ -1586,11 +1970,11 @@ addLayer("a", {
             name: `VA==`,
             style:{"border-radius":"0%","border-color":"red"},
             done() {return player.points.gte(10)&&player.f.multiplier.eq(1)},
-            tooltip: `R2V0IDEwI
+            tooltip(){ return (hasAchievement("a",15) ? `Get 10 points without having any multiplier in stage 0.` : `R2V0IDEwI
             HBvaW50cyB3aXRo
             b3V0IGhhdmluZyBhbnkgb
-            XVsdGlwbGllci4=
-            reward: Add 1 to the base adder of x only in stage 0.`,
+            XVsdGlwbGllci4=`)+
+            `\nreward: Add 1 to the base adder of x only in stage 0.`},
         },
         21: {
             name: "Gods are pleased",
@@ -1620,10 +2004,10 @@ addLayer("a", {
             name: `SA==`,
             style:{"border-radius":"0%","border-color":"red"},
             done() {return player.f.exp.gt(1.685)&&player.f.exp.lt(1.694)},
-            tooltip: `TWFrZSB0aGUgZXhwb25lb
+            tooltip() { return (hasAchievement("a",25) ? `Make the exponent of x exactly 1.69.` : `TWFrZSB0aGUgZXhwb25lb
             nQgb2YgeCBleGFjdGx
-            5IDEuNjku
-            reward: Add 0.01 to sacrifice bonus only in stage 0.`,
+            5IDEuNjku`)+
+            `\nreward: Add 0.01 to sacrifice bonus only in stage 0.`},
         },
         31: {
             name: "A challenging day",
@@ -1653,9 +2037,9 @@ addLayer("a", {
             name: `RQ==`,
             style:{"border-radius":"0%","border-color":"red"},
             done() {return player.f.exp.gte("1eeeeeeeeeeeeeeeeeee20")},
-            tooltip: `TWFrZSB0aGUgZXhwb25l
-            bnQgb2YgeCAxRjIwLg==
-            reward: 1.05x Point gain.`,
+            tooltip(){ return (hasAchievement("a",35) ? `Make the exponent of x 1F20.` : `TWFrZSB0aGUgZXhwb25l
+            bnQgb2YgeCAxRjIwLg==`)+
+            `\nreward: 1.05x Point gain.`},
         },
         41: {
             name: "A new function",
@@ -1685,10 +2069,10 @@ addLayer("a", {
             name: `VA==`,
             style:{"border-radius":"0%","border-color":"orange"},
             done() {return player.points.gte(250)&&player.f.ftype>=1&&player.f.calevel.eq(0)},
-            tooltip: `RWFybiAyNTAgcG9
+            tooltip(){ return (hasAchievement("a",45) ? `Earn 250 points without charging adder.` : `RWFybiAyNTAgcG9
             pbnRzIHdpdGhvdXQg
-            Y2hhcmdpbmcgYWRkZXIu
-            reward: Reduce the cost of charging adder a bit.`,
+            Y2hhcmdpbmcgYWRkZXIu`)+
+            `\nreward: Reduce the cost of charging adder a bit.`},
         },
         51: {
             name: "Wait,is it nerfed?",
@@ -1718,10 +2102,10 @@ addLayer("a", {
             name: `SA==`,
             style:{"border-radius":"0%","border-color":"orange"},
             done() {return inChallenge("f",22)&&player.f.ftype>=1&&tmp.f.clickables[21].unlocked},
-            tooltip: `RmluZCBhIHBsYWNlIHdoZ
+            tooltip(){ return (hasAchievement("a",55) ? `Find a place you can't charge.` : `RmluZCBhIHBsYWNlIHdoZ
             XJlIHlvdSBjYW4ndCBj
-            aGFyZ2Uu
-            reward: The factor of x is raised to ^1.05 in stage 1.`,
+            aGFyZ2Uu`)+
+            `\nreward: The factor of x is raised to ^1.05 in stage 1.`},
         },
         61: {
             name: "Eight in a row.",
@@ -1750,10 +2134,10 @@ addLayer("a", {
         65: {
             name: `SQ==`,
             style:{"border-radius":"0%","border-color":"orange"},
-            done() {return player.points.gte(100)&&player.f.calevel.eq(0)&&player.f.cmlevel.eq(0)&&player.f.ftype>=1},
-            tooltip: `R2V0IDEwMCBwb2ludHMgd2
-            l0aG91dCBjaGFyZ2luZy4=
-            reward: Reduce the cost of charging factor a bit.`,
+            done() {return player.points.gte(500)&&player.f.calevel.eq(0)&&player.f.cmlevel.eq(0)&&player.f.ftype>=1},
+            tooltip(){ return (hasAchievement("a",65) ? `Reach 500 points without charging.` : `R2V0IDEwMCBwb2ludHMgd2
+            l0aG91dCBjaGFyZ2luZy4=`)+
+            `\nreward: Reduce the cost of charging factor a bit.`},
         },
         71: {
             name: "let gamma=new Decimal(10)",
@@ -1783,9 +2167,43 @@ addLayer("a", {
             name: "Ug==.",
             style:{"border-radius":"0%","border-color":"yellow"},
             done() {return hasUpgrade("f",132)},
-            tooltip: `RmluZCB0aGUg
-            c2VjcmV0IG9uZS4=
-            reward: Add 1 to the base multiplier of x only in stage 2`,
+            tooltip(){ return (hasAchievement("a",75) ? `Find the secret one.` : `RmluZCB0aGUg
+            c2VjcmV0IG9uZS4=`)+
+            `\nreward: Add 1 to the base multiplier of x only in stage 2`},
+        },
+        81: {
+            name: "It's called funity challenges",
+            style:{"border-radius":"0%"},
+            done() {return challengeCompletions("f",51)>=1},
+            tooltip: "Complete log10 11 for the first time.",
+        },  
+        82: {
+            name: "We're halfway there",
+            style:{"border-radius":"0%"},
+            done() {return player.f.totalpower.gte(50)},
+            tooltip: "Get a total of 50 cubes.",
+        }, 
+        83: {
+            name: "Tick-tock-tick",
+            style:{"border-radius":"0%"},
+            done() {return hasChallenge("f",61)},
+            tooltip: "Complete log10 21.",
+        }, 
+        84: {
+            name: "I'm sick of this",
+            style:{"border-radius":"0%"},
+            done() {return hasUpgrade("f",241)},
+            tooltip: "Buy study 121.",
+        }, 
+        85: {
+            name: "RA==.",
+            style:{"border-radius":"0%","border-color":"yellow"},
+            done() {return !hasUpgrade("f",241)&&player.points.gte(4)},
+            tooltip(){ return (hasAchievement("a",85) ? `Get 400000 points without buying study 121.` : `R2V0IDQwMDA
+            wMCBwb2ludHMgd2l
+            0aG91dCBidXlpbmcgc
+            3R1ZHkgMTIxLg==.`)+
+            `\nreward: Reduce cube cost count by 1 in stage 2`},
         },
         update(diff) {	// Added this section to call adjustNotificationTime every tick, to reduce notification timers
             adjustNotificationTime(diff);
@@ -1913,7 +2331,7 @@ addLayer("m",{
         21:{
             title:"M → A",
             cost(x) { return Decimal.pow(2.5e6,x.div(3.875).add(1))},
-            effect(x) { return x.pow(2).times(0.2) },
+            effect(x) { return x.pow(2).times(0.5) },
             display() { return `Add a number to "ADDER" amount for each "MULTIPLIER" bought.
                                 Cost: ${format(this.cost())}
                                 Amount: ${format(getBuyableAmount("m",21))}
@@ -1935,7 +2353,7 @@ addLayer("m",{
         22:{
             title:"A → M",
             cost(x) { return new Decimal(5e8).pow(x.div(3).add(1)).pow(x.div(20).add(0.85)).pow(x.minus(1).max(0).add(1))},
-            effect(x) { return x.pow(x.div(100).add(1)).times(0.001) },
+            effect(x) { return x.pow(x.div(100).add(1)).times(0.0015) },
             display() { return `Add a number to "MULTIPLIER" base effect for each "ADDER" bought.
                                 Cost: ${format(this.cost())}
                                 Amount: ${format(getBuyableAmount("m",22))}
@@ -1951,7 +2369,7 @@ addLayer("m",{
         23:{
             title:"E → M",
             cost(x) { return new Decimal(1e20).pow(x.div(15).add(1)).pow(x.minus(4).max(1).pow(2).div(12).add(1))},
-            effect(x) { return x.pow(0.6) },
+            effect(x) { return x.pow(0.7) },
             display() { return `Add a number to "MULTIPLIER" amount for each "EXPONENT" bought.
                                 Cost: ${format(this.cost())}
                                 Amount: ${format(getBuyableAmount("m",23))}
@@ -1982,7 +2400,7 @@ addLayer("m",{
         31:{
             title:"A → A",
             cost(x) { return new Decimal(1e42).pow(x.div(5).add(1)).div(x.times(10000).add(1)).tetrate(x.minus(155).max(0).div(200000).add(1))},
-            effect(x) { return x.times(0.01).add(1) },
+            effect(x) { return x.times(0.015).add(1) },
             display() { return `"ADDER" base effect is multiplied by a number for each "ADDER" bought.
                                 Cost: ${format(this.cost())}
                                 Amount: ${format(getBuyableAmount("m",31))}
@@ -1998,7 +2416,7 @@ addLayer("m",{
         32:{
             title:"M↓",
             cost(x) { return new Decimal(1e48).pow(x.div(new Decimal(33.33).minus(x.div(2)).max(1)).pow(x.div(new Decimal(22.22).minus(x.div(3)).max(1)).add(1)).add(1))},
-            effect(x) { return new Decimal(1).div(x.div(10).add(1).pow(0.3)) },
+            effect(x) { return new Decimal(1).div(x.div(10).add(1).pow(0.4)) },
             display() { return `Reduce the cost of "MULTIPLIER".
                                 Cost: ${format(this.cost())}
                                 Amount: ${format(getBuyableAmount("m",32))}
@@ -2014,7 +2432,7 @@ addLayer("m",{
         33:{
             title:"E → E",
             cost(x) { return new Decimal(1e103).tetrate(x.div(new Decimal(3000).minus(x.times(100))).plus(hasUpgrade("m",15)?1e10 : 1))},
-            effect(x) { return x.times(0.001) },
+            effect(x) { return x.times(0.0015) },
             display() { return `Add a number to "EXPONENT" base effect for each "EXPONENT" bought.
                                 Cost: ${format(this.cost())}
                                 Amount: ${format(getBuyableAmount("m",33))}
@@ -2103,6 +2521,7 @@ addLayer("m",{
             unlocked(){return true},
             onClick(){
                 player.m.upgrades=[]
+                player.m.free=player.m.free.add(1)
                 setBuyableAmount("m",11,new Decimal(0))
                 setBuyableAmount("m",12,new Decimal(0))
                 setBuyableAmount("m",13,new Decimal(0))
