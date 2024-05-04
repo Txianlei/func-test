@@ -73,7 +73,7 @@ function getStartPoints(){
 
 // Determines if it should show points/sec
 function canGenPoints(){
-	return hasUpgrade("f",11)||hasUpgrade("f",61)||hasUpgrade("f",111)
+	return hasUpgrade("f",11)||hasUpgrade("f",61)||hasUpgrade("f",111)||hasUpgrade("f",251)
 }
 
 // Calculate points/sec!
@@ -90,6 +90,7 @@ function getPointGen() {
 	if(player.f.ftype==0) gain=gain.slog()
 	if(player.f.ftype==1) gain=Decimal.log(gain,player.f.y)
 	if(player.f.ftype==2) gain=gain.log10()
+	if(player.f.ftype==3) gain=gain.pow(player.f.k)
 	gain=gain.times(tmp.f.calctmult)
 	if(hasUpgrade("f",42)) gain=gain.times(upgradeEffect("f",42))
 	if(inChallenge("f",31)) gain=gain.div(player.f.y.pow(((challengeCompletions("f",31)+1)*0.25)))
@@ -106,7 +107,7 @@ var displayThings = [
 
 // Determines when the game "ends"
 function isEndgame() {
-	return hasUpgrade("f",181)
+	return player.f.ftype==3
 }
 
 
