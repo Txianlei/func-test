@@ -75,6 +75,11 @@ addLayer("f", {
                     ["buyables",[3,4]]
                 ],
                 unlocked(){return hasUpgrade("f",305)}
+            },
+            "Challenges":{
+                content:[
+                    ["challenges",[9]]
+                ]
             }
         }
     },
@@ -157,6 +162,24 @@ addLayer("f", {
             ],
             unlocked(){return player.f.ftype==3}
         },
+        "x":{
+            content:[
+                ["display-text",
+                function() { return 'Your point gain is:' },
+                {"font-size":"25px"}],
+                ["display-text",
+                    function() { return player.f.cfunc+"="+format(getPointGen())+"/s" },
+                    { "color": "rgb(65,205,255)", "font-size": "50px", "font-family": "Bahnschrift", "text-shadow" : "0 0 15px rgb(65,205,255)" }],
+                ["display-text",
+                    function() { return `You have ${format(player.points)} points.`},
+                { "color": "rgb(65,205,255)", "font-size": "50px", "font-family": "Bahnschrift", "text-shadow" : "0 0 15px rgb(65,205,255)" }],
+                "blank",
+                "blank",
+                "blank",
+                ["upgrades",[33]],
+            ],
+            unlocked(){return player.f.ftype==4}
+        },
         "Boosters":{
             content:[
                 ["display-text",
@@ -169,7 +192,7 @@ addLayer("f", {
         }, 
         "Challenges":{
             content:[
-                "challenges"
+                ["challenges",[1,2,3,4,5,6,7,8]]
             ],
             unlocked(){return player.f.challengechecker.gte(1)||hasUpgrade("f",35)}
         },
@@ -219,6 +242,7 @@ addLayer("f", {
         if(player.f.ftype==1) player.f.cfunc="logᵧ"+(player.f.exp.eq(1)?"":"(")+(player.f.multiplier.neq(1)?"(":"")+"(x"+(player.f.adder.eq(0)?")":"+"+(`${format(player.f.adder)})`))+(player.f.multiplier.neq(1)?"*"+(`${format(player.f.multiplier)}`)+")":"")+(player.f.exp.eq(1)?"":"^"+(`${format(player.f.exp)}`)+")")+(inChallenge("f",31)?"/"+format(player.f.y.pow(((challengeCompletions("f",31)+1)*0.25))):"")
         if(player.f.ftype==2) player.f.cfunc="log10"+(player.f.exp.eq(1)?"":"(")+(player.f.multiplier.neq(1)?"(":"")+"(x"+(player.f.adder.eq(0)?")":"+"+(`${format(player.f.adder)})`))+(player.f.multiplier.neq(1)?"*"+(`${format(player.f.multiplier)}`)+")":"")+(player.f.exp.eq(1)?"":"^"+(`${format(player.f.exp)}`)+")")+(tmp.f.calctmult.gt(1)?"*"+format(tmp.f.calctmult):"")
         if(player.f.ftype==3) player.f.cfunc=(tmp.f.calctrueexp.neq(1)?"(":"")+(player.f.multiplier.neq(1)?"(":"")+(player.f.adder.neq(0)?"(":"")+"x"+(player.f.adder.eq(0)?"":"+"+(`${format(player.f.adder)})`))+(player.f.multiplier.neq(1)?"*"+(`${format(player.f.multiplier)}`)+")":"")+"^k"+(tmp.f.calctmult.gt(1)?"*"+format(tmp.f.calctmult):"")+(tmp.f.calctrueexp.neq(1)?")^"+format(tmp.f.calctrueexp):"")
+        if(player.f.ftype==4) player.f.cfunc=(player.f.multiplier.neq(1)?"(":"")+(player.f.adder.neq(0)?"(":"")+"x"+(player.f.adder.eq(0)?"":"+"+(`${format(player.f.adder)})`))+(player.f.multiplier.neq(1)?"*"+(`${format(player.f.multiplier)}`)+")":"")
     },
     randTextGen(){
         let s1=String.fromCharCode(Math.floor(Math.random() * 66)+65)
@@ -386,7 +410,8 @@ addLayer("f", {
         if(hasChallenge("f",82)) tmult=tmult.times(2)
         if(hasUpgrade("f",322)&&player.f.inprotondil) tmult=tmult.times(upgradeEffect("f",322))
         tmult=tmult.times(buyableEffect("f",12))
-        tmult=tmult.times(tmp.f.getneboost)
+        if(!inChallenge("f",92)) tmult=tmult.times(tmp.f.getneboost)
+        if(inChallenge("f",91)) tmult=tmult.div(1e6)
         if(inChallenge("f",72)) tmult=new Decimal(1)
         return tmult
     },
@@ -432,9 +457,11 @@ addLayer("f", {
         if(hasUpgrade("f",323)) basek=basek.add(0.03)
         basek=basek.plus(new Decimal(0.008).times(challengeCompletions("f",72)))
         basek=basek.plus(buyableEffect("f",13))
+        if(hasChallenge("f",91)) basek=basek.add(0.05)
         if(inChallenge("f",72)) basek=new Decimal(0.15).div(challengeCompletions("f",72)*2+1)
         if(inChallenge("f",82)) basek=new Decimal(0.002)
-        
+        if(inChallenge("f",92)) basek=new Decimal(0.001)
+        if(inChallenge("f",93)) basek=basek.times((Decimal.pow(1.6,player.points.add(1).log10().floor())).min(400))
         return basek
     },
     calcgamma(){
@@ -460,6 +487,7 @@ addLayer("f", {
         if(hasUpgrade("f",303)&&player.f.inprotondil) et=et.times(upgradeEffect("f",303))
         if(hasUpgrade("f",313)&&player.f.inprotondil) et=et.times(1.8)
         if(hasUpgrade("f",314)&&player.f.inneutrondil) et=et.times(1.5)
+        if(inChallenge("f",91)) et=et.times(0.05)
         et=et.times(buyableEffect("f",42))
         return et
     },
@@ -534,7 +562,9 @@ addLayer("f", {
         let protongain=player.points.div(10).add(1).ln().pow(exp1)
         protongain=protongain.times(buyableEffect("f",11))
         if(hasUpgrade("f",302)) protongain=protongain.times(upgradeEffect("f",302))
+        if(hasAchievement("a",105)) protongain=protongain.times(1.05)
         protongain=protongain.pow(buyableEffect("f",33))
+        if(hasChallenge("f",93)) protongain=protongain.pow(1.2)
         return protongain.minus(player.f.proton).max(0)
     },
     getneutron(){
@@ -542,7 +572,9 @@ addLayer("f", {
         if(hasUpgrade("f",314)) exp2=exp2.add(0.2)
         let neutrongain=player.points.div(25).add(1).log10().pow(exp2)
         neutrongain=neutrongain.times(buyableEffect("f",31))
+        if(hasChallenge("f",92)) neutrongain=neutrongain.times(3)
         if(hasUpgrade("f",306)) neutrongain=neutrongain.times(upgradeEffect("f",306))
+        if(hasChallenge("f",93)) neutrongain=neutrongain.pow(1.2)
         return neutrongain.minus(player.f.neutron).max(0)
     },
     getneps(){
@@ -559,6 +591,7 @@ addLayer("f", {
         if(hasUpgrade("f",324)) exp4=exp4.add(upgradeEffect("f",324))
         exp4=exp4.add(buyableEffect("f",43))
         let neboost=player.f.ne.add(1).log10().times(2).pow(exp4).add(1)
+        if(hasChallenge("f",92)) neboost=player.f.ne.add(1).ln().times(exp4).pow(exp4).add(1)
         return neboost
     },
     upgrades:{
@@ -2508,7 +2541,7 @@ addLayer("f", {
             pay(){return player.f.proton=player.f.proton.minus(280)}, 
         },
         313:{
-            description(){return `Point gain is raised to ^1.1 in mormal game and ^1.8 in proton dilation.`},
+            description(){return `Point gain is raised to ^1.1 in normal game and ^1.8 in proton dilation.`},
             cost(){return new Decimal(400)},
             currencyDisplayName:"proton",
             unlocked(){ 
@@ -2657,6 +2690,22 @@ addLayer("f", {
             canAfford(){return player.f.ne.gte(1000000)},
             pay(){return player.f.ne=player.f.ne.minus(1000000)}, 
         },
+        326:{
+            description(){return `You can upgrade your function.`},
+            cost(){return new Decimal("1e1500")},
+            currencyDisplayName:"points",
+            unlocked(){ 
+                return hasUpgrade("f",291)
+            },
+            style:{"height":"75px","width":"175px","border":"2px solid","font-size":"15px",
+            "background-color"(){
+                let b=""
+                if(!hasUpgrade("f",326)&&canAffordUpgrade("f",326)) b="#EF1300"
+                return b
+            }},
+            canAfford(){return player.points.gte("1e1500")},
+            pay(){return player.points=player.points.minus("1e1500")}, 
+        },
     },
     clickables:{
         11:{
@@ -2726,6 +2775,16 @@ addLayer("f", {
                     Sacrifice is re-designed.
                     `
                 }
+                if (player.f.ftype==3){
+                    return `Reset all the progress but level up the function by 1.
+                    All upgrades will be removed.
+                    All studies will be removed
+                    The formula of point gain will be x.
+                    Remove dilation buyables and challenges.
+                    Remove exp challenges.
+                    Expand is removed.
+                    `
+                }
             },
             style:{"height":"300px","width":"300px","background-color":"#000000","border-radius":"0%","border-color":"white","border":"6px solid","color":"white","text-shadow":"0 0 15px white","font-size":"15px","font-family":""},
             unlocked(){
@@ -2737,6 +2796,9 @@ addLayer("f", {
                 }
                 if(player.f.ftype==2){
                     return hasUpgrade("f",241)
+                }
+                if(player.f.ftype==3){
+                    return hasUpgrade("f",326)
                 }
             },
             onClick(){
@@ -2757,6 +2819,25 @@ addLayer("f", {
                 player.f.cubereq=new Decimal(100)
                 player.f.challenges[51]=0
                 player.f.challenges[52]=0
+                player.f.challenges[71]=0
+                player.f.challenges[72]=0
+                player.f.challenges[81]=0
+                player.f.challenges[82]=0
+                player.f.challenges[91]=0
+                player.f.challenges[92]=0
+                player.f.challenges[93]=0
+                setBuyableAmount("f",11,new Decimal(0))
+                setBuyableAmount("f",12,new Decimal(0))
+                setBuyableAmount("f",13,new Decimal(0))
+                setBuyableAmount("f",21,new Decimal(0))
+                setBuyableAmount("f",22,new Decimal(0))
+                setBuyableAmount("f",23,new Decimal(0))
+                setBuyableAmount("f",31,new Decimal(0))
+                setBuyableAmount("f",32,new Decimal(0))
+                setBuyableAmount("f",33,new Decimal(0))
+                setBuyableAmount("f",41,new Decimal(0))
+                setBuyableAmount("f",42,new Decimal(0))
+                setBuyableAmount("f",43,new Decimal(0))
             },
             canClick(){return true}
         },
@@ -3170,6 +3251,93 @@ addLayer("f", {
                 player.points=new Decimal(1)
             },
         },
+        91:{
+            name() {return`Proton dilation EX`},
+            challengeDescription() {return`Point gain is divided by 1e6,then raised to ^0.05.You can complete it while in proton dilation!`},
+            unlocked(){return hasUpgrade("f",325)&&player.f.ftype==3},
+            goalDescription(){return  `350000 points.`},
+            style:{"border-radius":"2%","border-color":"#0000EF","font-size":"17px","background-color"(){
+                let b=""
+                if(inChallenge("f",91)&&player.f.inprotondil&&!tmp.f.challenges[91].canComplete) b="#2525EF25"
+                return b
+            },"color"(){
+                let c=""
+                if(inChallenge("f",91)&&player.f.inprotondil&&!tmp.f.challenges[91].canComplete) c="#2525EF"
+                return c
+            }},
+            rewardDescription:"Add 0.05 to base k,the second proton buyable won't reduce proton anymore",
+            canComplete(){return player.points.gte(350000)&&player.f.inprotondil },
+            marked(){return hasChallenge("f",91)},
+            onEnter(){
+                player.points=new Decimal(1)
+            },            
+            onExit(){
+                player.points=new Decimal(1)
+            },            
+            onComplete(){
+                player.points=new Decimal(1)
+            },
+        },
+        92:{
+            name() {return`Neutron dilation EX`},
+            challengeDescription() {return`NE doesn't have any effect and base k is always 0.001.You can complete it while in neutron dilation!`},
+            unlocked(){return hasChallenge("f",91)&&player.f.ftype==3},
+            goalDescription(){return  `5e41 points.`},
+            style:{"border-radius":"2%","border-color":"#EF0000","font-size":"17px","background-color"(){
+                let b=""
+                if(inChallenge("f",92)&&player.f.inneutrondil&&!tmp.f.challenges[92].canComplete) b="#EF252525"
+                return b
+            },"color"(){
+                let c=""
+                if(inChallenge("f",92)&&player.f.inneutrondil&&!tmp.f.challenges[92].canComplete) c="#EF2525"
+                return c
+            }},
+            rewardDescription:"Improve NE boost formula and triple neutron gain.",
+            canComplete(){return player.points.gte(5e41)&&player.f.inneutrondil},
+            marked(){return hasChallenge("f",92)},
+            onEnter(){
+                player.f.adder=player.f.adder.pow(0)
+                player.f.multiplier=player.f.multiplier.times(0)
+                player.points=new Decimal(1)
+            },            
+            onExit(){
+                player.f.adder=player.f.adder.pow(0)
+                player.f.multiplier=player.f.multiplier.pow(0)
+                player.points=new Decimal(1)
+            },            
+            onComplete(){
+                player.f.adder=player.f.adder.pow(0)
+                player.f.multiplier=player.f.multiplier.pow(0)
+                player.points=new Decimal(1)
+            },
+        },
+        93:{
+            name() {return`exp final`},
+            challengeDescription() {return`Run two other dilation challenges but you can complete this in normal game.1.6x base k for each Oom of points and capped at 400x.<br>Now: x${format(Decimal.pow(1.6,player.points.add(1).log10().floor()).min(400))}`},
+            unlocked(){return hasChallenge("f",92)&&player.f.ftype==3},
+            goalDescription(){return  `1e45 points.`},
+            style:{"border-radius":"2%","font-size":"17px"},
+            rewardDescription:"Neutron and proton gain is raised to ^1.2.",
+            canComplete(){return player.points.gte(1e45)},
+            marked(){return hasChallenge("f",93)},
+            onEnter(){
+                player.f.adder=player.f.adder.pow(0)
+                player.f.multiplier=player.f.multiplier.times(0)
+                player.points=new Decimal(1)
+            },            
+            onExit(){
+                player.f.adder=player.f.adder.pow(0)
+                player.f.multiplier=player.f.multiplier.times(0)
+                player.points=new Decimal(1)
+            },            
+            onComplete(){
+                player.f.adder=player.f.adder.pow(0)
+                player.f.multiplier=player.f.multiplier.times(0)
+                player.points=new Decimal(1)
+            },
+
+            countsAs:[91,92]
+        },
     },
     buyables:{
         11:{
@@ -3197,7 +3365,7 @@ addLayer("f", {
             canAfford() { return player.f.proton.gte(this.cost()) },
             buy(){
                 if(!tmp.f.buyables[12].canAfford) return
-                if(!hasUpgrade("f",12)) player.f.proton = player.f.proton.sub(this.cost())
+                if(!hasChallenge("f",91)) player.f.proton = player.f.proton.sub(this.cost())
                 setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
             },
             style:{"height":"250px","width":"250px","margin":"25px","border":"6px solid","border-radius":"0%","border-color"(){return tmp.f.buyables[12].canAfford? "#0000CC":"#00EF00"},"color"(){return tmp.f.buyables[12].canAfford? "#2545EF":"#00EF00"},"background-color"(){return tmp.f.buyables[12].canAfford? "#0000EF20":"#00000000"},"font-size":"17px"}
@@ -3637,7 +3805,7 @@ addLayer("a", {
         92: {
             name: "Oh no I can't get RQ==!",
             style:{"border-radius":"0%"},
-            done() {return tmp.f.calckmult.gt(1)},
+            done() {return player.f.kmult.gt(1)},
             tooltip: "Do a expanding.\nreward:Get RQ==.",
         }, 
         93: {
@@ -3656,8 +3824,70 @@ addLayer("a", {
             name: "Qw==.",
             style:{"border-radius":"0%","border-color":"green"},
             done() {return !hasUpgrade("f",241)&&player.points.gte(400000)},
-            tooltip(){ return (hasAchievement("a",85) ? `Reach expand hardcap.` : `UmVhY2ggZXhwYW5kIGhhcmRjYXAu.`)+
+            tooltip(){ return (hasAchievement("a",95) ? `Reach expand hardcap.` : `UmVhY2ggZXhwYW5kIGhhcmRjYXAu.`)+
             `\nreward: Add 0.001 to base k`},
+        },
+        101: {
+            name: "I've been charged",
+            style:{"border-radius":"0%"},
+            done() {return player.f.calevel.gte(30)&&player.f.ftype==3},
+            tooltip: "Charger your adder to level 30 in stage 3.",
+        },
+        102: {
+            name: "Reduce by reduce",
+            style:{"border-radius":"0%"},
+            done() {return challengeCompletions("f",71)>=5},
+            tooltip: "Complete exp11 for 5 times.",
+        },
+        103: {
+            name: "1 TICK RACE",
+            style:{"border-radius":"0%"},
+            done() {return hasChallenge("f",82)},
+            tooltip: "Complete exp22.",
+        },
+        104: {
+            name: "Time dilated",
+            style:{"border-radius":"0%"},
+            done() {return hasUpgrade("f",291 )},
+            tooltip: "Unlock dilation.",
+        },
+        105: {
+            name: "Tw==.",
+            style:{"border-radius":"0%","border-color":"green"},
+            done() {return !hasUpgrade("f",241)&&player.points.gte(400000)},
+            tooltip(){ return (hasAchievement("a",105) ? `Get 100 proton without buying studies.` : `R2V0IDEwMCBwcm90b24gd2l0aG9\n1dCBidXlpbmcgc3R1ZGllcy4=`)+
+            `\nreward: 1.05x proton gain.`},
+        },
+        111: {
+            name: "1e15 is too much",
+            style:{"border-radius":"0%"},
+            done() {return player.f.points.gte(1e15)&&player.f.inprotondil},
+            tooltip: "Get 1e15 points in proton dilation.",
+        },
+        112: {
+            name: "Neutron energy",
+            style:{"border-radius":"0%"},
+            done() {return player.f.ne.gt(0)},
+            tooltip: "Start to generate NE.",
+        },
+        113: {
+            name: "When did we get there?",
+            style:{"border-radius":"0%"},
+            done() {return getPointGen().gte("1.8e308")},
+            tooltip: "Earn 1.8e308 points per second.",
+        },
+        114: {
+            name: "Final is not final",
+            style:{"border-radius":"0%"},
+            done() {return hasChallenge("f",93)},
+            tooltip: "Complete exp final.",
+        },
+        115: {
+            name: "RA==.",
+            style:{"border-radius":"0%","border-color":"green"},
+            done() {return player.points.gte("1e2000")},
+            tooltip(){ return (hasAchievement("a",115) ? `Get 1e2000 points.` : `R2V0IDFlMjAwMCBwb2ludHM=`)+
+            `\nreward: 1.05x proton gain.`},
         },
         update(diff) {	// Added this section to call adjustNotificationTime every tick, to reduce notification timers
             adjustNotificationTime(diff);
@@ -3665,7 +3895,7 @@ addLayer("a", {
     },
     tabFormat: [
         "blank", 
-        ["display-text", function() { return"Achievements:"+player.a.achievements.length+"/46" }], 
+        ["display-text", function() { return"Achievements:"+player.a.achievements.length+"/55" }], 
         ["display-text", function() { return`Achievements on the last column are challenging, complete them to get a bonus!(Maybe you can do them later)` }], 
         "blank", "blank","blank","blank",
         "achievements",
