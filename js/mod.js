@@ -99,7 +99,7 @@ function getPointGen() {
 	gain=gain.times(player.f.multiplier)
 	if(hasAchievement("a",35)) gain=gain.times(1.05)
 	if(player.f.ftype<=2) gain=gain.pow(player.f.exp)
-	if(player.f.ftype==0) gain=gain.slog()
+	if(player.f.ftype==0) gain=gain.slog().pow(gain.gte(1)?2:0.5)
 	if(player.f.ftype==1) gain=Decimal.log(gain,player.f.y)
 	if(player.f.ftype==2) gain=gain.log10()
 	if(player.f.ftype==3) gain=gain.pow(player.f.k)
