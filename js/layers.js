@@ -55,7 +55,7 @@ addLayer("f", {
     gainExp() { // Calculate the exponent on main currency from bonuses
         return new Decimal(1)
     },
-    row: 2, // Row the layer is in on the tree (0 is the first row)
+    row:3, // Row the layer is in on the tree (0 is the first row)
     layerShown(){return true},
     microtabs:{
         dilation:{
@@ -205,7 +205,7 @@ addLayer("f", {
                 ["clickables",[3]],
                 ["upgrades",[13,14,15,16,17,18,19,20,21,22,23,24,29]]
             ],
-            unlocked(){return (hasUpgrade("f",125)||player.f.isstud)&&player.f.type<4}
+            unlocked(){return (hasUpgrade("f",125)||player.f.isstud)&&player.f.ftype<4}
         },
         "Dilation":{
             content:[
@@ -422,6 +422,7 @@ addLayer("f", {
         if(player.f.inneutrondil) mult=mult.pow(0.2)
         //stage 4^
         if(hasUpgrade("sp",22)) mult=mult.pow(1.1)
+        if(hasUpgrade("sp",35)) mult=mult.pow(1.2)
         return mult
     },
     calctmult(){
@@ -1256,7 +1257,7 @@ addLayer("f", {
             cost(){return new Decimal(1)},
             currencyDisplayName:"cube",
             unlocked(){ 
-                return (hasUpgrade("f",125)||player.f.isstud)&&player.f.type<4
+                return (hasUpgrade("f",125)||player.f.isstud)&&player.f.ftype<4
             },
             style:{"height":"150px","width":"250px","border":"6px solid","border-color":"rgb(255,180,0)","font-size":"15px",
         "color"(){
@@ -2785,6 +2786,19 @@ addLayer("f", {
             canAfford(){return player.points.gte(1e30)},
             pay(){return player.points=player.points.minus(1e30)},
         },
+        335:{
+            title:"V",
+            description(){return "Unlock Hyper prestige layer."},
+            cost(){return new Decimal(1e50)},
+            unlocked(){ 
+                return player.f.ftype==4&&hasUpgrade("f",334)
+            },
+            onPurchase(){
+                player.tab='hp'
+            },
+            canAfford(){return player.points.gte(1e50)},
+            pay(){return player.points=player.points.minus(1e50)},
+        },
     },
     clickables:{
         11:{
@@ -3016,6 +3030,15 @@ addLayer("f", {
             unlocked(){return hasUpgrade("f",334)},
             onClick(){
                 player.tab='pu'
+            },
+            canClick(){return true}
+        },
+        54:{
+            display(){return `Spin to hyper prestige tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#0068A5","color":"#0068A5","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return hasUpgrade("f",335)},
+            onClick(){
+                player.tab='hp'
             },
             canClick(){return true}
         },
@@ -3637,6 +3660,7 @@ addLayer("p", {
         unlocked: true,
 		points: new Decimal(0),
         buyableamo: new Decimal(0),
+        buyableboost: new Decimal(0.1),
     }},
     color: "#31aeb0",
     requires: new Decimal(10), // Can be a function that takes requirement increases into account
@@ -3665,6 +3689,7 @@ addLayer("p", {
         exp = new Decimal(1)
         if(hasUpgrade("p",23)) exp=exp.times(1.05)
         if(hasUpgrade("p",42)) exp=exp.times(1.025)
+        if(hasUpgrade("sp",35)) exp=exp.times(1.025)
         return exp
     },
     passiveGeneration(){return hasMilestone("sp",1) ? 1 : hasMilestone("p",2) ? 0.05 : 0},
@@ -3676,6 +3701,8 @@ addLayer("p", {
         let keep=[]
         if(hasMilestone("sp",0)&&resettingLayer=="sp") keep.push("milestones")
         if(hasMilestone("sp",2)&&resettingLayer=="sp") keep.push("upgrades")
+        if(hasMilestone("pu",0)) keep.push("milestones")
+        if(hasMilestone("pu",0)) keep.push("upgrades")
         if (layers[resettingLayer].row > this.row) layerDataReset("p", keep)
     },
     layerShown(){return hasUpgrade("f",332)},
@@ -3704,7 +3731,7 @@ addLayer("p", {
         },
         "Buyables":{
             content:[
-                ["display-text",function() { return `Each buyables Adds 0.1 to the base multiplier of x. Currently:<h2 style="color:#31aeb0">+${format(tmp.p.calcbuyableboost)}</h2>`}],
+                ["display-text",function() { return `Each buyables Adds ${format(player.p.buyableboost)} to the base multiplier of x. Currently:<h2 style="color:#31aeb0">+${format(tmp.p.calcbuyableboost)}</h2>`}],
                 "blank",
                 "buyables",
             ],
@@ -3718,12 +3745,19 @@ addLayer("p", {
         let boost=Decimal.pow(exp5,player.p.points.pow(0.5).add(1).ln()).minus(1)
         let sc=new Decimal(100)
         if(hasMilestone("sp",3)) sc=sc.times(2)
+        if(hasMilestone("sp",3)) sc=sc.times(6)
         if(hasUpgrade("p",41)) boost=boost.pow(1.25)
+        boost=boost.times(buyableEffect("p",21))
         if(boost.gt(sc)) boost=boost.minus(sc).log10().pow(3).add(sc)
         return boost
     },
     calcbuyableboost(){
-        return player.p.buyableamo.div(10)
+        let multi=new Decimal(0.1)
+        if(hasUpgrade("pu",11)) multi=new Decimal(0.3)
+        if(hasUpgrade("pu",12)) multi=new Decimal(0.5)
+        if(hasUpgrade("pu",13)) multi=new Decimal(0.8)
+        player.p.buyableboost=multi
+        return player.p.buyableamo.times(multi)
     },
     upgrades:{
         11:{
@@ -3895,7 +3929,7 @@ addLayer("p", {
             },
             canAfford(){return player.p.points.gte(1e10)},
             pay(){return player.p.points=player.p.points.minus(1e10)},
-            effect(){return player.p.points.add(1).log10().add(1).ln().pow(1.5).add(1)},
+            effect(){return player.p.points.add(1).log10().add(1).ln().pow(hasMilestone("p",7) ? 4 : 1.5).add(1)},
             effectDisplay(){return `x${format(upgradeEffect("p",43))}`},
         },
         44:{
@@ -3937,6 +3971,15 @@ addLayer("p", {
             },
             canClick(){return true}
         },
+        14:{
+            display(){return `Spin to hyper prestige tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#0068A5","color":"#0068A5","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.hp.unlocked},
+            onClick(){
+                player.tab='hp'
+            },
+            canClick(){return true}
+        },
     },
     milestones:{
         0: {
@@ -3971,12 +4014,33 @@ addLayer("p", {
             effectDescription: `"Point Boost" exp. is 1, unlock a new buyable.`,
             unlocked(){return hasMilestone("sp",4)}
         },
+        5: {
+            requirementDescription: "5e23 prestige points",
+            done() { return player.p.points.gte(5e23)},
+            style:{"width":"500px"},
+            effectDescription: `Double SP gain, unlock a new buyable.`,
+            unlocked(){return player.pu.unlocked}
+        },
+        6: {
+            requirementDescription: "1e29 prestige points",
+            done() { return player.p.points.gte(1e29)},
+            style:{"width":"500px"},
+            effectDescription: `"Prestige boost booster" effect base is 4, unlock a new buyable.`,
+            unlocked(){return player.pu.unlocked}
+        },
+        7: {
+            requirementDescription: "1e34 prestige points",
+            done() { return player.p.points.gte(1e34)},
+            style:{"width":"500px"},
+            effectDescription: `"Prestige boost+++" effect exp. is 4, unlock a new buyable.`,
+            unlocked(){return player.pu.unlocked}
+        },
     },
     buyables:{
         11:{
             title:"Point booster",
             cost(x) { return Decimal.pow(5,Decimal.pow(x,1.1)).times(1e20)},
-            effect(x) { return x.pow(2).add(1)},
+            effect(x) { return x.pow(hasUpgrade("sp",33) ? 3 : 2).add(1)},
             display() { return `Boost point gain.
                                 Cost: ${format(this.cost())} points
                                 Amount: ${format(getBuyableAmount("p",11))}
@@ -3993,7 +4057,7 @@ addLayer("p", {
         12:{
             title:"Adder booster",
             cost(x) { return Decimal.pow(10,x.pow(1.25)).times(1e13)},
-            effect(x) { return Decimal.pow(4,x.div(1.5)).pow(0.8).times(2)},
+            effect(x) { return Decimal.pow(4,x.div(1.5)).pow(hasUpgrade("pu",12)? 0.9 : 0.8).times(2)},
             display() { return `Boost the adder of x.
                                 Cost: ${format(this.cost())} prestige points
                                 Amount: ${format(getBuyableAmount("p",12))}
@@ -4001,7 +4065,7 @@ addLayer("p", {
             canAfford() { return player.p.points.gte(this.cost()) },
             buy(){
                 if(!tmp.p.buyables[12].canAfford) return
-                player.points = player.points.sub(this.cost())
+                player.p.points = player.p.points.sub(this.cost())
                 setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
                 player.p.buyableamo=player.p.buyableamo.add(1)
             },
@@ -4011,7 +4075,7 @@ addLayer("p", {
         13:{
             title:"Prestige booster",
             cost(x) { return Decimal.pow(2,x.add(1).pow(2)).times(1e17)},
-            effect(x) { return Decimal.pow(2,x).pow(0.875)},
+            effect(x) { return Decimal.pow((hasMilestone("sp",5) ? 2.75 : 2),x).pow(0.875)},
             display() { return `Boost prestige point gain.
                                 Cost: ${format(this.cost())} prestige points
                                 Amount: ${format(getBuyableAmount("p",13))}
@@ -4019,11 +4083,65 @@ addLayer("p", {
             canAfford() { return player.p.points.gte(this.cost()) },
             buy(){
                 if(!tmp.p.buyables[13].canAfford) return
-                player.points = player.points.sub(this.cost())
+                player.p.points = player.p.points.sub(this.cost())
                 setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
                 player.p.buyableamo=player.p.buyableamo.add(1)
             },
             unlocked(){return hasMilestone("p",4)},
+            style:{"height":"250px","width":"250px","font-size":"15px"}
+        },
+        21:{
+            title:"Prestige boost booster",
+            cost(x) { return Decimal.pow(2.1,x.add(1).pow(1.75)).times(1e23)},
+            effect(x) { return Decimal.pow(hasMilestone("p",6) ? 4: 2,x)},
+            display() { return `Boost the effect of prestige points before softcap.
+                                Cost: ${format(this.cost())} prestige points
+                                Amount: ${format(getBuyableAmount("p",21))}
+                                Effect: x${format(this.effect())}` },
+            canAfford() { return player.p.points.gte(this.cost()) },
+            buy(){
+                if(!tmp.p.buyables[21].canAfford) return
+                player.p.points = player.p.points.sub(this.cost())
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+                player.p.buyableamo=player.p.buyableamo.add(1)
+            },
+            unlocked(){return hasMilestone("p",5)},
+            style:{"height":"250px","width":"250px","font-size":"15px"}
+        },
+        22:{
+            title:"Super booster",
+            cost(x) { return Decimal.pow(3,x.add(1).pow(2)).times(1e28)},
+            effect(x) { return Decimal.pow(8.25,x).pow(0.5)},
+            display() { return `Boost SP gain.
+                                Cost: ${format(this.cost())} prestige points
+                                Amount: ${format(getBuyableAmount("p",22))}
+                                Effect: x${format(this.effect())}` },
+            canAfford() { return player.p.points.gte(this.cost()) },
+            buy(){
+                if(!tmp.p.buyables[22].canAfford) return
+                player.p.points = player.p.points.sub(this.cost())
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+                player.p.buyableamo=player.p.buyableamo.add(1)
+            },
+            unlocked(){return hasMilestone("p",6)},
+            style:{"height":"250px","width":"250px","font-size":"15px"}
+        },
+        23:{
+            title:"Super boost booster",
+            cost(x) { return Decimal.pow(2,x.add(1).pow(2.75)).times(1e33)},
+            effect(x) { return Decimal.pow(5,x.pow(0.75))},
+            display() { return `Boost SP boost base.
+                                Cost: ${format(this.cost())} prestige points
+                                Amount: ${format(getBuyableAmount("p",23))}
+                                Effect: x${format(this.effect())}` },
+            canAfford() { return player.p.points.gte(this.cost()) },
+            buy(){
+                if(!tmp.p.buyables[23].canAfford) return
+                player.p.points = player.p.points.sub(this.cost())
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+                player.p.buyableamo=player.p.buyableamo.add(1)
+            },
+            unlocked(){return hasMilestone("p",7)},
             style:{"height":"250px","width":"250px","font-size":"15px"}
         },
     }
@@ -4031,7 +4149,7 @@ addLayer("p", {
 addLayer("sp", {
     name: "super prestige", // This is optional, only used in a few places, If absent it just uses the layer id.
     symbol: "SP", // This appears on the layer's node. Default is the id with the first letter capitalized
-    position: 1, // Horizontal position within a row. By default it uses the layer id and sorts in alphabetical order
+    position: 0, // Horizontal position within a row. By default it uses the layer id and sorts in alphabetical order
     startData() { return {
         unlocked: false,
 		points: new Decimal(0),
@@ -4049,6 +4167,10 @@ addLayer("sp", {
         if(hasUpgrade("p",44)) mult=mult.times(2)
         if(hasUpgrade("sp",15)) mult=mult.times(upgradeEffect("sp",15))
         if(hasUpgrade("sp",24)) mult=mult.times(upgradeEffect("sp",24))
+        if(hasUpgrade("sp",34)) mult=mult.times(upgradeEffect("sp",34))
+        if(hasMilestone("p",5)) mult=mult.times(2)
+        mult=mult.times(buyableEffect("p",22))
+        if(player.hp.unlocked) mult=mult.times(tmp.hp.calchpboost)
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -4060,8 +4182,10 @@ addLayer("sp", {
         {key: "s", description: "S: Reset for super prestige points", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
     ],
     layerShown(){return hasUpgrade("f",333)},
+    passiveGeneration(){return hasMilestone("pu",1)?0.05:0},
     doReset(resettingLayer){
         player.f.multiplier=new Decimal(0)
+        if (layers[resettingLayer].row > this.row) layerDataReset("sp")
     },
     tabFormat:{
         "Main":{
@@ -4071,6 +4195,7 @@ addLayer("sp", {
                 "blank",
                 "prestige-button",
                 ["display-text",function() { return `You have ${format(player.p.points)} prestige points.`},],
+                ["display-text",function() { return hasMilestone("pu",1) ? `You are gaining ${format(getResetGain("sp","normal").times(tmp.sp.passiveGeneration))} super prestige points per second.` : ``},],
                 "blank",
                 "upgrades",
                 "blank",
@@ -4089,7 +4214,8 @@ addLayer("sp", {
     calcspboost(){
         let exp6=new Decimal(1.25)
         if(hasUpgrade("sp",25)) exp6=exp6.add(0.1)
-        let boost=(hasMilestone("sp",2)? player.sp.best : player.sp.points).add(1).pow(exp6).ln().pow(2).times(2).max(1)
+        if(hasMilestone("pu",2)) exp6=exp6.add(0.25)
+        let boost=(hasMilestone("sp",2)? player.sp.best : player.sp.points).times(buyableEffect("p",23)).add(1).pow(exp6).ln().pow(2).times(2).max(1)
         return boost
     },
     branches:["p"],
@@ -4226,6 +4352,38 @@ addLayer("sp", {
             effect(){return player.sp.points.add(1).log10().add(1).pow(2).div(50)},
             effectDisplay(){return `+${format(upgradeEffect("sp",32))}`},
         },
+        33:{
+            title:"Super buyable boost",
+            description(){return `Effect exp. of "Point booster" is 3 instead of 2.`},
+            cost(){return new Decimal(300000)},
+            unlocked(){ 
+                return hasUpgrade("sp",32)
+            },
+            canAfford(){return player.sp.points.gte(300000)},
+            pay(){return player.sp.points=player.sp.points.minus(300000)},
+        },
+        34:{
+            title:"Super Antiboost+",
+            description(){return `Boost SP points gain based on prestige points.`},
+            cost(){return new Decimal(700000)},
+            unlocked(){ 
+                return hasUpgrade("sp",33)
+            },
+            canAfford(){return player.sp.points.gte(700000)},
+            pay(){return player.sp.points=player.sp.points.minus(700000)},
+            effect(){return player.p.points.add(1).log10().pow(1.5)},
+            effectDisplay(){return `x${format(upgradeEffect("sp",34))}`},
+        },
+        35:{
+            title:"We could get MORE",
+            description(){return `The multiplier of x is raised to ^1.2,prestige point gain is raised to ^1.025.`},
+            cost(){return new Decimal(5e9)},
+            unlocked(){ 
+                return hasUpgrade("sp",34)
+            },
+            canAfford(){return player.sp.points.gte(5e9)},
+            pay(){return player.sp.points=player.sp.points.minus(5e9)},
+        },
     },
     clickables:{
         11:{
@@ -4252,6 +4410,15 @@ addLayer("sp", {
             unlocked(){return player.pu.unlocked},
             onClick(){
                 player.tab='pu'
+            },
+            canClick(){return true}
+        },
+        14:{
+            display(){return `Spin to hyper prestige tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#0068A5","color":"#0068A5","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.hp.unlocked},
+            onClick(){
+                player.tab='hp'
             },
             canClick(){return true}
         },
@@ -4287,6 +4454,18 @@ addLayer("sp", {
             style:{"width":"500px"},
             effectDescription: "Unlock a prestige buyable.",
         },
+        5: {
+            requirementDescription: "250000 super prestige points",
+            done() { return player.sp.points.gte(250000)},
+            style:{"width":"500px"},
+            effectDescription: `"Prestige booster" effect base is 2.75`,
+        },
+        6: {
+            requirementDescription: "1e9 super prestige points",
+            done() { return player.sp.points.gte(1e9)},
+            style:{"width":"500px"},
+            effectDescription: `The softcap of prestige points boost starts 2x later.`,
+        },
     }
 }),
 addLayer("pu", {
@@ -4300,10 +4479,11 @@ addLayer("pu", {
     baseAmount() {return player.points}, // Get the current amount of baseResource
     type: "static", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
     branches: ["p"],
-    exponent() { return 4 }, // Prestige currency exponent
-    base() { return 10 },
+    exponent() { return 3 }, // Prestige currency exponent
+    base() { return 4 },
     gainMult() { 
         let mult = new Decimal(1);
+        if(hasUpgrade("pu",13)) mult=mult.div(upgradeEffect("pu",13))
         return mult;
     },
     row: 1, // Row the layer is in on the tree (0 is the first row)
@@ -4325,6 +4505,10 @@ addLayer("pu", {
         best: new Decimal(0),
         total: new Decimal(0),
     }},
+    doReset(resettingLayer){
+        player.f.multiplier=new Decimal(0)
+        if (layers[resettingLayer].row > this.row) layerDataReset("pu")
+    },
     tabFormat:{
         "Main":{
             content:[
@@ -4338,6 +4522,68 @@ addLayer("pu", {
                 "blank",
                 "clickables"
             ]
+        },
+        "Milestones":{
+            content:[
+                ["display-text",function() { return `You have <h2 style="color:#14CEA3">${player.pu.points}</h2> prestige upgraders, which boost prestige points gain by <h2 style="color:#14CEA3">${format(tmp.pu.effect)}</h2>.`},
+                { "font-size":"17.5px","text-shadow" : "0 0 10px #14CEA3"},],
+                "blank",
+                "milestones",
+            ]
+        }
+    },
+    upgrades:{
+        11:{
+            title:"Upgrader boost",
+            description(){return `Each of prestige buyables adds 0.3 instead of 0.1 to the base multiplier of x.`},
+            cost(){return new Decimal(2)},
+            unlocked(){ 
+                return player.pu.unlocked
+            },
+            canAfford(){return player.pu.points.gte(2)},
+            pay(){return player.pu.points=player.pu.points.minus(2)},
+        },
+        12:{
+            title:"Upgrader boost+",
+            description(){return `Each of prestige buyables adds 0.5 instead of 0.3 to the base multiplier of x,"Adder booster" effect exp. is 0.9`},
+            cost(){return new Decimal(3)},
+            unlocked(){ 
+                return player.pu.unlocked
+            },
+            canAfford(){return player.pu.points.gte(3)},
+            pay(){return player.pu.points=player.pu.points.minus(3)},
+        },
+        13:{
+            title:"Upgrader Antiboost",
+            description(){return `Each of prestige buyables adds 0.8 instead of 0.5 to the base multiplier of x,Divide PU cost based on points`},
+            cost(){return new Decimal(4)},
+            unlocked(){ 
+                return player.pu.unlocked
+            },
+            canAfford(){return player.pu.points.gte(4)},
+            pay(){return player.pu.points=player.pu.points.minus(4)},
+            effect(){return player.points.add(1).pow(0.25)},
+            effectDisplay(){return `/${format(upgradeEffect("pu",13))}`},
+        },
+    },
+    milestones:{
+        0: {
+            requirementDescription: "2 Prestige Upgraders",
+            done() { return player.pu.points.gte(2)},
+            style:{"width":"500px"},
+            effectDescription: "Kept prestige milestones and upgrades on all resets.",
+        },
+        1: {
+            requirementDescription: "3 Prestige Upgraders",
+            done() { return player.pu.points.gte(3)},
+            style:{"width":"500px"},
+            effectDescription: "Gain 5% of SP points on reset per second.",
+        },
+        2: {
+            requirementDescription: "4 Prestige Upgraders",
+            done() { return player.pu.points.gte(4)},
+            style:{"width":"500px"},
+            effectDescription: "Add 0.25 to SP boost exp.",
         },
     },
     clickables:{
@@ -4353,7 +4599,7 @@ addLayer("pu", {
         12:{
             display(){return `Spin to prestige tab`},
             style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#31aeb0","color":"#31aeb0","font-size":"15px","background-color":"#00000000"},
-            unlocked(){return player.sp.unlocked},
+            unlocked(){return player.pu.unlocked},
             onClick(){
                 player.tab='p'
             },
@@ -4368,7 +4614,115 @@ addLayer("pu", {
             },
             canClick(){return true}
         },
+        14:{
+            display(){return `Spin to hyper prestige tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#0068A5","color":"#0068A5","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.hp.unlocked},
+            onClick(){
+                player.tab='hp'
+            },
+            canClick(){return true}
+        },
     },
+}),
+addLayer("hp", {
+    name: "hyper prestige", // This is optional, only used in a few places, If absent it just uses the layer id.
+    symbol: "HP", // This appears on the layer's node. Default is the id with the first letter capitalized
+    position: 0, // Horizontal position within a row. By default it uses the layer id and sorts in alphabetical order
+    startData() { return {
+        unlocked: false,
+		points: new Decimal(0),
+        best: new Decimal(0)
+    }},
+    color: "#0068A5",
+    requires: new Decimal(1e10), // Can be a function that takes requirement increases into account
+    resource: "hyper prestige points", // Name of prestige currency
+    baseResource: "super prestige points", // Name of resource prestige is based on
+    baseAmount() {return player.sp.points}, // Get the current amount of baseResource
+    type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
+    exponent: 0.025, // Prestige currency exponent
+    gainMult() { // Calculate the multiplier for main currency from bonuses
+        mult = new Decimal(1)
+        return mult
+    },
+    gainExp() { // Calculate the exponent on main currency from bonuses
+        exp = new Decimal(1)
+        return exp
+    },
+    row: 2, // Row the layer is in on the tree (0 is the first row)
+    hotkeys: [
+        {key: "h", description: "H: Reset for hyper prestige points", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
+    ],
+    layerShown(){return hasUpgrade("f",335)},
+    doReset(resettingLayer){
+        player.f.multiplier=new Decimal(0)
+    },
+    branches:["sp"],
+    tabFormat:{
+        "Main":{
+            content:[
+                ["display-text",function() { return `You have <h2 style="color:#0068A5">${format(player.hp.points)}</h2> hyper prestige points, which boosts SP gain by <h2 style="color:#0068A5">${format(tmp.hp.calchpboost)}</h2>.`},
+                { "font-size":"17.5px","text-shadow" : "0 0 10px #0068A5"},],
+                "blank",
+                "prestige-button",
+                ["display-text",function() { return `You have ${format(player.sp.points)} super prestige points.`},],
+                "blank",
+                "upgrades",
+                "blank",
+                "clickables"
+            ]
+        },
+        "Milestones":{
+            content:[
+                ["display-text",function() { return `You have <h2 style="color:#0068A5">${format(player.hp.points)}</h2> hyper prestige points, which boosts SP gain by <h2 style="color:#0068A5">${format(tmp.hp.calchpboost)}</h2>.`},
+                { "font-size":"17.5px","text-shadow" : "0 0 10px #0068A5"},],
+                "blank",
+                "milestones",
+            ]
+        }
+    },
+    calchpboost(){
+        let boost=player.hp.points.add(1).pow(2).log10().pow(2).times(10).add(1)
+        return boost
+    },
+    clickables:{
+        11:{
+            display(){return `Spin to function tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#EEEEEE","color":"#DDDDDD","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.hp.unlocked},
+            onClick(){
+                player.tab='f'
+            },
+            canClick(){return true}
+        },
+        12:{
+            display(){return `Spin to prestige tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#31aeb0","color":"#31aeb0","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.hp.unlocked},
+            onClick(){
+                player.tab='p'
+            },
+            canClick(){return true}
+        },
+        13:{
+            display(){return `Spin to super prestige tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#217782","color":"#217782","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.hp.unlocked},
+            onClick(){
+                player.tab='sp'
+            },
+            canClick(){return true}
+        },
+        14:{
+            display(){return `Spin to prestige upgrader tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#14CEA3","color":"#14CEA3","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.hp.unlocked},
+            onClick(){
+                player.tab='pu'
+            },
+            canClick(){return true}
+        },
+    }
 }),
 addLayer("a", {
     startData() { return {
