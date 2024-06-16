@@ -1,4 +1,4 @@
-addLayer("f", {
+  addLayer("f", {
     name: "function", // This is optional, only used in a few places, If absent it just uses the layer id.
     symbol: "F", // This appears on the layer's node. Default is the id with the first letter capitalized
     position: 0, // Horizontal position within a row. By default it uses the layer id and sorts in alphabetical order
@@ -176,7 +176,7 @@ addLayer("f", {
                 "blank",
                 "blank",
                 "blank",
-                ["upgrades",[33]],
+                ["upgrades",[33,34]],
             ],
             unlocked(){return player.f.ftype==4}
         },
@@ -233,7 +233,6 @@ addLayer("f", {
     },
     update(diff){
         player.f.points=player.points
-        player.f.adder=tmp.f.calcadder
         player.f.multiplier=tmp.f.calctimer
         player.f.y=tmp.f.calcgamma
         player.f.caeffect=tmp.f.effofca.pow(player.f.calevel)
@@ -270,7 +269,7 @@ addLayer("f", {
         player.f.randtext=s1+s2+s3+s4+s5+s7+s5+s6+s1+s11+s12+s8+s9+s10+s4+s11+s12+s1+s2+s5+s6+s7+s8+s9+s10+s2+s3+s4+"\n"+s10+s11+s12+s1+s2+s3+s3+s4+s5+s6+s7+s8+s9+s10+s6+s7+s8+s9+s11+s12
     },
     calcadder(){
-        let a=new Decimal(0)
+        a=new Decimal(0)
         //stage 0 +
         if(hasUpgrade("f",12)) a=a.plus(0.1)
         if(hasUpgrade("f",14)) a=a.plus(upgradeEffect("f",14))
@@ -330,13 +329,12 @@ addLayer("f", {
         //stage 2 ^
         if(player.f.log10_21time>15&&inChallenge("f",61)) a=a.pow(0.6)
         //stage 3 ^
-        
         if(hasUpgrade("f",284)) a=a.pow(upgradeEffect("f",284))
         if(hasUpgrade("f",242)) a=a.pow(1.075)
         if(hasUpgrade("f",316)) a=a.pow(1.25)
         a=a.pow(buyableEffect("f",23))
         if(player.f.inneutrondil) a=a.pow(0.2)
-        return new Decimal(1e20)
+        player.f.adder=a
     },
     getCube(){
         let scal3=new Decimal(1.8)
@@ -359,73 +357,76 @@ addLayer("f", {
         }
     },
     calctimer(){
-        let mult=new Decimal(1)
+        m=new Decimal(1)
         //stage 0 +
-        if(hasUpgrade("f",13)) mult=mult.plus(0.25)
-        if(hasUpgrade("f",15)) mult=mult.plus(upgradeEffect("f",15))
+        if(hasUpgrade("f",13)) m=m.plus(0.25)
+        if(hasUpgrade("f",15)) m=m.plus(upgradeEffect("f",15))
         if(hasChallenge("f",21)&&player.f.ftype==0) mult=mult.plus(25)
         //stage 1 +
-        if(hasUpgrade("f",64)) mult=mult.plus(0.4)
-        if(hasUpgrade("f",71)) mult=mult.plus(upgradeEffect("f",71))
-        if(hasUpgrade("f",81)) mult=mult.plus(upgradeEffect("f",81))
+        if(hasUpgrade("f",64)) m=m.plus(0.4)
+        if(hasUpgrade("f",71)) m=m.plus(upgradeEffect("f",71))
+        if(hasUpgrade("f",81)) m=m.plus(upgradeEffect("f",81))
         //stage 2 +
-        if(hasUpgrade("f",115)) mult=mult.plus(0.5)
-        if(hasUpgrade("f",122)&&(player.f.log10_21time<=5)) mult=mult.plus(upgradeEffect("f",122))
-        if(hasUpgrade("f",141)) mult=mult.plus(upgradeEffect("f",141))
-        if(hasUpgrade("f",191)) mult=mult.plus(25)
-        if(player.f.log10_21time>60) mult=mult.plus(upgradeEffect("f",202))
-        if(hasAchievement("a",75)&&player.f.ftype==2) mult=mult.plus(1)
+        if(hasUpgrade("f",115)) m=m.plus(0.5)
+        if(hasUpgrade("f",122)&&(player.f.log10_21time<=5)) m=m.plus(upgradeEffect("f",122))
+        if(hasUpgrade("f",141)) m=m.plus(upgradeEffect("f",141))
+        if(hasUpgrade("f",191)) m=m.plus(25)
+        if(player.f.log10_21time>60) m=m.plus(upgradeEffect("f",202))
+        if(hasAchievement("a",75)&&player.f.ftype==2) m=m.plus(1)
         //stage 3 +
-        if(hasUpgrade("f",253)) mult=mult.plus(upgradeEffect("f",253))
-        if(hasUpgrade("f",262)) mult=mult.plus(upgradeEffect("f",262))
-        if(hasUpgrade("f",212)) mult=mult.plus(upgradeEffect("f",212))
-        mult=mult.pow(new Decimal(1.05).pow(challengeCompletions("f",81)))
+        if(hasUpgrade("f",253)) m=m.plus(upgradeEffect("f",253))
+        if(hasUpgrade("f",262)) m=m.plus(upgradeEffect("f",262))
+        if(hasUpgrade("f",212)) m=m.plus(upgradeEffect("f",212))
+        m=m.pow(new Decimal(1.05).pow(challengeCompletions("f",81)))
         //stage 4 +
-        mult=mult.add(tmp.p.calcbuyableboost)
+        m=m.add(tmp.p.calcbuyableboost)
         //LOGY21 DEBUFF
-        if(inChallenge("f",41)) mult=new Decimal(1)
+        if(inChallenge("f",41)) m=new Decimal(1)
         //stage 0 *
-        if(hasUpgrade("f",21)) mult=mult.times(upgradeEffect("f",21))
-        if(hasUpgrade("f",25)) mult=mult.times(2)
-        if(hasUpgrade("f",45)) mult=mult.times(upgradeEffect("f",45))
-        if(hasChallenge("f",11)) mult=mult.times(challengeEffect("f",11))
+        if(hasUpgrade("f",21)) m=m.times(upgradeEffect("f",21))
+        if(hasUpgrade("f",25)) m=m.times(2)
+        if(hasUpgrade("f",45)) m=m.times(upgradeEffect("f",45))
+        if(hasChallenge("f",11)) m=m.times(challengeEffect("f",11))
         //stage 1 *
-        if(hasUpgrade("f",84)) mult=mult.times(4)
-        if (player.f.iscm&&!inChallenge("f",51))mult=mult.times(player.f.cmeffect)
+        if(hasUpgrade("f",84)) m=m.times(4)
+        if (player.f.iscm&&!inChallenge("f",51))m=m.times(player.f.cmeffect)
         //stage 2 *
-        if(hasUpgrade("f",124)) mult=mult.times(upgradeEffect("f",124))
-        if(hasUpgrade("f",151)) mult=mult.times(3)
-        if(hasUpgrade("f",153)||inChallenge("f",52)) mult=mult.times(upgradeEffect("f",153))
-        if(hasUpgrade("f",202)) mult=mult.times(upgradeEffect("f",202))
+        if(hasUpgrade("f",124)) m=m.times(upgradeEffect("f",124))
+        if(hasUpgrade("f",151)) m=m.times(3)
+        if(hasUpgrade("f",153)||inChallenge("f",52)) m=m.times(upgradeEffect("f",153))
+        if(hasUpgrade("f",202)) m=m.times(upgradeEffect("f",202))
         //stage 3 *
-        if(hasUpgrade("f",272)) mult=mult.times(upgradeEffect("f",272))
-        if(hasUpgrade("f",285)) mult=mult.times(3)
-        mult=mult.times(buyableEffect("f",21))
+        if(hasUpgrade("f",272)) m=m.times(upgradeEffect("f",272))
+        if(hasUpgrade("f",285)) m=m.times(3)
+        m=m.times(buyableEffect("f",21))
         //stage 4 *
-        if(hasUpgrade("p",11)) mult=mult.times(upgradeEffect("p",11))
-        if(hasUpgrade("p",12)) mult=mult.times(upgradeEffect("p",12))
-        if(hasUpgrade("p",22)) mult=mult.times(upgradeEffect("p",22))
-        if(hasUpgrade("sp",12)) mult=mult.times(2)
-        if(hasUpgrade("sp",14)) mult=mult.times(upgradeEffect("sp",14))
-        mult=mult.times(buyableEffect("p",11))
-        mult=mult.times(tmp.sp.calcspboost)
+        if(hasUpgrade("p",11)) m=m.times(upgradeEffect("p",11))
+        if(hasUpgrade("p",12)) m=m.times(upgradeEffect("p",12))
+        if(hasUpgrade("p",22)) m=m.times(upgradeEffect("p",22))
+        if(hasUpgrade("sp",12)) m=m.times(2)
+        if(hasUpgrade("sp",14)) m=m.times(upgradeEffect("sp",14))
+        if(hasUpgrade("hp",34)) m=m.times(upgradeEffect("hp",34))
+        if(hasUpgrade("pu",15)) m=m.times(upgradeEffect("pu",15))
+        m=m.times(buyableEffect("p",11))
+        m=m.times(tmp.sp.calcspboost)
         //stage 0 ^
-        if(hasUpgrade("f",33)) mult=mult.pow(upgradeEffect("f",33))
-        if(inChallenge("f",11)) mult=mult.sqrt()
+        if(hasUpgrade("f",33)) m=m.pow(upgradeEffect("f",33))
+        if(inChallenge("f",11)) m=m.sqrt()
         //stage 1 ^
-        if(hasAchievement("a",55)&&player.f.ftype==1) mult=mult.pow(1.05)
+        if(hasAchievement("a",55)&&player.f.ftype==1) m=m.pow(1.05)
         //stage 2 ^
-        if(hasUpgrade("f",152)) mult=mult.pow(1.1)
+        if(hasUpgrade("f",152)) m=m.pow(1.1)
         //stage 3 ^
-        if(hasUpgrade("f",205)) mult=mult.pow(1.075)
-        if(inChallenge("f",81)) mult=mult.pow(new Decimal(0.995).pow(player.f.exp21time))
-        mult=mult.pow(buyableEffect("f",41))
-        if(player.f.inneutrondil) mult=mult.pow(0.2)
+        if(hasUpgrade("f",205)) m=m.pow(1.075)
+        if(inChallenge("f",81)) m=m.pow(new Decimal(0.995).pow(player.f.exp21time))
+        m=m.pow(buyableEffect("f",41))
+        if(player.f.inneutrondil) m=m.pow(0.2)
         //stage 4^
-        if(hasUpgrade("sp",22)) mult=mult.pow(1.1)
-        if(hasUpgrade("sp",35)) mult=mult.pow(1.2)
-        return mult
-        
+        if(hasUpgrade("sp",22)) m=m.pow(1.1)
+        if(hasUpgrade("sp",35)) m=m.pow(1.2)
+        m=m.pow(tmp.c.calcshardboost)
+        if(player.c.choose32&&player.c.isbegun) m=m.pow(0.3)
+        return m
     },
     calctmult(){
         let tmult=new Decimal(1)
@@ -2757,7 +2758,7 @@ addLayer("f", {
                 return player.f.ftype==4&&hasUpgrade("f",331)
             },
             onPurchase(){
-                player.tab='sp'
+                player.tab='p'
             },
             canAfford(){return player.points.gte(10)},
             pay(){return player.points=player.points.minus(10)},
@@ -2800,6 +2801,34 @@ addLayer("f", {
             },
             canAfford(){return player.points.gte(1e50)},
             pay(){return player.points=player.points.minus(1e50)},
+        },
+        341:{
+            title:"VI",
+            description(){return "Unlock challenge layer."},
+            cost(){return new Decimal(1e75)},
+            unlocked(){ 
+                return player.f.ftype==4&&hasUpgrade("f",335)
+            },
+            onPurchase(){
+                player.tab='c'
+                player.c.checker=true
+                player.c.unlocked=true
+            },
+            canAfford(){return player.points.gte(1e75)},
+            pay(){return player.points=player.points.minus(1e75)},
+        },
+        342:{
+            title:"VII",
+            description(){return "Unlock super upgrader layer."},
+            cost(){return new Decimal(1e200)},
+            unlocked(){ 
+                return player.f.ftype==4&&hasUpgrade("f",341)
+            },
+            onPurchase(){
+                player.tab='su'
+            },
+            canAfford(){return player.points.gte(1e200)},
+            pay(){return player.points=player.points.minus(1e200)},
         },
     },
     clickables:{
@@ -3041,6 +3070,24 @@ addLayer("f", {
             unlocked(){return hasUpgrade("f",335)},
             onClick(){
                 player.tab='hp'
+            },
+            canClick(){return true}
+        },
+        55:{
+            display(){return `Spin to challenge tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#45AC68","color":"#45AC68","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.c.checker},
+            onClick(){
+                player.tab='c'
+            },
+            canClick(){return true}
+        },
+        61:{
+            display(){return `Spin to super upgrader tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#04AE83","color":"#04AE83","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return hasUpgrade("f",342)},
+            onClick(){
+                player.tab='su'
             },
             canClick(){return true}
         },
@@ -3687,6 +3734,7 @@ addLayer("p", {
         if(hasMilestone("p",1)) mult=mult.times(3)
         mult=mult.times(buyableEffect("p",13))
         mult=mult.times(tmp.pu.effect)
+        if(player.c.choose33&&player.c.isbegun) mult=mult.times(0)
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -3694,6 +3742,8 @@ addLayer("p", {
         if(hasUpgrade("p",23)) exp=exp.times(1.05)
         if(hasUpgrade("p",42)) exp=exp.times(1.025)
         if(hasUpgrade("sp",35)) exp=exp.times(1.025)
+        if(hasMilestone("sp",7)) exp=exp.times(tmp.c.calcshardboost)
+        if(player.c.choose11&&player.c.isbegun) exp=exp.times(0.5)
         return exp
     },
     passiveGeneration(){return hasMilestone("sp",1) ? 1 : hasMilestone("p",2) ? 0.05 : 0},
@@ -3750,9 +3800,10 @@ addLayer("p", {
         let boost=Decimal.pow(exp5,player.p.points.pow(0.5).add(1).ln()).minus(1)
         let sc=new Decimal(100)
         if(hasMilestone("sp",3)) sc=sc.times(2)
+        if(player.c.choose13&&player.c.isbegun) sc=new Decimal(0)
         if(hasUpgrade("p",41)) boost=boost.pow(1.25)
         boost=boost.times(buyableEffect("p",21))
-        if(boost.gt(sc)) boost=boost.minus(sc).add(1).log10().pow(3).add(sc)
+        if(boost.gt(sc)) boost=boost.minus(sc).add(1).log10().pow(3).add(sc).pow(player.c.choose13&&player.c.isbegun?0.5:1)
         return boost
     },
     calcbuyableboost(){
@@ -3782,7 +3833,7 @@ addLayer("p", {
             },
             canAfford(){return player.p.points.gte(3)},
             pay(){return player.p.points=player.p.points.minus(3)},
-            effect(){return player.p.points.add(1).log10().add(1).pow(1.5).pow(hasUpgrade("p",24) ? upgradeEffect("p",24):1)},
+            effect(){return player.c.choose12&&player.c.isbegun? new Decimal(1) : player.p.points.add(1).log10().add(1).pow(1.5).pow(hasUpgrade("p",24) ? upgradeEffect("p",24):1)},
             effectDisplay(){return `x${format(upgradeEffect("p",11))}`},
         },
         12:{
@@ -3794,7 +3845,7 @@ addLayer("p", {
             },
             canAfford(){return player.p.points.gte(10)},
             pay(){return player.p.points=player.p.points.minus(10)},
-            effect(){return player.points.pow(hasMilestone("p",4) ? 1 : 0.4).add(1).ln().pow(1.2).add(1)},
+            effect(){return player.c.choose12&&player.c.isbegun? new Decimal(1) : player.points.pow(hasMilestone("p",4) ? 1 : 0.4).add(1).ln().pow(1.2).add(1)},
             effectDisplay(){return `x${format(upgradeEffect("p",12))}`},
         },
         13:{
@@ -3806,7 +3857,7 @@ addLayer("p", {
             },
             canAfford(){return player.p.points.gte(20)},
             pay(){return player.p.points=player.p.points.minus(20)},
-            effect(){return player.points.pow(0.3).add(1).ln().pow(hasMilestone("p",3) ? 1.25 : 0.75).add(1)},
+            effect(){return player.c.choose12&&player.c.isbegun? new Decimal(1) : player.points.pow(0.3).add(1).ln().pow(hasMilestone("p",3) ? 1.25 : 0.75).add(1)},
             effectDisplay(){return `x${format(upgradeEffect("p",13))}`},
         },
         14:{
@@ -3828,7 +3879,7 @@ addLayer("p", {
             },
             canAfford(){return player.p.points.gte(150)},
             pay(){return player.p.points=player.p.points.minus(150)},
-            effect(){return Decimal.pow(1.5,player.p.points.add(1).log10()).add(1).ln().pow(hasUpgrade("p",33) ? upgradeEffect("p",33).add(1.75) : new Decimal(1.75)).add(1)},
+            effect(){return player.c.choose12&&player.c.isbegun? new Decimal(1) : Decimal.pow(1.5,player.p.points.add(1).log10()).add(1).ln().pow(hasUpgrade("p",33) ? upgradeEffect("p",33).add(1.75) : new Decimal(1.75)).add(1)},
             effectDisplay(){return `x${format(upgradeEffect("p",21))}`},
         },
         22:{
@@ -3840,7 +3891,7 @@ addLayer("p", {
             },
             canAfford(){return player.p.points.gte(300)},
             pay(){return player.p.points=player.p.points.minus(300)},
-            effect(){return Decimal.pow(1.5,(hasUpgrade("sp",23) ? player.sp.upgrades.length+player.p.upgrades.length:player.p.upgrades.length))},
+            effect(){return player.c.choose12&&player.c.isbegun? new Decimal(1) : Decimal.pow(1.5,(hasUpgrade("sp",23) ? player.sp.upgrades.length+player.p.upgrades.length:player.p.upgrades.length))},
             effectDisplay(){return `x${format(upgradeEffect("p",22))}`},
         },
         23:{
@@ -3862,7 +3913,7 @@ addLayer("p", {
             },
             canAfford(){return player.p.points.gte(1.5e5)},
             pay(){return player.p.points=player.p.points.minus(1.5e5)},
-            effect(){return player.p.points.add(1).log10().pow(1.25).div(100).add(1).min(2)},
+            effect(){return player.c.choose12&&player.c.isbegun? new Decimal(1) : player.p.points.add(1).log10().pow(1.25).div(100).add(1).min(2)},
             effectDisplay(){return `^${format(upgradeEffect("p",24))}`},
         },
         31:{
@@ -3993,6 +4044,24 @@ addLayer("p", {
             },
             canClick(){return true}
         },
+        15:{
+            display(){return `Spin to challenge tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#45AC68","color":"#45AC68","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.c.checker},
+            onClick(){
+                player.tab='c'
+            },
+            canClick(){return true}
+        },
+        21:{
+            display(){return `Spin to super upgrader tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#04AE83","color":"#04AE83","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.su.unlocked},
+            onClick(){
+                player.tab='su'
+            },
+            canClick(){return true}
+        },
     },
     milestones:{
         0: {
@@ -4053,7 +4122,7 @@ addLayer("p", {
         11:{
             title:"Point booster",
             cost(x) { return Decimal.pow(5,Decimal.pow(x,1.1)).times(1e20)},
-            effect(x) { return x.pow(hasUpgrade("hp",25) ? 4 : hasUpgrade("sp",33) ? 3 : 2).add(1)},
+            effect(x) { return x.pow(new Decimal(hasMilestone("hp",6) ? 8 : hasUpgrade("hp",25) ? 4 : hasUpgrade("sp",33) ? 3 : 2).add(hasUpgrade("hp",32)?upgradeEffect("hp",32):0)).add(1)},
             display() { return `Boost point gain.
                                 Cost: ${format(this.cost())} points
                                 Amount: ${format(getBuyableAmount("p",11))}
@@ -4061,7 +4130,7 @@ addLayer("p", {
             canAfford() { return player.points.gte(this.cost()) },
             buy(){
                 if(!tmp.p.buyables[11].canAfford) return
-                player.points = player.points.sub(this.cost())
+                if(!hasUpgrade("hp",14)) player.points = player.points.sub(this.cost())
                 setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
                 player.p.buyableamo=player.p.buyableamo.add(1)
             },
@@ -4078,7 +4147,7 @@ addLayer("p", {
             canAfford() { return player.p.points.gte(this.cost()) },
             buy(){
                 if(!tmp.p.buyables[12].canAfford) return
-                player.p.points = player.p.points.sub(this.cost())
+                if(!hasUpgrade("hp",14))player.p.points = player.p.points.sub(this.cost())
                 setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
                 player.p.buyableamo=player.p.buyableamo.add(1)
             },
@@ -4096,7 +4165,7 @@ addLayer("p", {
             canAfford() { return player.p.points.gte(this.cost()) },
             buy(){
                 if(!tmp.p.buyables[13].canAfford) return
-                player.p.points = player.p.points.sub(this.cost())
+                if(!hasUpgrade("hp",14))player.p.points = player.p.points.sub(this.cost())
                 setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
                 player.p.buyableamo=player.p.buyableamo.add(1)
             },
@@ -4114,7 +4183,7 @@ addLayer("p", {
             canAfford() { return player.p.points.gte(this.cost()) },
             buy(){
                 if(!tmp.p.buyables[21].canAfford) return
-                player.p.points = player.p.points.sub(this.cost())
+                if(!hasUpgrade("hp",14))player.p.points = player.p.points.sub(this.cost())
                 setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
                 player.p.buyableamo=player.p.buyableamo.add(1)
             },
@@ -4123,7 +4192,7 @@ addLayer("p", {
         },
         22:{
             title:"Super booster",
-            cost(x) { return Decimal.pow(3,x.add(1).pow(2)).times(1e28)},
+            cost(x) { return Decimal.pow(3,x.add(1).pow(2)).times(hasUpgrade("hp",33)?1e18:1e28)},
             effect(x) { return Decimal.pow(8.25,x).pow(0.5)},
             display() { return `Boost SP gain.
                                 Cost: ${format(this.cost())} prestige points
@@ -4132,7 +4201,7 @@ addLayer("p", {
             canAfford() { return player.p.points.gte(this.cost()) },
             buy(){
                 if(!tmp.p.buyables[22].canAfford) return
-                player.p.points = player.p.points.sub(this.cost())
+                if(!hasUpgrade("hp",14))player.p.points = player.p.points.sub(this.cost())
                 setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
                 player.p.buyableamo=player.p.buyableamo.add(1)
             },
@@ -4141,7 +4210,7 @@ addLayer("p", {
         },
         23:{
             title:"Super boost booster",
-            cost(x) { return Decimal.pow(2,x.add(1).pow(2.75)).times(1e33)},
+            cost(x) { return Decimal.pow(2,x.add(1).pow(2.75)).times(hasUpgrade("hp",33)?1e23:1e33)},
             effect(x) { return Decimal.pow(5,x.pow(0.75))},
             display() { return `Boost SP boost base.
                                 Cost: ${format(this.cost())} prestige points
@@ -4150,7 +4219,7 @@ addLayer("p", {
             canAfford() { return player.p.points.gte(this.cost()) },
             buy(){
                 if(!tmp.p.buyables[23].canAfford) return
-                player.p.points = player.p.points.sub(this.cost())
+                if(!hasUpgrade("hp",14))player.p.points = player.p.points.sub(this.cost())
                 setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
                 player.p.buyableamo=player.p.buyableamo.add(1)
             },
@@ -4190,11 +4259,14 @@ addLayer("sp", {
         if(hasMilestone("hp",4)) mult=mult.times(3)
         mult=mult.times(buyableEffect("p",22))
         if(player.hp.unlocked) mult=mult.times(tmp.hp.calchpboost)
+        if(player.c.choose31&&player.c.isbegun) mult=mult.times(0)
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
         exp = new Decimal(1)
         if(hasUpgrade("hp",12)) exp=exp.times(1.1)
+        if(hasMilestone("hp",5)) exp=exp.times(tmp.c.calcshardboost)
+        if(player.c.choose21&&player.c.isbegun) exp=exp.times(0.6)
         return exp
     },
     row: 1, // Row the layer is in on the tree (0 is the first row)
@@ -4239,7 +4311,7 @@ addLayer("sp", {
         if(hasUpgrade("sp",25)) exp6=exp6.add(0.1)
         if(hasMilestone("pu",2)) exp6=exp6.add(0.25)
         if(hasUpgrade("hp",11)) exp6=exp6.add(upgradeEffect("hp",11))
-        let boost=(hasMilestone("sp",2)? player.sp.best : player.sp.points).times(buyableEffect("p",23)).add(1).pow(exp6).ln().pow(2).times(2).max(1).pow(hasMilestone("hp",1)?2:1)
+        let boost=(hasMilestone("sp",2)? player.sp.best : player.sp.points).times(buyableEffect("p",23)).add(1).pow(exp6).ln().pow(2).times(2).max(1).pow(hasMilestone("hp",1)?2:1) 
         return boost
     },
     branches:["p"],
@@ -4273,7 +4345,7 @@ addLayer("sp", {
             },
             canAfford(){return player.sp.points.gte(1)},
             pay(){return player.sp.points=player.sp.points.minus(1)},
-            effect(){return player.sp.points.add(1).log10().pow((hasUpgrade("sp",32) ? upgradeEffect("sp",32) : new Decimal(0)).add(2.5)).add(1).min(1e12)},
+            effect(){return (player.c.choose23&&player.c.isbegun)? new Decimal(1) : player.sp.points.add(1).log10().pow((hasUpgrade("sp",32) ? upgradeEffect("sp",32) : new Decimal(0)).add(2.5)).add(1).min(1e12)},
             effectDisplay(){return `x${format(upgradeEffect("sp",13))}`},
         },
         14:{
@@ -4285,7 +4357,7 @@ addLayer("sp", {
             },
             canAfford(){return player.sp.points.gte(5)},
             pay(){return player.sp.points=player.sp.points.minus(5)},
-            effect(){return player.sp.points.add(1).pow(0.75).log10().pow(3.333).add(1)},
+            effect(){return (player.c.choose23&&player.c.isbegun)? new Decimal(1) : player.sp.points.add(1).pow(0.75).log10().pow(3.333).add(1)},
             effectDisplay(){return `x${format(upgradeEffect("sp",14))}`},
         },
         15:{
@@ -4297,7 +4369,7 @@ addLayer("sp", {
             },
             canAfford(){return player.sp.points.gte(35)},
             pay(){return player.sp.points=player.sp.points.minus(35)},
-            effect(){return player.sp.points.add(1).pow(2).log10().add(1)},
+            effect(){return (player.c.choose23&&player.c.isbegun)? new Decimal(1) : player.sp.points.add(1).pow(2).log10().add(1)},
             effectDisplay(){return `x${format(upgradeEffect("sp",15))}`},
         },
         21:{
@@ -4446,6 +4518,24 @@ addLayer("sp", {
             },
             canClick(){return true}
         },
+        15:{
+            display(){return `Spin to challenge tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#45AC68","color":"#45AC68","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.c.checker},
+            onClick(){
+                player.tab='c'
+            },
+            canClick(){return true}
+        },
+        21:{
+            display(){return `Spin to super upgrader tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#04AE83","color":"#04AE83","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.su.unlocked},
+            onClick(){
+                player.tab='su'
+            },
+            canClick(){return true}
+        },
     },
     milestones:{
         0: {
@@ -4490,6 +4580,13 @@ addLayer("sp", {
             style:{"width":"500px"},
             effectDescription: `The softcap of prestige points boost starts 2x later.`,
         },
+        7: {
+            requirementDescription: "1e35 super prestige points",
+            done() { return player.sp.points.gte(1e35)},
+            style:{"width":"500px"},
+            effectDescription: `Challenge shards affect prestige point gain.`,
+            unlocked(){return player.c.checker}
+        },
     }
 }),
 addLayer("pu", {
@@ -4517,6 +4614,7 @@ addLayer("pu", {
         let mult = new Decimal(1);
         if(hasUpgrade("pu",13)) mult=mult.div(upgradeEffect("pu",13))
         if(hasUpgrade("hp",31)) mult=mult.div(upgradeEffect("hp",31))
+        mult=mult.pow(new Decimal(1).div(tmp.su.effect))
         return mult;
     },
     row: 1, // Row the layer is in on the tree (0 is the first row)
@@ -4529,7 +4627,7 @@ addLayer("pu", {
         return base
     },
     effect() {
-        if ((!player.pu.unlocked)) return new Decimal(1);
+        if ((!player.pu.unlocked)||(player.c.choose22&&player.c.isbegun)) return new Decimal(1);
         return Decimal.pow(tmp.pu.effectBase,player.pu.points)
     },
     startData() { return {
@@ -4609,6 +4707,18 @@ addLayer("pu", {
             canAfford(){return player.pu.points.gte(10)},
             pay(){return player.pu.points=player.pu.points.minus(10)},
         },
+        15:{
+            title:"Upgrader hyperboost",
+            description(){return `Boost point gain based on PU.`},
+            cost(){return new Decimal(21)},
+            unlocked(){ 
+                return player.pu.unlocked
+            },
+            canAfford(){return player.pu.points.gte(21)},
+            pay(){return player.pu.points=player.pu.points.minus(21)},
+            effect(){return Decimal.pow(2,player.pu.points.add(1).pow(1.1))},
+            effectDisplay(){return `x${format(upgradeEffect("pu",15))}`},
+        },
     },
     milestones:{
         0: {
@@ -4673,6 +4783,24 @@ addLayer("pu", {
             },
             canClick(){return true}
         },
+        15:{
+            display(){return `Spin to challenge tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#45AC68","color":"#45AC68","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.c.checker},
+            onClick(){
+                player.tab='c'
+            },
+            canClick(){return true}
+        },
+        21:{
+            display(){return `Spin to super upgrader tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#04AE83","color":"#04AE83","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.su.unlocked},
+            onClick(){
+                player.tab='su'
+            },
+            canClick(){return true}
+        },
     },
 }),
 addLayer("hp", {
@@ -4700,6 +4828,7 @@ addLayer("hp", {
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
         exp = new Decimal(1)
+        if(hasMilestone("hp",6)) exp=exp.times(tmp.c.calcshardboost)
         return exp
     },
     row: 2, // Row the layer is in on the tree (0 is the first row)
@@ -4737,6 +4866,7 @@ addLayer("hp", {
     calchpboost(){
         let exp7=new Decimal(2)
         if(hasMilestone("hp",4)) exp7=exp7.add(0.5)
+        if(hasMilestone("hp",5)) exp7=exp7.add(1.5)
         let boost=player.hp.points.add(1).pow(exp7).log10().pow(2).times(10).add(1)
         return boost
     },
@@ -4777,7 +4907,7 @@ addLayer("hp", {
         },
         14:{
             title:"Why auto?",
-            description(){return `Buy 1 of each prestige buyables per tick.`},
+            description(){return `Buy 1 of each prestige buyables per tick. Prestige buyables cost nothing.`},
             cost(){return new Decimal(8)},
             unlocked(){ 
                 return hasUpgrade("hp",13)
@@ -4851,21 +4981,55 @@ addLayer("hp", {
         },
         31:{
             title:"Hyper boost++",
-            description(){return `"Divide PU cost based on HP,PU is cheaper.`},
+            description(){return `Divide PU cost based on HP,PU is cheaper.`},
             cost(){return new Decimal(2.5e8)},
             unlocked(){ 
-                return hasUpgrade("hp",24)
+                return hasUpgrade("hp",25)
             },
             canAfford(){return player.hp.points.gte(2.5e8)},
             pay(){return player.hp.points=player.hp.points.minus(2.5e8)},
             effect(){return player.hp.points.add(1).pow(0.75)},
             effectDisplay(){return `/${format(upgradeEffect("hp",31))}`},
         },
+        32:{
+            title:"Hyper point boost",
+            description(){return `Add a number to "point booster" base based on HP.`},
+            cost(){return new Decimal(1e9)},
+            unlocked(){ 
+                return hasUpgrade("hp",31)
+            },
+            canAfford(){return player.hp.points.gte(1e9)},
+            pay(){return player.hp.points=player.hp.points.minus(1e9)},
+            effect(){return player.hp.points.add(1).log10().add(1).pow(0.75).div(10)},
+            effectDisplay(){return `+${format(upgradeEffect("hp",32))}`},
+        },
+        33:{
+            title:"Hyper buyable boost",
+            description(){return `"Super booster" and "Super boost booster" are cheaper.`},
+            cost(){return new Decimal(1e10)},
+            unlocked(){ 
+                return hasUpgrade("hp",32)
+            },
+            canAfford(){return player.hp.points.gte(1e10)},
+            pay(){return player.hp.points=player.hp.points.minus(1e10)},
+        },
+        34:{
+            title:"Hyper point boost max",
+            description(){return `Boost point gain based on HP.`},
+            cost(){return new Decimal(1e11)},
+            unlocked(){ 
+                return hasUpgrade("hp",33)
+            },
+            canAfford(){return player.hp.points.gte(1e11)},
+            pay(){return player.hp.points=player.hp.points.minus(1e11)},
+            effect(){return player.hp.points.add(1)},
+            effectDisplay(){return `x${format(upgradeEffect("hp",34))}`},
+        },
     },
     milestones:{
         0: {
             requirementDescription: "1 hyper prestige points",
-            done() { return player.hp.points.gte(9)},
+            done() { return player.hp.points.gte(1)},
             style:{"width":"500px"},
             effectDescription: "Kept super prestige milestones and prestige upgrader contents on all resets.",
         },
@@ -4883,7 +5047,7 @@ addLayer("hp", {
         },
         3: {
             requirementDescription: "500 hyper prestige points",
-            done() { return player.hp.points.gte(10)},
+            done() { return player.hp.points.gte(500)},
             style:{"width":"500px"},
             effectDescription:"The second PU milestone's effect is 100%, prestige boost formula is better.",
         },
@@ -4892,6 +5056,18 @@ addLayer("hp", {
             done() { return player.hp.points.gte(2500)},
             style:{"width":"500px"},
             effectDescription:"HP boost formula is better, Triple HP and SP gain.",
+        },
+        5: {
+            requirementDescription: "1e11 hyper prestige points",
+            done() { return player.hp.points.gte(1e11)},
+            style:{"width":"500px"},
+            effectDescription:"HP boost formula is better, challenge shard affects SP gain.",
+        },
+        6: {
+            requirementDescription: "1e15 hyper prestige points",
+            done() { return player.hp.points.gte(1e15)},
+            style:{"width":"500px"},
+            effectDescription:`"Point booster" base is 8, challenge shard affects HP gain.`,
         },
     },
     clickables:{
@@ -4928,6 +5104,490 @@ addLayer("hp", {
             unlocked(){return player.hp.unlocked},
             onClick(){
                 player.tab='pu'
+            },
+            canClick(){return true}
+        },
+        15:{
+            display(){return `Spin to challenge tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#45AC68","color":"#45AC68","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.c.checker},
+            onClick(){
+                player.tab='c'
+            },
+            canClick(){return true}
+        },
+        21:{
+            display(){return `Spin to super upgrader tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#04AE83","color":"#04AE83","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.su.unlocked},
+            onClick(){
+                player.tab='su'
+            },
+            canClick(){return true}
+        },
+    }
+}),
+addLayer("c", {
+    name: "challenges", // This is optional, only used in a few places, If absent it just uses the layer id.
+    symbol: "C", // This appears on the layer's node. Default is the id with the first letter capitalized
+    position: 1, // Horizontal position within a row. By default it uses the layer id and sorts in alphabetical order
+    startData() { return {
+        unlocked: true,
+		points: new Decimal(0),
+        shard: new Decimal(0),
+        depth:1,
+        goal:new Decimal(0),
+        checker:false,
+        isbegun:false,
+        choose11:false,
+        choose12:false,
+        choose13:false,
+        choose21:false,
+        choose22:false,
+        choose23:false,
+        choose31:false,
+        choose32:false,
+        clist:""
+    }},
+    color: "#45AC68",
+    requires: new Decimal(10), // Can be a function that takes requirement increases into account
+    resource: "challenge shards", // Name of prestige currency
+    baseResource: "points", // Name of resource prestige is based on
+    baseAmount() {return player.points}, // Get the current amount of baseResource
+    type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
+    exponent: 0.05, // Prestige currency exponent
+    gainMult() { // Calculate the multiplier for main currency from bonuses
+        mult = new Decimal(1)
+        return mult
+    },
+    gainExp() { // Calculate the exponent on main currency from bonuses
+        exp = new Decimal(1)
+        return exp
+    },
+    row: 2, // Row the layer is in on the tree (0 is the first row)
+    layerShown(){return hasUpgrade("f",341)},
+    branches:["sp"],
+    tabFormat:{
+        "Main":{
+            content:[
+                ["display-text",function() { return `You can get <h2 style="color:#45AC68">${format(tmp.c.getshard)}</h2> challenge shards after finish challenges.<br>
+                 Max shard you've got is <h2 style="color:#45AC68">${format(player.c.points)}</h2>, which boost the multiplier of x by <h2 style="color:#45AC68">^${format(tmp.c.calcshardboost)}</h2><br>
+                 Goal: <h2 style="color:#45AC68">${format(player.points)}/${format(player.c.goal)}</h2> points.`},
+                    { "font-size":"17.5px","text-shadow" : "0 0 10px #45AC68"},],
+                "blank",
+                ["display-text",function() { return `Current challenge:[<h2 style="color:#45AC68">${player.c.clist}</h2>]<br>`+(player.c.isbegun?`You're in challenge now!`:`Not in challenge now!`)},
+                       { "font-size":"17.5px","text-shadow" : "0 0 10px #45AC68"},],
+                "blank",
+                ["display-text",function() { return `You're in challenge depth ${player.c.depth} now.`}],
+                "blank",
+                "clickables"
+            ]
+        },
+        "Info":{
+            content:[
+                ["infobox","c_intro"],
+                ["infobox","d1_info"],
+                ["infobox","d2_info"],
+                ["infobox","d3_info"]
+            ]
+        },
+    },
+    getshard(){
+        gs=new Decimal(0)
+        if(player.c.choose11) gs=gs.add(1)
+        if(player.c.choose12) gs=gs.add(1)
+        if(player.c.choose13) gs=gs.add(2)
+        if(player.c.choose21) gs=gs.add(2)
+        if(player.c.choose22) gs=gs.add(2)
+        if(player.c.choose23) gs=gs.add(3)
+        if(player.c.choose31) gs=gs.add(3)
+        if(player.c.choose32) gs=gs.add(3)
+        if(player.c.choose33) gs=gs.add(4)
+        return gs
+    },
+    getclist(){
+        let cl=""
+        if(player.c.choose11) cl+=" 11 "
+        if(player.c.choose12) cl+=" 12 "
+        if(player.c.choose13) cl+=" 13 "
+        if(player.c.choose21) cl+=" 21 "
+        if(player.c.choose22) cl+=" 22 "
+        if(player.c.choose23) cl+=" 23 "
+        if(player.c.choose31) cl+=" 31 "
+        if(player.c.choose32) cl+=" 32 "
+        if(player.c.choose33) cl+=" 33 "
+        player.c.clist=cl
+    },
+    getgoal(){
+        let g=new Decimal(1)
+        let cnt=new Decimal(0)
+        if(player.c.choose11) {
+            g=g.times(1e60)
+            cnt=cnt.add(1)
+        }
+        if(player.c.choose12) {
+            g=g.times(cnt.eq(0)?1e75:1e50)
+            cnt=cnt.add(1.5)
+        }
+        if(player.c.choose13) {
+            g=g.times(cnt.eq(0)?Decimal.pow(10,93.75):1e75)
+            cnt=cnt.add(1.25)
+        }
+        if(player.c.choose21) {
+            g=g.times(cnt.eq(0)?Decimal.pow(10,131.25):1e75)
+            cnt=cnt.add(1.75)
+        }
+        if(player.c.choose22) {
+            g=g.times(cnt.eq(0)?1e160:1e80)
+            cnt=cnt.add(2)
+        }
+        if(player.c.choose23) {
+            g=g.times(cnt.eq(0)?1e140:1e80)
+            cnt=cnt.add(1.75)
+        }
+        if(player.c.choose31) {
+            g=g.times(cnt.eq(0)?Decimal.pow(10,90):1e60)
+            cnt=cnt.add(1.5)
+        }
+        if(player.c.choose32) {
+            g=g.times(cnt.eq(0)?Decimal.pow(10,180):1e60)
+            cnt=cnt.add(3)
+        }
+        if(player.c.choose33) {
+            g=g.times(cnt.eq(0)?Decimal.pow(10,300):1e60)
+            cnt=cnt.add(5)
+        }
+        player.c.goal=g.pow(new Decimal(1).div(cnt.max(1)))
+    },
+    calcshardboost(){
+        return player.c.points.times(0.03).add(1)
+    },
+    infoboxes: {
+        c_intro: {
+            title: "Stage 4 challenges intro",
+            body() { return `<br><h3>Welcome to the first challenge layer in stage 4! Here's something you should notice.</h3><br><br>
+                1.This layer has 3 challenge Depths, each depth has some challenges.Challenge will give you challenge shards based on the Depth.<br><br>
+                2.Each challenge gives you different debuffs, They could affect together!<br><br>
+                3.Click a challenge's picture to choose it.<br><br>
+                4.You must choose at least 1 challenge to begin challenges.
+                5.You can know challenge's contents in infoboxes under.<br><br>
+                6.Each challenge has a certain goal,the mean goal of all chosen challenges determines the final goal to reach.
+                ENJOY!
+                ` },
+            style:{"width":"1100px"},
+        },
+        d1_info: {
+            title: "Depth 1",
+            body() { return `Prestige dilate[11]:Prestige point gain is raised to ^0.5, Goal:1e60 points<br>
+                             Prestige deboost[12]:The effect of the 1st and 2nd row of prestige upgrades are their default value, Goal:1e50 points<br>
+                             Softcap power[13]:The softcap of prestige point boost starts from 0 and it is 2x stronger, Goal:1e75 points.` },
+            style:{"width":"1100px"},
+        },
+        d2_info: {
+            title: "Depth 2",
+            body() { return `Super dilate[21]:Super prestige point gain is raised to ^0.6, Goal:1e75 points<br>
+                             Upgrader disabled[22]:Prestige upgrader's effect is 1, Goal:1e60 points<br>
+                             Super deboost[23]:The effect of the 1st row of super prestige upgrades are their default value, Goal:1e80 points.` },
+            style:{"width":"1100px"},
+        },
+        d3_info: {
+            title: "Depth 3",
+            body() { return `Super disabled[31]:You can't gain super prestige points, Goal:1e60 points<br>
+                             Slog11's return[32]:The multiplier of x is raised to ^0.3, Goal:1e60 points<br>
+                             Prestige disabled[33]:You cannot gain prestige points, Goal:1e60 points.` },
+            style:{"width":"1100px"},
+        },
+    },
+    clickables:{
+        11:{
+            display(){return player.c.choose11? `<img src="js/cpic/c11choose.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`:`<img src="js/cpic/c11.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`},
+            style:{"height":"161px","width":"161px","border-radius":"0%","border":"6px solid","border-color"(){return player.c.choose11 ? "#45AC68":"#DDDDDD"},"color":"#45AC68","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.c.depth==1},
+            onClick(){
+                player.c.choose11=!player.c.choose11
+            },
+            canClick(){return !player.c.isbegun}
+        },
+        12:{
+            display(){return player.c.choose12? `<img src="js/cpic/c12choose.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`:`<img src="js/cpic/c12.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`},
+            style:{"height":"161px","width":"161px","border-radius":"0%","border":"6px solid","border-color"(){return player.c.choose12 ? "#45AC68":"#DDDDDD"},"color":"#45AC68","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.c.depth==1},
+            onClick(){
+                player.c.choose12=!player.c.choose12
+            },
+            canClick(){return !player.c.isbegun}
+        },
+        13:{
+            display(){return player.c.choose13? `<img src="js/cpic/c13choose.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`:`<img src="js/cpic/c13.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`},
+            style:{"height":"161px","width":"161px","border-radius":"0%","border":"6px solid","border-color"(){return player.c.choose13 ? "#45AC68":"#DDDDDD"},"color":"#45AC68","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.c.depth==1},
+            onClick(){
+                player.c.choose13=!player.c.choose13
+            },
+            canClick(){return !player.c.isbegun}
+        },
+        21:{
+            display(){return player.c.choose21? `<img src="js/cpic/c21choose.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`:`<img src="js/cpic/c21.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`},
+            style:{"height":"161px","width":"161px","border-radius":"0%","border":"6px solid","border-color"(){return player.c.choose21 ? "#45AC68":"#DDDDDD"},"color":"#45AC68","font-size":"15px","background-color":"#00000000","margin-top":"-15px"},
+            unlocked(){return player.c.depth==2},
+            onClick(){
+                player.c.choose21=!player.c.choose21
+            },
+            canClick(){return !player.c.isbegun}
+        },
+        22:{
+            display(){return player.c.choose22? `<img src="js/cpic/c22choose.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`:`<img src="js/cpic/c22.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`},
+            style:{"height":"161px","width":"161px","border-radius":"0%","border":"6px solid","border-color"(){return player.c.choose22 ? "#45AC68":"#DDDDDD"},"color":"#45AC68","font-size":"15px","background-color":"#00000000","margin-top":"-15px"},
+            unlocked(){return player.c.depth==2},
+            onClick(){
+                player.c.choose22=!player.c.choose22
+            },
+            canClick(){return !player.c.isbegun}
+        },
+        23:{
+            display(){return player.c.choose23? `<img src="js/cpic/c23choose.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`:`<img src="js/cpic/c23.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`},
+            style:{"height":"161px","width":"161px","border-radius":"0%","border":"6px solid","border-color"(){return player.c.choose23 ? "#45AC68":"#DDDDDD"},"color":"#45AC68","font-size":"15px","background-color":"#00000000","margin-top":"-15px"},
+            unlocked(){return player.c.depth==2},
+            onClick(){
+                player.c.choose23=!player.c.choose23
+            },
+            canClick(){return !player.c.isbegun}
+        },
+        31:{
+            display(){return player.c.choose31? `<img src="js/cpic/c31choose.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`:`<img src="js/cpic/c31.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`},
+            style:{"height":"161px","width":"161px","border-radius":"0%","border":"6px solid","border-color"(){return player.c.choose31 ? "#45AC68":"#DDDDDD"},"color":"#45AC68","font-size":"15px","background-color":"#00000000","margin-top":"-30px"},
+            unlocked(){return player.c.depth==3},
+            onClick(){
+                player.c.choose31=!player.c.choose31
+            },
+            canClick(){return !player.c.isbegun}
+        },
+        32:{
+            display(){return player.c.choose32? `<img src="js/cpic/c32choose.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`:`<img src="js/cpic/c32.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`},
+            style:{"height":"161px","width":"161px","border-radius":"0%","border":"6px solid","border-color"(){return player.c.choose32 ? "#45AC68":"#DDDDDD"},"color":"#45AC68","font-size":"15px","background-color":"#00000000","margin-top":"-30px"},
+            unlocked(){return player.c.depth==3},
+            onClick(){
+                player.c.choose32=!player.c.choose32
+            },
+            canClick(){return !player.c.isbegun}
+        },
+        33:{
+            display(){return player.c.choose33? `<img src="js/cpic/c33choose.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`:`<img src="js/cpic/c33.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`},
+            style:{"height":"161px","width":"161px","border-radius":"0%","border":"6px solid","border-color"(){return player.c.choose33 ? "#45AC68":"#DDDDDD"},"color":"#45AC68","font-size":"15px","background-color":"#00000000","margin-top":"-30px"},
+            unlocked(){return player.c.depth==3},
+            onClick(){
+                player.c.choose33=!player.c.choose33
+            },
+            canClick(){return !player.c.isbegun}
+        },
+        41:{
+            display(){return `Go deeper`},
+            style:{"height":"40px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#45AC68","color":"#45AC68","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.c.checker},
+            onClick(){
+                player.c.depth+=1
+            },
+            canClick(){return player.c.depth!=3}
+        },
+        42:{
+            display(){return `Start challenges`},
+            style:{"height":"40px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#45AC68","color":"#45AC68","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.c.checker},
+            onClick(){
+                player.c.isbegun=true
+                player.f.multiplier=new Decimal(0)
+                doReset("hp")
+            },
+            canClick(){return (!player.c.isbegun)&&(!tmp.c.getshard.eq(0))}
+        },
+        43:{
+            display(){return `End challenges`},
+            style:{"height":"40px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#45AC68","color":"#45AC68","font-size":"15px","background-color"(){return player.points.gte(player.c.goal)&&player.c.isbegun? "#ECEF31":"#00000000"}},
+            unlocked(){return player.c.checker},
+            onClick(){
+                if(player.points.gte(player.c.goal)) player.c.points=player.c.points.max(tmp.c.getshard)
+                doReset("hp")
+                player.c.isbegun=false
+            },
+            canClick(){return player.c.isbegun}
+        },
+        44:{
+            display(){return `Go higher`},
+            style:{"height":"40px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#45AC68","color":"#45AC68","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.c.checker},
+            onClick(){
+                player.c.depth-=1
+            },
+            canClick(){return player.c.depth!=1}
+        },
+        51:{
+            display(){return `Spin to function tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#EEEEEE","color":"#DDDDDD","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.c.checker},
+            onClick(){
+                player.tab='f'
+            },
+            canClick(){return true}
+        },
+        52:{
+            display(){return `Spin to prestige tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#31aeb0","color":"#31aeb0","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.c.checker},
+            onClick(){
+                player.tab='p'
+            },
+            canClick(){return true}
+        },
+        53:{
+            display(){return `Spin to super prestige tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#217782","color":"#217782","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.c.checker},
+            onClick(){
+                player.tab='sp'
+            },
+            canClick(){return true}
+        },
+        54:{
+            display(){return `Spin to prestige upgrader tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#14CEA3","color":"#14CEA3","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.c.checker},
+            onClick(){
+                player.tab='pu'
+            },
+            canClick(){return true}
+        },
+        55:{
+            display(){return `Spin to hyper prestige tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#0068A5","color":"#0068A5","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.c.checker},
+            onClick(){
+                player.tab='hp'
+            },
+            canClick(){return true}
+        },
+        61:{
+            display(){return `Spin to super upgrader tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#04AE83","color":"#45AC68","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.su.unlocked},
+            onClick(){
+                player.tab='su'
+            },
+            canClick(){return true}
+        },
+    }
+}),addLayer("su", {
+    name: "super upgraders", // This is optional, only used in a few places, If absent it just uses the layer id.
+    symbol: "SU", // This appears on the layer's node. Default is the id with the first letter capitalized
+    position: 2, // Horizontal position within a row. By default it uses the layer id and sorts in alphabetical order
+    color: "#04AE83",
+    requires() { return new Decimal(1e20) }, // Can be a function that takes requirement increases into account
+    resource: "super upgraders", // Name of prestige currency
+    baseResource: "hyper prestige points", // Name of resource prestige is based on
+    baseAmount() {return player.hp.points}, // Get the current amount of baseResource
+    type: "static", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
+    branches: ["sp"],
+    exponent() { 
+        ba=3
+        return ba 
+    }, // Prestige currency exponent
+    base() {
+        ca=6
+        return ca  
+    },
+    gainMult() { 
+        let mult = new Decimal(1);
+        return mult;
+    },
+    row: 2, // Row the layer is in on the tree (0 is the first row)
+    hotkeys: [
+        {key: "d", description: "Press D to perform a super upgrader reset", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
+    ],
+    layerShown(){return hasUpgrade("f",342)},
+    effectBase() {
+        let base = new Decimal(0.9);
+        return base
+    },
+    effect() {
+        if ((!player.su.unlocked)) return new Decimal(1);
+        return Decimal.pow(tmp.su.effectBase,player.su.points)
+    },
+    startData() { return {
+        unlocked: false,
+        points: new Decimal(0),
+        best: new Decimal(0),
+        total: new Decimal(0),
+    }},
+    doReset(resettingLayer){
+        player.points=new Decimal(0)
+        if (layers[resettingLayer].row > this.row) layerDataReset("su")
+    },
+    tabFormat:{
+        "Main":{
+            content:[
+                ["display-text",function() { return `You have <h2 style="color:#04AE83">${player.su.points}</h2> super upgraders, prestige upgrader's cost is raised to <h2 style="color:#04AE83">^${format(tmp.su.effect)}</h2>.`},
+                { "font-size":"17.5px","text-shadow" : "0 0 10px #14CEA3"},],
+                "blank",
+                "prestige-button",
+                ["display-text",function() { return `You have ${format(player.hp.points)} hyper prestige points.`},],
+                "blank",
+                "upgrades",
+                "blank",
+                "clickables"
+            ]
+        },
+    },
+    clickables:{
+        11:{
+            display(){return `Spin to function tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#EEEEEE","color":"#DDDDDD","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.su.unlocked},
+            onClick(){
+                player.tab='f'
+            },
+            canClick(){return true}
+        },
+        12:{
+            display(){return `Spin to prestige tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#31aeb0","color":"#31aeb0","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.su.unlocked},
+            onClick(){
+                player.tab='p'
+            },
+            canClick(){return true}
+        },
+        13:{
+            display(){return `Spin to prestige upgrader tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#14CEA3","color":"#14CEA3","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.su.unlocked},
+            onClick(){
+                player.tab='pu'
+            },
+            canClick(){return true}
+        },
+        14:{
+            display(){return `Spin to hyper prestige tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#0068A5","color":"#0068A5","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.su.unlocked},
+            onClick(){
+                player.tab='hp'
+            },
+            canClick(){return true}
+        },
+        15:{
+            display(){return `Spin to challenge tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#45AC68","color":"#45AC68","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.su.unlocked},
+            onClick(){
+                player.tab='c'
+            },
+            canClick(){return true}
+        },
+        21:{
+            display(){return `Spin to super upgrader tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#04AE83","color":"#04AE83","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.su.unlocked},
+            onClick(){
+                player.tab='su'
             },
             canClick(){return true}
         },
