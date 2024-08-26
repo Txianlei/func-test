@@ -55,7 +55,7 @@ addLayer("f", {
     gainExp() { // Calculate the exponent on main currency from bonuses
         return new Decimal(1)
     },
-    row:4, // Row the layer is in on the tree (0 is the first row)
+    row:5, // Row the layer is in on the tree (0 is the first row)
     layerShown(){return true},
     microtabs:{
         dilation:{
@@ -411,8 +411,11 @@ addLayer("f", {
         if(hasUpgrade("hp",34)) m=m.times(upgradeEffect("hp",34))
         if(hasUpgrade("pu",15)) m=m.times(upgradeEffect("pu",15))
         if(hasUpgrade("up",23)) m=m.times(upgradeEffect("up",23))
+        if(hasUpgrade("su",14)) m=m.times("1e576")
         m=m.times(buyableEffect("p",11))
         m=m.times(tmp.sp.calcspboost)
+        m=m.times(Decimal.pow(1.3,player.r.rt))
+        if(player.r.rngseed1[0]=='1'||player.r.rngseed1[0]=='4'||player.r.rngseed1[0]=='7') m=m.times(tmp.r.calcrng1boost[1])
         //stage 0 ^
         if(hasUpgrade("f",33)) m=m.pow(upgradeEffect("f",33))
         if(inChallenge("f",11)) m=m.sqrt()
@@ -2847,17 +2850,30 @@ addLayer("f", {
             pay(){return player.points=player.points.minus("1.8e308")},
         },
         344:{
-            title:"VIII",
+            title:"IX",
             description(){return "Unlock prestium layer."},
             cost(){return new Decimal("1e1120")},
             unlocked(){ 
                 return player.f.ftype==4&&hasUpgrade("f",343)
             },
             onPurchase(){
-                player.tab='up'
+                player.tab='pt'
             },
             canAfford(){return player.points.gte("1e1120")},
             pay(){return player.points=player.points.minus("1e1120")},
+        },
+        345:{
+            title:`X`,
+            description(){return `Unlock <p style= "color:#EF25EF">Reincarnation</p>`},
+            cost(){return new Decimal("1e100000")},
+            unlocked(){ 
+                return player.f.ftype==4&&hasUpgrade("f",344)
+            },
+            onPurchase(){
+                player.tab='r'
+            },
+            canAfford(){return player.points.gte("1e100000")},
+            pay(){return player.points=player.points.minus("1e100000")},
         },
     },
     clickables:{
@@ -3135,6 +3151,15 @@ addLayer("f", {
             unlocked(){return player.pt.unlocked},
             onClick(){
                 player.tab='pt'
+            },
+            canClick(){return true}
+        },
+        64:{
+            display(){return `Spin to reincarnation tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#EF25EF","color":"#EF25EF","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.r.unlocked},
+            onClick(){
+                player.tab='r'
             },
             canClick(){return true}
         },
@@ -3769,6 +3794,7 @@ addLayer("p", {
         gain=0.25
         if(hasUpgrade("sp",21)) gain=0.275
         if(hasUpgrade("hp",21)) gain=0.3
+        if((((player.r.rngseed1[0]/1)+(player.r.rngseed1[1]/1))>=17)||(((player.r.rngseed1[0]/1)+(player.r.rngseed1[1]/1))<=3)) gain+=tmp.r.calcrng1boost[1]
         return gain
     }, // Prestige currency exponent
     gainMult() { // Calculate the multiplier for main currency from bonuses
@@ -3785,6 +3811,7 @@ addLayer("p", {
         mult=mult.times(buyableEffect("p",13))
         mult=mult.times(tmp.pu.effect)
         mult=mult.times(tmp.up.calcupboost)
+        if(player.r.rngseed1[1]=='3'||player.r.rngseed1[1]=='5'||player.r.rngseed1[1]=='8') mult=mult.times(tmp.r.calcrng1boost[2])
         if(player.c.choose33&&player.c.isbegun) mult=mult.times(0)
         return mult
     },
@@ -3795,6 +3822,7 @@ addLayer("p", {
         if(hasUpgrade("sp",35)) exp=exp.times(1.025)
         if(hasMilestone("sp",7)) exp=exp.times(tmp.c.calcshardboost)
         if(player.c.choose11&&player.c.isbegun) exp=exp.times(0.5)
+        exp=exp.times(tmp.r.calcrpboost)
         return exp
     },
     passiveGeneration(){return hasMilestone("sp",1) ? 1 : hasMilestone("p",2) ? 0.05 : 0},
@@ -3855,8 +3883,10 @@ addLayer("p", {
         if(player.c.choose13&&player.c.isbegun) sc=new Decimal(0)
         if(hasUpgrade("p",41)) boost=boost.pow(1.25)
         boost=boost.times(buyableEffect("p",21))
+        if((player.r.rngseed1[0]=='0'&&player.r.rngseed1[1]!='0')) boost=boost.pow(tmp.r.calcrng1boost[1])
         if(boost.gt(sc)) boost=boost.minus(sc).add(1).log10().pow(3).add(sc).pow(player.c.choose13&&player.c.isbegun?0.5:1)
         boost=boost.pow(tmp.pt.calcboost3)
+
         player.p.sc=sc
         return boost
     },
@@ -3933,7 +3963,7 @@ addLayer("p", {
         },
         21:{
             title:"Prestige Antiboost",
-            description(){return "Boost prestige point gain based itself."},
+            description(){return "Boost prestige point gain based on itself."},
             cost(){return new Decimal(150)},
             unlocked(){ 
                 return hasUpgrade("p",13)
@@ -4141,6 +4171,15 @@ addLayer("p", {
             },
             canClick(){return true}
         },
+        24:{
+            display(){return `Spin to reincarnation tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#EF25EF","color":"#EF25EF","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.r.unlocked},
+            onClick(){
+                player.tab='r'
+            },
+            canClick(){return true}
+        },
     },
     milestones:{
         0: {
@@ -4157,7 +4196,7 @@ addLayer("p", {
         },
         2: {
             requirementDescription: "1e7 prestige points",
-            done() { return player.p.points.gte(1e7)},
+            done() { return player.p.points.gte(1e7)||player.r.coreLv.gte(1)},
             style:{"width":"500px"},
             effectDescription: "Gain 5% of prestige point gain on reset per second.",
         },
@@ -4201,7 +4240,7 @@ addLayer("p", {
         11:{
             title:"Point booster",
             cost(x) { return Decimal.pow(5,Decimal.pow(x,1.1)).times(1e20)},
-            effect(x) { return x.pow(new Decimal(hasMilestone("hp",6) ? 8 : hasUpgrade("hp",25) ? 4 : hasUpgrade("sp",33) ? 3 : 2).add(hasUpgrade("hp",32)?upgradeEffect("hp",32):0)).add(1)},
+            effect(x) { return ((player.r.rngseed1[1]=='0'&&player.r.rngseed1[0]!='0')?x.add(tmp.r.calcrng1boost[2]):x).pow(new Decimal(hasMilestone("hp",6) ? 8 : hasUpgrade("hp",25) ? 4 : hasUpgrade("sp",33) ? 3 : 2).add(hasUpgrade("hp",32)?upgradeEffect("hp",32):0)).add(1)},
             display() { return `Boost point gain.
                                 Cost: ${format(this.cost())} points
                                 Amount: ${format(getBuyableAmount("p",11))}
@@ -4376,6 +4415,7 @@ addLayer("sp", {
         mult=mult.times(buyableEffect("p",22))
         mult=mult.times(tmp.up.calcupboost)
         if(player.hp.unlocked) mult=mult.times(tmp.hp.calchpboost)
+        if(player.r.rngseed2[0]=='7'||player.r.rngseed2[1]=='7') mult=mult.times(tmp.r.calcrng2boost[1])
         if(player.c.choose31&&player.c.isbegun) mult=mult.times(0)
         return mult
     },
@@ -4384,6 +4424,7 @@ addLayer("sp", {
         if(hasUpgrade("hp",12)) exp=exp.times(1.1)
         if(hasMilestone("hp",5)) exp=exp.times(tmp.c.calcshardboost)
         if(player.c.choose21&&player.c.isbegun) exp=exp.times(0.6)
+        if(player.r.rngseed2[0]=='1'||player.r.rngseed2[0]=='5') exp=exp.times(1.01)
         return exp
     },
     row: 1, // Row the layer is in on the tree (0 is the first row)
@@ -4673,11 +4714,20 @@ addLayer("sp", {
             },
             canClick(){return true}
         },
+        24:{
+            display(){return `Spin to reincarnation tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#EF25EF","color":"#EF25EF","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.r.unlocked},
+            onClick(){
+                player.tab='r'
+            },
+            canClick(){return true}
+        },
     },
     milestones:{
         0: {
             requirementDescription: "2 super prestige points",
-            done() { return player.sp.points.gte(2)},
+            done() { return player.sp.points.gte(2)||player.r.coreLv.gte(3)},
             style:{"width":"500px"},
             effectDescription: "Kept prestige milestones on reset.",
         },
@@ -5002,6 +5052,15 @@ addLayer("pu", {
             unlocked(){return player.pt.unlocked},
             onClick(){
                 player.tab='pt'
+            },
+            canClick(){return true}
+        },
+        24:{
+            display(){return `Spin to reincarnation tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#EF25EF","color":"#EF25EF","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.r.unlocked},
+            onClick(){
+                player.tab='r'
             },
             canClick(){return true}
         },
@@ -5373,6 +5432,15 @@ addLayer("hp", {
             },
             canClick(){return true}
         },
+        24:{
+            display(){return `Spin to reincarnation tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#EF25EF","color":"#EF25EF","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.r.unlocked},
+            onClick(){
+                player.tab='r'
+            },
+            canClick(){return true}
+        },
     }
 }),
 addLayer("c", {
@@ -5419,7 +5487,7 @@ addLayer("c", {
     doReset(resettingLayer){
         let keep=[]
         keep.push("checker")
-        if(hasMilestone("up",0)) keep.push("points")
+        if(hasMilestone("up",0)&&resettingLayer!='r') keep.push("points")
         if (layers[resettingLayer].row > this.row) layerDataReset("c",keep)
     },
     tabFormat:{
@@ -5747,6 +5815,15 @@ addLayer("c", {
             },
             canClick(){return true}
         },
+        64:{
+            display(){return `Spin to reincarnation tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#EF25EF","color":"#EF25EF","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.r.unlocked},
+            onClick(){
+                player.tab='r'
+            },
+            canClick(){return true}
+        },
     }
 }),addLayer("su", {
     name: "super upgraders", // This is optional, only used in a few places, If absent it just uses the layer id.
@@ -5860,6 +5937,16 @@ addLayer("c", {
             },
             effectDisplay(){return `<br>P->PT:x${format(this.effect()[0])}<br>PT->P:${format(this.effect()[1])}`},
         },
+        14:{
+            title:"A boost",
+            description(){return `x1e576 points.`},
+            cost(){return new Decimal(25)},
+            unlocked(){ 
+                return player.pt.unlocked
+            },
+            canAfford(){return player.su.points.gte(25)},
+            pay(){return player.su.points=player.su.points.minus(25)},
+        },
     },
     milestones:{
         0: {
@@ -5948,6 +6035,15 @@ addLayer("c", {
             },
             canClick(){return true}
         },
+        24:{
+            display(){return `Spin to reincarnation tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#EF25EF","color":"#EF25EF","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.r.unlocked},
+            onClick(){
+                player.tab='r'
+            },
+            canClick(){return true}
+        },
     }
 }),
 addLayer("up", {
@@ -5987,6 +6083,8 @@ addLayer("up", {
     doReset(resettingLayer){
         player.f.multiplier=new Decimal(0)
         player.points=new Decimal(0)
+        let keep=[]
+        if (layers[resettingLayer].row > this.row) layerDataReset("up", keep)
     },
     branches:["p","hp"],
     tabFormat:{
@@ -5998,7 +6096,7 @@ addLayer("up", {
                 "prestige-button",
                 ["display-text",function() { return `You have ${format(player.points)} points.`},],
                 "blank",
-                "upgrades",
+                ["upgrades",[1,2,3]],
                 "blank",
                 "clickables"
             ]
@@ -6010,7 +6108,7 @@ addLayer("up", {
                 "blank",
                 "milestones",
             ]
-        }
+        },
     },
     calcupboost(){
         let exp8=new Decimal(25)
@@ -6081,7 +6179,7 @@ addLayer("up", {
         21:{
             title:"Ultra adder boost",
             description(){return `Boost the adder of x based on UP.`},
-            cost(){return new Decimal(3)},
+            cost(){return new Decimal(1000)},
             unlocked(){ 
                 return hasUpgrade("up",15)
             },
@@ -6143,6 +6241,16 @@ addLayer("up", {
             },
             canAfford(){return player.up.points.gte(1e56)},
             pay(){return player.up.points=player.up.points.minus(1e56)},
+        },
+        32:{
+            title:"Purification",
+            description(){return `Prestium gain is raised to ^1.025.`},
+            cost(){return new Decimal("1e1050")},
+            unlocked(){ 
+                return hasUpgrade("up",31)
+            },
+            canAfford(){return player.up.points.gte("1e1050")},
+            pay(){return player.up.points=player.up.points.minus("1e1050")},
         },
     },
     milestones:{
@@ -6256,6 +6364,15 @@ addLayer("up", {
             },
             canClick(){return true}
         },
+        24:{
+            display(){return `Spin to reincarnation tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#EF25EF","color":"#EF25EF","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.r.unlocked},
+            onClick(){
+                player.tab='r'
+            },
+            canClick(){return true}
+        },
     }
 }),
 addLayer("pt", {
@@ -6291,6 +6408,7 @@ addLayer("pt", {
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
         exp = new Decimal(1)
+        if(hasUpgrade("up",32)) exp=exp.times(1.025)
         return exp
     },
     row: 3, // Row the layer is in on the tree (0 is the first row)
@@ -6301,6 +6419,8 @@ addLayer("pt", {
     doReset(resettingLayer){
         player.f.multiplier=new Decimal(0)
         player.points=new Decimal(0)
+        let keep=[]
+        if (layers[resettingLayer].row > this.row) layerDataReset("pt", keep)
     },
     passiveGeneration(){return hasMilestone("up",4)?1:0},
     branches:["hp"],
@@ -6352,23 +6472,23 @@ addLayer("pt", {
     },
     calcblv(){
         if(player.pt.cst[1].lte(0)){
-            player.pt.blv[1]=player.pt.blv[1].add(1)
+            player.pt.blv[1]=player.pt.blv[1].add(1).min(100)
             player.pt.cst[1]=player.pt.basecst[1].times(player.pt.cstup[1].pow(player.pt.blv[1]))
         }
         if(player.pt.cst[2].lte(0)){
-            player.pt.blv[2]=player.pt.blv[2].add(1)
+            player.pt.blv[2]=player.pt.blv[2].add(1).min(55)
             player.pt.cst[2]=player.pt.basecst[2].times(player.pt.cstup[2].pow(player.pt.blv[2]).pow(player.pt.blv[2].minus(10).max(0).div(10).add(1)))
         }
         if(player.pt.cst[3].lte(0)){
-            player.pt.blv[3]=player.pt.blv[3].add(1)
+            player.pt.blv[3]=player.pt.blv[3].add(1).min(55)
             player.pt.cst[3]=player.pt.basecst[3].times(player.pt.cstup[3].pow(player.pt.blv[3]).add(player.pt.blv[3].times(0.999)))
         }
         if(player.pt.cst[4].lte(0)){
-            player.pt.blv[4]=player.pt.blv[4].add(1)
+            player.pt.blv[4]=player.pt.blv[4].add(1).min(75)
             player.pt.cst[4]=player.pt.basecst[4].times(player.pt.cstup[4].pow(player.pt.blv[4]))
         }
         if(player.pt.cst[5].lte(0)){
-            player.pt.blv[5]=player.pt.blv[5].add(1)
+            player.pt.blv[5]=player.pt.blv[5].add(1).min(55)
             player.pt.cst[5]=player.pt.basecst[5].times(Decimal.pow((player.pt.cstup[5].pow(player.pt.blv[5])),(player.pt.blv[5].div(10).add(1))).add(Decimal.pow(2,player.pt.blv[5])))
         }
     },
@@ -6543,40 +6663,40 @@ addLayer("pt", {
             canClick(){return (player.pt.ischoose[1]||player.pt.ischoose[2]||player.pt.ischoose[3]||player.pt.ischoose[4]||player.pt.ischoose[5]||player.pt.ischoose[6])&&(!(player.pt.ischoose[1]&&player.pt.work[1].eq(0)))&&(!(player.pt.ischoose[2]&&player.pt.work[2].eq(0)))&&(!(player.pt.ischoose[3]&&player.pt.work[3].eq(0)))&&(!(player.pt.ischoose[4]&&player.pt.work[4].eq(0)))&&(!(player.pt.ischoose[5]&&player.pt.work[5].eq(0)))&&(!(player.pt.ischoose[6]&&player.pt.work[6].eq(0)))}
         },
         21:{
-            display(){return `Building I|LV.${tmp.pt.getlv}\nNext at ${formatTime(tmp.pt.calclefttime.div(Decimal.pow(tmp.pt.calcboost5.times(1.5),player.pt.work[1]).minus(1).max(0.5)))}`},
-            style:{"height":"105px","width":"200px","border-radius":"0%","border":"6px solid","border-color":"yellow","font-size":"14px","background-color"(){return player.pt.ischoose[1]?"#EEDB0530":"#00000000"},"color":"#EEDB05"},
+            display(){return `Building I|LV.${tmp.pt.getlv}\nNext at ${formatTimeLong(tmp.pt.calclefttime.div(Decimal.pow(tmp.pt.calcboost5.times(1.5),player.pt.work[1]).minus(1).max(0.5)))}`},
+            style:{"height":"105px","width":"200px","border-radius":"0%","border":"6px solid","border-color":"yellow","font-size":"14px","background-color"(){return tmp.pt.getlv.gte(100)? "#21EB2525":player.pt.ischoose[1]?"#EEDB0530":"#00000000"},"color":"#EEDB05"},
             onClick(){
                 player.pt.ischoose[1]=!player.pt.ischoose[1]
             },
             canClick(){return !(player.pt.ischoose[2]||player.pt.ischoose[3]||player.pt.ischoose[4]||player.pt.ischoose[5]||player.pt.ischoose[6])}
         },
         22:{
-            display(){return `Building II|LV.${tmp.pt.getlv2}\nNext at ${formatTime(tmp.pt.calclefttime2.div(Decimal.pow(tmp.pt.calcboost5.times(1.5),player.pt.work[2]).minus(1).max(0.5)))}`},
-            style:{"height":"105px","width":"200px","border-radius":"0%","border":"6px solid","border-color":"yellow","font-size":"14px","background-color"(){return player.pt.ischoose[2]?"#EEDB0530":"#00000000"},"color":"#EEDB05"},
+            display(){return `Building II|LV.${tmp.pt.getlv2}\nNext at ${formatTimeLong(tmp.pt.calclefttime2.div(Decimal.pow(tmp.pt.calcboost5.times(1.5),player.pt.work[2]).minus(1).max(0.5)))}`},
+            style:{"height":"105px","width":"200px","border-radius":"0%","border":"6px solid","border-color":"yellow","font-size":"14px","background-color"(){return tmp.pt.getlv2.gte(55)? "#21EB2525":player.pt.ischoose[2]?"#EEDB0530":"#00000000"},"color":"#EEDB05"},
             onClick(){
                 player.pt.ischoose[2]=!player.pt.ischoose[2]
             },
             canClick(){return !(player.pt.ischoose[1]||player.pt.ischoose[3]||player.pt.ischoose[4]||player.pt.ischoose[5]||player.pt.ischoose[6])}
         },
         23:{
-            display(){return `Building III|LV.${tmp.pt.getlv3}\nNext at ${formatTime(tmp.pt.calclefttime3.div(Decimal.pow(tmp.pt.calcboost5.times(1.5),player.pt.work[3]).minus(1).max(0.5)))}`},
-            style:{"height":"105px","width":"200px","border-radius":"0%","border":"6px solid","border-color":"yellow","font-size":"14px","background-color"(){return player.pt.ischoose[3]?"#EEDB0530":"#00000000"},"color":"#EEDB05"},
+            display(){return `Building III|LV.${tmp.pt.getlv3}\nNext at ${formatTimeLong(tmp.pt.calclefttime3.div(Decimal.pow(tmp.pt.calcboost5.times(1.5),player.pt.work[3]).minus(1).max(0.5)))}`},
+            style:{"height":"105px","width":"200px","border-radius":"0%","border":"6px solid","border-color":"yellow","font-size":"14px","background-color"(){return tmp.pt.getlv3.gte(55)? "#21EB2525":player.pt.ischoose[3]?"#EEDB0530":"#00000000"},"color":"#EEDB05"},
             onClick(){
                 player.pt.ischoose[3]=!player.pt.ischoose[3]
             },
             canClick(){return !(player.pt.ischoose[1]||player.pt.ischoose[2]||player.pt.ischoose[4]||player.pt.ischoose[5]||player.pt.ischoose[6])}
         },
         24:{
-            display(){return `Building IV|LV.${tmp.pt.getlv4}\nNext at ${formatTime(tmp.pt.calclefttime4.div(Decimal.pow(tmp.pt.calcboost5.times(1.5),player.pt.work[4]).minus(1).max(0.5)))}`},
-            style:{"height":"105px","width":"200px","border-radius":"0%","border":"6px solid","border-color":"yellow","font-size":"14px","background-color"(){return player.pt.ischoose[4]?"#EEDB0530":"#00000000"},"color":"#EEDB05"},
+            display(){return `Building IV|LV.${tmp.pt.getlv4}\nNext at ${formatTimeLong(tmp.pt.calclefttime4.div(Decimal.pow(tmp.pt.calcboost5.times(1.5),player.pt.work[4]).minus(1).max(0.5)))}`},
+            style:{"height":"105px","width":"200px","border-radius":"0%","border":"6px solid","border-color":"yellow","font-size":"14px","background-color"(){return tmp.pt.getlv4.gte(75)? "#21EB2525":player.pt.ischoose[4]?"#EEDB0530":"#00000000"},"color":"#EEDB05"},
             onClick(){
                 player.pt.ischoose[4]=!player.pt.ischoose[4]
             },
             canClick(){return !(player.pt.ischoose[1]||player.pt.ischoose[2]||player.pt.ischoose[3]||player.pt.ischoose[5]||player.pt.ischoose[6])}
         },
         25:{
-            display(){return `Building V|LV.${tmp.pt.getlv5}\nNext at ${formatTime(tmp.pt.calclefttime5.div(Decimal.pow(tmp.pt.calcboost5.times(1.5),player.pt.work[5]).minus(1).max(0.5)))}`},
-            style:{"height":"105px","width":"200px","border-radius":"0%","border":"6px solid","border-color":"yellow","font-size":"14px","background-color"(){return player.pt.ischoose[5]?"#EEDB0530":"#00000000"},"color":"#EEDB05"},
+            display(){return `Building V|LV.${tmp.pt.getlv5}\nNext at ${formatTimeLong(tmp.pt.calclefttime5.div(Decimal.pow(tmp.pt.calcboost5.times(1.5),player.pt.work[5]).minus(1).max(0.5)))}`},
+            style:{"height":"105px","width":"200px","border-radius":"0%","border":"6px solid","border-color":"yellow","font-size":"14px","background-color"(){return tmp.pt.getlv5.gte(55)? "#21EB2525":player.pt.ischoose[5]?"#EEDB0530":"#00000000"},"color":"#EEDB05"},
             onClick(){
                 player.pt.ischoose[5]=!player.pt.ischoose[5]
             },
@@ -6653,6 +6773,302 @@ addLayer("pt", {
                 player.tab='up'
             },
             canClick(){return true}
+        },
+        54:{
+            display(){return `Spin to reincarnation tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#EF25EF","color":"#EF25EF","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.r.unlocked},
+            onClick(){
+                player.tab='r'
+            },
+            canClick(){return true}
+        },
+    }
+}),
+addLayer("r", {
+    name: "Reincarnation", // This is optional, only used in a few places, If absent it just uses the layer id.
+    symbol: "R", // This appears on the layer's node. Default is the id with the first letter capitalized
+    position: 1, // Horizontal position within a row. By default it uses the layer id and sorts in alphabetical order
+    startData() { return {
+        unlocked: false,
+		points: new Decimal(0),
+        best: new Decimal(0),
+        rt:new Decimal(0),
+        rp:new Decimal(0),
+        coreLv:new Decimal(0),
+        rngseed1:"00",
+        rngseed2:"00"
+    }},
+    color: "#EF25EF",
+    requires: new Decimal("1e100000"), // Can be a function that takes requirement increases into account
+    resource: "reincarnation point", // Name of prestige currency
+    baseResource: "points", // Name of resource prestige is based on
+    baseAmount() {return player.points}, // Get the current amount of baseResource
+    type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
+    exponent: 0.00005, // Prestige currency exponent
+    gainMult() { // Calculate the multiplier for main currency from bonuses
+        mult = new Decimal(1)
+        return mult
+    },
+    gainExp() { // Calculate the exponent on main currency from bonuses
+        exp = new Decimal(1)
+        return exp
+    },
+    row: 4, // Row the layer is in on the tree (0 is the first row)
+    hotkeys: [
+        {key: "r", description: "R: Reincarnation", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
+    ],
+    layerShown(){return hasUpgrade("f",345)},
+    doReset(resettingLayer){
+        player.f.multiplier=new Decimal(0)
+        player.points=new Decimal(0)
+        player.r.rt=player.r.rt.add(1)
+    },
+    branches:["up"],
+    tabFormat:{
+        "Core":{
+            content:[
+                ["display-text",function() { return `You have <h2 style="color:#EF25EF">${format(player.r.points)}</h2> reincarnation points, which produce ${format(tmp.r.getrp)} Rein power/s.`},
+                { "font-size":"17.5px","text-shadow" : "0 0 10px #EF25EF"},],
+                "blank",
+                "prestige-button",
+                ["display-text",function() { return `You have reincarnation for ${format(player.r.rt)} times.`},],
+                ["display-text",function() { return `You have ${format(player.points)} points.`},],
+                "blank",
+                ["display-text",function() { return `You have <h2 style="color:#EF25EF">${format(player.r.rp)}</h2> reincarnation power, prestige point gain is raised to <h2 style="color:#EF25EF">${format(tmp.r.calcrpboost,precision = 4)}</h2> .`},
+                    { "font-size":"17.5px","text-shadow" : "0 0 10px #EF25EF"},],
+                "blank",
+                ["clickables",[1,4,5]],
+            ]
+        },
+        "Core-effects":{
+            content:[
+                ["display-text",function() { return `You have <h2 style="color:#EF25EF">${format(player.r.points)}</h2> reincarnation points, which produce ${format(tmp.r.getrp)} Rein power/s.`},
+                { "font-size":"17.5px","text-shadow" : "0 0 10px #EF25EF"},],
+                "blank",
+                "milestones",
+            ]
+        },
+        "Upgrade generator":{
+            content:[
+                ["display-text",function() { return `You have <h2 style="color:#EF25EF">${format(player.r.points)}</h2> reincarnation points, which produce ${format(tmp.r.getrp)} Rein power/s.`},
+                { "font-size":"17.5px","text-shadow" : "0 0 10px #EF25EF"},],
+                "blank",
+                ["display-text",function() { return `Seed: <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">${player.r.rngseed1}</h2>`+(hasMilestone("r",2)?`<h2 style="color:#217782;text-shadow : 0 0 10px #217782">${player.r.rngseed2}</h2>`:``)},
+                    { "font-size":"17.5px"},],
+                "blank",
+                ["display-text",function() { return `${tmp.r.calcrng1boost[0]}`+(hasMilestone("r",2)?`<br>${tmp.r.calcrng2boost[0]}`:``)},
+                    { "font-size":"17.5px"},],
+                "blank",
+                ["clickables",[2]],
+            ],
+            unlocked(){return hasMilestone("r",0)}
+        },
+    },
+    update(diff){
+        player.r.rp=player.r.rp.add(tmp.r.getrp.times(diff))
+    },
+    calclvreq(){
+        return Decimal.pow(Decimal.pow(20,player.r.coreLv),player.r.coreLv.div(5).add(1)).times(200)
+    },
+    getrp(){
+        let gain=new Decimal(1)
+        gain=player.r.points.sqrt().div(3).pow(1.25)
+        let t=new Decimal(1)
+        if(hasMilestone("r",0)) t=t.times(2)
+        if(player.r.rngseed1=="99"||player.r.rngseed1=="01") t=t.times(tmp.r.calcrng1boost[2])
+        return player.r.unlocked?gain.times(t):new Decimal(0)
+    },
+    calcrpboost(){
+        let boost=new Decimal(1)
+        boost=boost.add(player.r.rp.add(1).log10().add(1).pow(2.5).log10().div(250))
+        return boost.pow(1.1)
+    },
+    rngseed1(){
+        s=Math.floor(Math.random()*100).toString()
+        if(s<10){
+            return '0'+s
+        }
+        return s
+    },
+    rngseed2(){
+        s=Math.floor(Math.random()*100).toString()
+        if(s<10){
+            return '0'+s
+        }
+        return s
+    },
+    calcrng1boost(){
+        let a=player.r.rngseed1[0]
+        let b=player.r.rngseed1[1]
+        let c=""
+        let d=""
+        let eff1=new Decimal(0)
+        let eff2=new Decimal(0)
+        if(a=='0'&&b!="0"){
+            c=`Prestige boost is raised to <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">^1.0`+b+`</h2>`
+            eff1=1+(b/100)
+        }
+        if(b=='0'&&a!="0"){
+            d=`Get <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">${format(a/3)}</h2>`+` free "Point booster"`
+            eff2=a/3
+        }
+        if(a=='1'||a=='4'||a=='7'){
+            c=`Boost point gain based on <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">log`+Math.floor((10-(b/10))*10)/10+`(prestige points+1)^`+Math.floor(a/2*10)/10+`</h2>`
+            eff1=player.p.points.add(1).log(Math.floor((10-(b/10))*10)/10).pow(a/2).add(1)
+        }
+        if(b=='3'||b=='5'||b=='8'){
+            d=`Boost prestige point gain based on <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">log10(points^`+Math.floor(a/2*10)/10+`+1)</h2>`
+            eff2=player.points.pow(a/2).add(1).log10().add(1)
+        }
+        if(((a/1)+(b/1)>=17)||((a/1)+(b/1)<=3)){
+            c=`Add <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">`+(format((a/10000)+(b/10000),precision = 4))+`</h2> to prestige gain exp `
+            eff1=(a/10000)+(b/10000)
+        }
+        if(a+b=="99"||a+b=="01"){
+            d=`Boost rp gain based on <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">log10(log10(prestige points))</h2> `
+            eff2=player.p.points.add(1).log10().add(1).log10().add(1)
+        }
+        let lst=[c+`<br>`+d,eff1,eff2];
+        return lst
+    },
+    calcrng2boost(){
+        let a=player.r.rngseed2[0]
+        let b=player.r.rngseed2[1]
+        let c=""
+        let d=""
+        let eff1=new Decimal(0)
+        let eff2=new Decimal(0)
+        if(a=='1'||a=='5'){
+            c=`Super prestige gain is raised to <h2 style="color:#217782;text-shadow : 0 0 10px #217782">^1.01</h2>`
+            eff1=1.01
+        }
+        if(a=='7'||b=='7'){
+            c=`Boost SP gain based on <h2 style="color:#217782;text-shadow : 0 0 10px #217782">log10(prestige points)^${format(((a/7)+(b/7)))}</h2>`
+            eff1=player.p.points.add(1).log10().add(1).pow((a/7)+(b/7))
+        }
+        let lst=[c+`<br>`+d,eff1,eff2];
+        return lst
+    },
+    clickables:{
+        11:{
+            display(){return `Increase core level(${player.r.coreLv}->${player.r.coreLv.add(1)})<br>Require:${format(tmp.r.calclvreq,precision = 0)} RP`},
+            style:{"height":"150px","width":"250px","border-radius":"2%","border":"6px solid","border-color":"#EF25EF","font-size":"14px","color":"#EF25EF","background-color":"#DF35EF33"},
+            onClick(){
+                player.r.coreLv=player.r.coreLv.add(1)
+                player.r.rp=new Decimal(0)
+            },
+            canClick(){return player.r.rp.gte(tmp.r.calclvreq)}
+        },
+        21:{
+            display(){return `Generate a random seed`},
+            style:{"height":"100px","width":"150px","border-radius":"2%","border":"6px solid","border-color":"#EF25EF","font-size":"14px","color":"#EF25EF","background-color":"#DF35EF33"},
+            onClick(){
+                player.r.rngseed1=tmp.r.rngseed1
+                player.r.rngseed2=tmp.r.rngseed2
+            },
+            canClick(){return true}
+        },
+        41:{
+            display(){return `Spin to function tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#EEEEEE","color":"#DDDDDD","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.pt.unlocked},
+            onClick(){
+                player.tab='f'
+            },
+            canClick(){return true}
+        },
+        42:{
+            display(){return `Spin to prestige tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#31aeb0","color":"#31aeb0","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.pt.unlocked},
+            onClick(){
+                player.tab='p'
+            },
+            canClick(){return true}
+        },
+        43:{
+            display(){return `Spin to super prestige tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#217782","color":"#217782","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.pt.unlocked},
+            onClick(){
+                player.tab='sp'
+            },
+            canClick(){return true}
+        },
+        44:{
+            display(){return `Spin to prestige upgrader tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#14CEA3","color":"#14CEA3","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.pt.unlocked},
+            onClick(){
+                player.tab='pu'
+            },
+            canClick(){return true}
+        },
+        45:{
+            display(){return `Spin to hyper prestige tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#0068A5","color":"#0068A5","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.pt.unlocked},
+            onClick(){
+                player.tab='hp'
+            },
+            canClick(){return true}
+        },
+        51:{
+            display(){return `Spin to challenge tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#45AC68","color":"#45AC68","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.pt.unlocked},
+            onClick(){
+                player.tab='c'
+            },
+            canClick(){return true}
+        },
+        52:{
+            display(){return `Spin to super upgrader tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#04AE83","color":"#04AE83","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.pt.unlocked},
+            onClick(){
+                player.tab='su'
+            },
+            canClick(){return true}
+        },
+        53:{
+            display(){return `Spin to ultra prestige tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#5C00CC","color":"#5C00CC","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.pt.unlocked},
+            onClick(){
+                player.tab='up'
+            },
+            canClick(){return true}
+        },
+        54:{
+            display(){return `Spin to prestium tab`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#EEDB05","color":"#EEDB05","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return player.pt.unlocked},
+            onClick(){
+                player.tab='pt'
+            },
+            canClick(){return true}
+        },
+    },
+    milestones:{
+        0: {
+            requirementDescription: "Core level 1",
+            done() { return player.r.coreLv.gte(1)},
+            style:{"width":"500px"},
+            effectDescription: "Keep prestige milestone 3 on all resets, Double Rein power gain.Unlock upgrade generator.",
+        },
+        1: {
+            requirementDescription: "Core level 2",
+            done() { return player.r.coreLv.gte(2)},
+            style:{"width":"500px"},
+            effectDescription(){return `Boost point gain based on reincarnation times, Currently:x${format(Decimal.pow(1.3,player.r.rt))}`},
+        },
+        2: {
+            requirementDescription: "Core level 3",
+            done() { return player.r.coreLv.gte(3)},
+            style:{"width":"500px"},
+            effectDescription(){return `Keep SP milestone 1 on all resets. Unlock a new seed.`},
         },
     }
 }),
