@@ -415,7 +415,8 @@ addLayer("f", {
         m=m.times(buyableEffect("p",11))
         m=m.times(tmp.sp.calcspboost)
         m=m.times(Decimal.pow(1.3,player.r.rt))
-        if(player.r.rngseed1[0]=='1'||player.r.rngseed1[0]=='4'||player.r.rngseed1[0]=='7') m=m.times(tmp.r.calcrng1boost[1])
+        if((player.r.rngseed1[0]=='1'||player.r.rngseed1[0]=='4'||player.r.rngseed1[0]=='7')&&player.r.allowrng1) m=m.times(tmp.r.calcrng1boost[3])
+        if(((player.r.rngseed2[0]/1)>=5&&(player.r.rngseed2[1]/1)<=6)&&player.r.allowrng2) m=m.times(tmp.r.calcrng2boost[5])
         //stage 0 ^
         if(hasUpgrade("f",33)) m=m.pow(upgradeEffect("f",33))
         if(inChallenge("f",11)) m=m.sqrt()
@@ -3794,7 +3795,7 @@ addLayer("p", {
         gain=0.25
         if(hasUpgrade("sp",21)) gain=0.275
         if(hasUpgrade("hp",21)) gain=0.3
-        if((((player.r.rngseed1[0]/1)+(player.r.rngseed1[1]/1))>=17)||(((player.r.rngseed1[0]/1)+(player.r.rngseed1[1]/1))<=3)) gain+=tmp.r.calcrng1boost[1]
+        if(((((player.r.rngseed1[0]/1)+(player.r.rngseed1[1]/1))>=17)||(((player.r.rngseed1[0]/1)+(player.r.rngseed1[1]/1))<=3))&&player.r.allowrng1) gain+=tmp.r.calcrng1boost[5]
         return gain
     }, // Prestige currency exponent
     gainMult() { // Calculate the multiplier for main currency from bonuses
@@ -3811,7 +3812,7 @@ addLayer("p", {
         mult=mult.times(buyableEffect("p",13))
         mult=mult.times(tmp.pu.effect)
         mult=mult.times(tmp.up.calcupboost)
-        if(player.r.rngseed1[1]=='3'||player.r.rngseed1[1]=='5'||player.r.rngseed1[1]=='8') mult=mult.times(tmp.r.calcrng1boost[2])
+        if((player.r.rngseed1[1]=='3'||player.r.rngseed1[1]=='5'||player.r.rngseed1[1]=='8')&&player.r.allowrng1) mult=mult.times(tmp.r.calcrng1boost[4])
         if(player.c.choose33&&player.c.isbegun) mult=mult.times(0)
         return mult
     },
@@ -3832,7 +3833,7 @@ addLayer("p", {
     ],
     doReset(resettingLayer){
         let keep=[]
-        if(hasMilestone("sp",0)&&resettingLayer=="sp") keep.push("milestones")
+        if((hasMilestone("sp",0)&&resettingLayer=="sp")||hasMilestone("r",0)) keep.push("milestones")
         if(hasMilestone("sp",2)&&resettingLayer=="sp") keep.push("upgrades")
         if(hasMilestone("pu",0)) keep.push("milestones")
         if(hasMilestone("pu",0)) keep.push("upgrades")
@@ -3883,7 +3884,7 @@ addLayer("p", {
         if(player.c.choose13&&player.c.isbegun) sc=new Decimal(0)
         if(hasUpgrade("p",41)) boost=boost.pow(1.25)
         boost=boost.times(buyableEffect("p",21))
-        if((player.r.rngseed1[0]=='0'&&player.r.rngseed1[1]!='0')) boost=boost.pow(tmp.r.calcrng1boost[1])
+        if((player.r.rngseed1[0]=='0'&&player.r.rngseed1[1]!='0')&&player.r.allowrng1) boost=boost.pow(tmp.r.calcrng1boost[1])
         if(boost.gt(sc)) boost=boost.minus(sc).add(1).log10().pow(3).add(sc).pow(player.c.choose13&&player.c.isbegun?0.5:1)
         boost=boost.pow(tmp.pt.calcboost3)
 
@@ -4196,7 +4197,7 @@ addLayer("p", {
         },
         2: {
             requirementDescription: "1e7 prestige points",
-            done() { return player.p.points.gte(1e7)||player.r.coreLv.gte(1)},
+            done() { return player.p.points.gte(1e7)},
             style:{"width":"500px"},
             effectDescription: "Gain 5% of prestige point gain on reset per second.",
         },
@@ -4240,7 +4241,7 @@ addLayer("p", {
         11:{
             title:"Point booster",
             cost(x) { return Decimal.pow(5,Decimal.pow(x,1.1)).times(1e20)},
-            effect(x) { return ((player.r.rngseed1[1]=='0'&&player.r.rngseed1[0]!='0')?x.add(tmp.r.calcrng1boost[2]):x).pow(new Decimal(hasMilestone("hp",6) ? 8 : hasUpgrade("hp",25) ? 4 : hasUpgrade("sp",33) ? 3 : 2).add(hasUpgrade("hp",32)?upgradeEffect("hp",32):0)).add(1)},
+            effect(x) { return ((player.r.rngseed1[1]=='0'&&player.r.rngseed1[0]!='0'&&player.r.allowrng1)?x.add(tmp.r.calcrng1boost[2]):x).pow(new Decimal(hasMilestone("hp",6) ? 8 : hasUpgrade("hp",25) ? 4 : hasUpgrade("sp",33) ? 3 : 2).add(hasUpgrade("hp",32)?upgradeEffect("hp",32):0)).add(1)},
             display() { return `Boost point gain.
                                 Cost: ${format(this.cost())} points
                                 Amount: ${format(getBuyableAmount("p",11))}
@@ -4334,7 +4335,7 @@ addLayer("p", {
         22:{
             title:"Super booster",
             cost(x) { return Decimal.pow(3,x.add(1).pow(2)).times(hasUpgrade("hp",33)?1e18:1e28)},
-            effect(x) { return Decimal.pow(8.25,x).pow(0.5)},
+            effect(x) { return Decimal.pow(8.25,(((player.r.rngseed2[0]=='2'||player.r.rngseed2[0]=='3'||player.r.rngseed2[0]=='8')&&player.r.allowrng2)?x.add(tmp.r.calcrng2boost[3]):x)).pow(0.5)},
             display() { return `Boost SP gain.
                                 Cost: ${format(this.cost())} prestige points
                                 Amount: ${format(getBuyableAmount("p",22))}
@@ -4415,7 +4416,7 @@ addLayer("sp", {
         mult=mult.times(buyableEffect("p",22))
         mult=mult.times(tmp.up.calcupboost)
         if(player.hp.unlocked) mult=mult.times(tmp.hp.calchpboost)
-        if(player.r.rngseed2[0]=='7'||player.r.rngseed2[1]=='7') mult=mult.times(tmp.r.calcrng2boost[1])
+        if((player.r.rngseed2[1]=='5'||player.r.rngseed2[1]=='7'||player.r.rngseed2[1]=='9')&&player.r.allowrng2) mult=mult.times(tmp.r.calcrng2boost[4])
         if(player.c.choose31&&player.c.isbegun) mult=mult.times(0)
         return mult
     },
@@ -4436,7 +4437,7 @@ addLayer("sp", {
     doReset(resettingLayer){
         player.points=new Decimal(0)
         let keep = [];
-        if(hasMilestone("hp",0)) keep.push("milestones")
+        if(hasMilestone("hp",0)||hasMilestone("r",2)) keep.push("milestones")
         if(hasMilestone("hp",2)) keep.push("upgrades")
         if (layers[resettingLayer].row > this.row) layerDataReset("sp",keep)
     },
@@ -5931,8 +5932,8 @@ addLayer("c", {
             pay(){return player.su.points=player.su.points.minus(11)},
             effect(){
                 a=[new Decimal(1),new Decimal(1)]
-                a[0]=player.p.points.add(1).log10().pow(0.5).add(1)
-                a[1]=Decimal.pow(player.pt.points,20).pow(0.85).add(1)
+                a[0]=player.p.points.add(1).log10().pow(0.5).add(1).pow(((player.r.rngseed1[1]=='6'||player.r.rngseed1[0]=='3')&&player.r.allowrng1)?tmp.r.calcrng1boost[7]:1)
+                a[1]=Decimal.pow(player.pt.points,20).pow(0.85).add(1).pow(((player.r.rngseed1[1]=='6'||player.r.rngseed1[0]=='3')&&player.r.allowrng1)?tmp.r.calcrng1boost[7]:1)
                 return a
             },
             effectDisplay(){return `<br>P->PT:x${format(this.effect()[0])}<br>PT->P:${format(this.effect()[1])}`},
@@ -6797,7 +6798,10 @@ addLayer("r", {
         rp:new Decimal(0),
         coreLv:new Decimal(0),
         rngseed1:"00",
-        rngseed2:"00"
+        rngseed2:"00",
+        r1dynamicboost:new Decimal(1),
+        allowrng1:false,
+        allowrng2:false,
     }},
     color: "#EF25EF",
     requires: new Decimal("1e100000"), // Can be a function that takes requirement increases into account
@@ -6808,6 +6812,8 @@ addLayer("r", {
     exponent: 0.00005, // Prestige currency exponent
     gainMult() { // Calculate the multiplier for main currency from bonuses
         mult = new Decimal(1)
+        if((player.r.rngseed1=="99")&&player.r.allowrng1) mult=mult.times(2)
+        if((player.r.rngseed2=="99")&&player.r.allowrng2) mult=mult.times(2)
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -6857,31 +6863,33 @@ addLayer("r", {
                 ["display-text",function() { return `Seed: <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">${player.r.rngseed1}</h2>`+(hasMilestone("r",2)?`<h2 style="color:#217782;text-shadow : 0 0 10px #217782">${player.r.rngseed2}</h2>`:``)},
                     { "font-size":"17.5px"},],
                 "blank",
-                ["display-text",function() { return `${tmp.r.calcrng1boost[0]}`+(hasMilestone("r",2)?`<br>${tmp.r.calcrng2boost[0]}`:``)},
-                    { "font-size":"17.5px"},],
-                "blank",
                 ["clickables",[2]],
+                ["display-text",function() { return `${tmp.r.calcrng1boost[0]}`+(hasMilestone("r",2)?`<br>${tmp.r.calcrng2boost[0]}`:``)},
+                    { "font-size":"17.5px"},],     
             ],
             unlocked(){return hasMilestone("r",0)}
         },
     },
     update(diff){
         player.r.rp=player.r.rp.add(tmp.r.getrp.times(diff))
+        if(player.r.rngseed1[0]=='6'||player.r.rngseed1[0]=='2') player.r.r1dynamicboost=player.r.r1dynamicboost.times(Decimal.pow((Math.floor(player.r.rngseed1[1]/2*10)/100+1),diff))
     },
     calclvreq(){
-        return Decimal.pow(Decimal.pow(20,player.r.coreLv),player.r.coreLv.div(5).add(1)).times(200)
+        return Decimal.pow(Decimal.pow(15,player.r.coreLv),player.r.coreLv.div(5).add(1)).times(200)
     },
     getrp(){
         let gain=new Decimal(1)
-        gain=player.r.points.sqrt().div(3).pow(1.25)
+        gain=player.r.points.sqrt().div(3).pow(1.25).times(1.5)
         let t=new Decimal(1)
         if(hasMilestone("r",0)) t=t.times(2)
-        if(player.r.rngseed1=="99"||player.r.rngseed1=="01") t=t.times(tmp.r.calcrng1boost[2])
+        if((player.r.rngseed1=="99"||player.r.rngseed1=="01")&&player.r.allowrng1) t=t.times(tmp.r.calcrng1boost[6])
+        if((player.r.rngseed1=="99")&&player.r.allowrng1) t=t.times(10)
+        if((player.r.rngseed2=="99")&&player.r.allowrng2) t=t.times(10)
         return player.r.unlocked?gain.times(t):new Decimal(0)
     },
     calcrpboost(){
         let boost=new Decimal(1)
-        boost=boost.add(player.r.rp.add(1).log10().add(1).pow(2.5).log10().div(250))
+        boost=boost.add(player.r.rp.add(1).log10().add(1).pow(2.5).log10().div(200))
         return boost.pow(1.1)
     },
     rngseed1(){
@@ -6903,8 +6911,17 @@ addLayer("r", {
         let b=player.r.rngseed1[1]
         let c=""
         let d=""
+        let e=""
+        let f=""
+        let g="",h="",i="",k="",m=""
         let eff1=new Decimal(0)
         let eff2=new Decimal(0)
+        let eff3=new Decimal(1)
+        let eff4=new Decimal(1)
+        let eff5=new Decimal(0)
+        let eff6=new Decimal(1)
+        let eff7=new Decimal(1)
+        player.r.allowrng1=false
         if(a=='0'&&b!="0"){
             c=`Prestige boost is raised to <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">^1.0`+b+`</h2>`
             eff1=1+(b/100)
@@ -6914,40 +6931,74 @@ addLayer("r", {
             eff2=a/3
         }
         if(a=='1'||a=='4'||a=='7'){
-            c=`Boost point gain based on <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">log`+Math.floor((10-(b/10))*10)/10+`(prestige points+1)^`+Math.floor(a/2*10)/10+`</h2>`
-            eff1=player.p.points.add(1).log(Math.floor((10-(b/10))*10)/10).pow(a/2).add(1)
+            e=`Boost point gain based on <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">log`+Math.floor((10-(b/10))*10)/10+`(prestige points+1)^`+Math.floor(a/2*10)/10+`</h2>`
+            eff3=player.p.points.add(1).log(Math.floor((10-(b/10))*10)/10).pow(a/2).add(1)
         }
         if(b=='3'||b=='5'||b=='8'){
-            d=`Boost prestige point gain based on <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">log10(points^`+Math.floor(a/2*10)/10+`+1)</h2>`
-            eff2=player.points.pow(a/2).add(1).log10().add(1)
+            f=`Boost prestige point gain based on <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">log10(points^`+Math.floor(a/2*10)/10+`+1)</h2>`
+            eff4=player.points.pow(a/2).add(1).log10().add(1)
         }
         if(((a/1)+(b/1)>=17)||((a/1)+(b/1)<=3)){
-            c=`Add <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">`+(format((a/10000)+(b/10000),precision = 4))+`</h2> to prestige gain exp `
-            eff1=(a/10000)+(b/10000)
+            g=`Add <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">`+(format((a/10000)+(b/10000),precision = 4))+`</h2> to prestige gain exp `
+            eff5=(a/10000)+(b/10000)
         }
         if(a+b=="99"||a+b=="01"){
-            d=`Boost rp gain based on <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">log10(log10(prestige points))</h2> `
-            eff2=player.p.points.add(1).log10().add(1).log10().add(1)
+            h=`Boost rp gain based on <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">log10(log10(prestige points))</h2> `
+            eff6=player.p.points.add(1).log10().add(1).log10().add(1)
         }
-        let lst=[c+`<br>`+d,eff1,eff2];
+        if(b=='6'||a=='3'){
+            i=`SU upgrade 3 is raised to <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">^1.0`+a+b+`</h2>`
+            eff7=1+(a/100)+(b/1000)
+        }
+        if(a=='6'||a=='2'){
+            k=`Get a prestige point dynamic boost:<h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">x${format(player.r.r1dynamicboost)}</h2>(<h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">x${Math.floor((b/2)*10)/100+1}</h2> per second).`
+        }
+        if(a+b=="99"){
+            m=`10x Rein power and 2x RP gain.`
+        }
+        let lst=[c+((c||d)?`<br>`:``)+d+((d||e)?`<br>`:``)+e+((e||f)?`<br>`:``)+f+((f||g)?`<br>`:``)+g+((g||h)?`<br>`:``)+h+((h||i)?`<br>`:``)+i+((i||k)?`<br>`:``)+k+((k||m)?`<br>`:``)+m,eff1,eff2,eff3,eff4,eff5,eff6,eff7];
+        player.r.allowrng1=true
         return lst
+        
     },
     calcrng2boost(){
         let a=player.r.rngseed2[0]
         let b=player.r.rngseed2[1]
         let c=""
         let d=""
-        let eff1=new Decimal(0)
-        let eff2=new Decimal(0)
+        let e=""
+        let f="",g="",m=""
+        let eff1=new Decimal(1)
+        let eff2=new Decimal(1)
+        let eff3=new Decimal(0)
+        let eff4=new Decimal(1)
+        let eff5=new Decimal(1)
+        player.r.allowrng2=false
         if(a=='1'||a=='5'){
             c=`Super prestige gain is raised to <h2 style="color:#217782;text-shadow : 0 0 10px #217782">^1.01</h2>`
             eff1=1.01
         }
-        if(a=='7'||b=='7'){
-            c=`Boost SP gain based on <h2 style="color:#217782;text-shadow : 0 0 10px #217782">log10(prestige points)^${format(((a/7)+(b/7)))}</h2>`
-            eff1=player.p.points.add(1).log10().add(1).pow((a/7)+(b/7))
+        if((a/1)>=4&&(b/1)<=5){
+            d=`SP boost is raised to <h2 style="color:#217782;text-shadow : 0 0 10px #217782">^1.0${Math.floor(a/3)}</h2>`
+            eff2=((a/100)/3)+1
         }
-        let lst=[c+`<br>`+d,eff1,eff2];
+        if(a=='2'||a=='3'||a=='8'){
+            e=`Get <h2 style="color:#217782;text-shadow : 0 0 10px #217782">${format(a/5+1)}</h2> free "Super booster"`
+            eff3=(a/5)+1
+        }
+        if(b=='5'||b=='7'||b=='9'){
+            f=`Boost SP gain based on <h2 style="color:#217782;text-shadow : 0 0 10px #217782">log10(SP)^${a}</h2>.`
+            eff4=player.sp.points.add(1).log10().pow(a).add(1)
+        }
+        if(((a/1)>=5)&&((b/1)<=6)){
+            g=`Boost point gain based on <h2 style="color:#217782;text-shadow : 0 0 10px #217782">ln(SP)^${Math.floor((b/2)*10)/10}</h2>.`
+            eff5=player.sp.points.add(1).ln().pow(b/2).add(1)
+        }
+        if(a+b=="99"){
+            m=`10x Rein power and 2x RP gain.`
+        }
+        let lst=[c+((c||d)?`<br>`:``)+d+((d||e)?`<br>`:``)+e+((e||f)?`<br>`:``)+f+((f||g)?`<br>`:``)+g+((g||m)?'<br':``)+m,eff1,eff2,eff3,eff4,eff5];
+        player.r.allowrng2=true
         return lst
     },
     clickables:{
@@ -6966,6 +7017,7 @@ addLayer("r", {
             onClick(){
                 player.r.rngseed1=tmp.r.rngseed1
                 player.r.rngseed2=tmp.r.rngseed2
+                if(player.r.rngseed1[0]=='6'||player.r.rngseed1[0]=='2') player.r.r1dynamicboost=new Decimal(1)
             },
             canClick(){return true}
         },
@@ -7056,7 +7108,7 @@ addLayer("r", {
             requirementDescription: "Core level 1",
             done() { return player.r.coreLv.gte(1)},
             style:{"width":"500px"},
-            effectDescription: "Keep prestige milestone 3 on all resets, Double Rein power gain.Unlock upgrade generator.",
+            effectDescription: "Keep prestige milestones on all resets, Double Rein power gain.Unlock upgrade generator.",
         },
         1: {
             requirementDescription: "Core level 2",
@@ -7068,7 +7120,7 @@ addLayer("r", {
             requirementDescription: "Core level 3",
             done() { return player.r.coreLv.gte(3)},
             style:{"width":"500px"},
-            effectDescription(){return `Keep SP milestone 1 on all resets. Unlock a new seed.`},
+            effectDescription(){return `Keep SP milestones on all resets. Unlock a new seed.`},
         },
     }
 }),
