@@ -415,7 +415,7 @@ addLayer("f", {
         m=m.times(buyableEffect("p",11))
         m=m.times(tmp.sp.calcspboost)
         m=m.times(tmp.r.getreboost)
-        m=m.times(Decimal.pow(1.3,player.r.rt))
+        m=m.times(Decimal.pow(1.5,player.r.rt))
         if((player.r.rngseed1[0]=='1'||player.r.rngseed1[0]=='4'||player.r.rngseed1[0]=='7')&&player.r.allowrng1) m=m.times(tmp.r.calcrng1boost[3])
         if(((player.r.rngseed2[0]/1)>=5&&(player.r.rngseed2[1]/1)<=6)&&player.r.allowrng2) m=m.times(tmp.r.calcrng2boost[5])
         if(((player.r.rngseed3[0]=='2')||(player.r.rngseed3[0]=='5')||(player.r.rngseed3[0]=='8'))&&player.r.allowrng3) m=m.times(tmp.r.calcrng3boost[3])   
@@ -436,6 +436,7 @@ addLayer("f", {
         if(hasUpgrade("sp",35)) m=m.pow(1.2)
         m=m.pow(tmp.c.calcshardboost)
         if(player.c.choose32&&player.c.isbegun) m=m.pow(0.3)
+        if(player.r.rc1&&player.r.rcbegun) m=m.pow(0.85)
         return m
     },
     calctmult(){
@@ -3825,6 +3826,7 @@ addLayer("p", {
         if(hasUpgrade("sp",35)) exp=exp.times(1.025)
         if(hasMilestone("sp",7)) exp=exp.times(tmp.c.calcshardboost)
         if(player.c.choose11&&player.c.isbegun) exp=exp.times(0.5)
+        if(player.r.rc1&&player.r.rcbegun&&player.up.best.gte(1)) exp=exp.times(0.75)
         exp=exp.times(tmp.r.calcrpboost)
         return exp
     },
@@ -4429,6 +4431,7 @@ addLayer("sp", {
         if(hasMilestone("hp",5)) exp=exp.times(tmp.c.calcshardboost)
         if(player.c.choose21&&player.c.isbegun) exp=exp.times(0.6)
         if(player.r.rngseed2[0]=='1'||player.r.rngseed2[0]=='5') exp=exp.times(1.01)
+        if(player.r.rc1&&player.r.rcbegun&&player.up.best.gte(1)) exp=exp.times(0.75)
         return exp
     },
     row: 1, // Row the layer is in on the tree (0 is the first row)
@@ -5105,6 +5108,7 @@ addLayer("hp", {
     gainExp() { // Calculate the exponent on main currency from bonuses
         exp = new Decimal(1)
         if(hasMilestone("hp",6)) exp=exp.times(tmp.c.calcshardboost)
+        if(player.r.rc1&&player.r.rcbegun&&player.up.best.gte(1)) exp=exp.times(0.75)
         return exp
     },
     row: 2, // Row the layer is in on the tree (0 is the first row)
@@ -5470,7 +5474,6 @@ addLayer("c", {
         choose31:false,
         choose32:false,
         choose33:false,
-        choose41:false,
         clist:""
     }},
     color: "#45AC68",
@@ -5520,7 +5523,6 @@ addLayer("c", {
                 ["infobox","d1_info"],
                 ["infobox","d2_info"],
                 ["infobox","d3_info"],
-                ["infobox",function(){ return (hasMilestone("r",6) ? "d4_info":"")}],
             ]
         },
     },
@@ -5535,7 +5537,7 @@ addLayer("c", {
         if(player.c.choose31) gs=gs.add(3)
         if(player.c.choose32) gs=gs.add(3)
         if(player.c.choose33) gs=gs.add(4)
-        if(player.c.choose41) gs=gs.add(2)
+
         return gs
     },
     getclist(){
@@ -5549,7 +5551,6 @@ addLayer("c", {
         if(player.c.choose31) cl+=" 31 "
         if(player.c.choose32) cl+=" 32 "
         if(player.c.choose33) cl+=" 33 "
-        if(player.c.choose41) cl+=" 41 "
         player.c.clist=cl
     },
     getgoal(){
@@ -5591,10 +5592,6 @@ addLayer("c", {
             g=g.times(cnt.eq(0)?Decimal.pow(10,300):1e60)
             cnt=cnt.add(5)
         } 
-        if(player.c.choose41) {
-            g=g.times(cnt.eq(0)?Decimal.pow(10,70000):"1e35000")
-            cnt=cnt.add(2)
-        }
         player.c.goal=g.pow(new Decimal(1).div(cnt.max(1)))
     },
     calcshardboost(){
@@ -5633,11 +5630,6 @@ addLayer("c", {
             body() { return `Super disabled[31]:You can't gain super prestige points, Goal:1e60 points<br>
                              Slog11's return[32]:The multiplier of x is raised to ^0.3, Goal:1e60 points<br>
                              Prestige disabled[33]:You cannot gain prestige points, Goal:1e60 points.` },
-            style:{"width":"1100px"},
-        },
-        d4_info: {
-            title: "Depth 4",
-            body() { return `Broken prestige[41]:Prestige points can't boost anything, Goal:1e3200 points<br>` },
             style:{"width":"1100px"},
         },
     },
@@ -5723,28 +5715,19 @@ addLayer("c", {
             },
             canClick(){return !player.c.isbegun}
         },
-        41:{
-            display(){return player.c.choose41? `<img src="js/cpic/c41choose.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`:`<img src="js/cpic/c41.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`},
-            style:{"height":"161px","width":"161px","border-radius":"0%","border":"6px solid","border-color"(){return player.c.choose41 ? "#45AC68":"#DDDDDD"},"color":"#45AC68","font-size":"15px","background-color":"#00000000","margin-top":"-30px"},
-            unlocked(){return player.c.depth==4},
-            onClick(){
-                player.c.choose41=!player.c.choose41
-            },
-            canClick(){return !player.c.isbegun}
-        },
         51:{
             display(){return `Go deeper`},
             style:{"height":"40px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#45AC68","color":"#45AC68","font-size":"15px","background-color":"#00000000"},
-            unlocked(){return player.c.checker},
+            unlocked(){return true},
             onClick(){
                 player.c.depth+=1
             },
-            canClick(){return (hasMilestone("r",6)?player.c.depth<=3:player.c.depth<=2)}
+            canClick(){return player.c.depth<=2}
         },
         52:{
             display(){return `Start challenges`},
             style:{"height":"40px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#45AC68","color":"#45AC68","font-size":"15px","background-color":"#00000000"},
-            unlocked(){return player.c.checker},
+            unlocked(){return true},
             onClick(){
                 player.c.isbegun=true
                 player.f.multiplier=new Decimal(0)
@@ -5755,7 +5738,7 @@ addLayer("c", {
         53:{
             display(){return `End challenges`},
             style:{"height":"40px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#45AC68","color":"#45AC68","font-size":"15px","background-color"(){return player.points.gte(player.c.goal)&&player.c.isbegun? "#ECEF31":"#00000000"}},
-            unlocked(){return player.c.checker},
+            unlocked(){return true},
             onClick(){
                 if(player.points.gte(player.c.goal)) player.c.points=player.c.points.max(tmp.c.getshard)
                 doReset("hp")
@@ -5766,7 +5749,7 @@ addLayer("c", {
         54:{
             display(){return `Go higher`},
             style:{"height":"40px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#45AC68","color":"#45AC68","font-size":"15px","background-color":"#00000000"},
-            unlocked(){return player.c.checker},
+            unlocked(){return true},
             onClick(){
                 player.c.depth-=1
             },
@@ -5775,7 +5758,7 @@ addLayer("c", {
         61:{
             display(){return `Spin to function tab`},
             style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#EEEEEE","color":"#DDDDDD","font-size":"15px","background-color":"#00000000"},
-            unlocked(){return player.c.checker},
+            unlocked(){return true},
             onClick(){
                 player.tab='f'
             },
@@ -5784,7 +5767,7 @@ addLayer("c", {
         62:{
             display(){return `Spin to prestige tab`},
             style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#31aeb0","color":"#31aeb0","font-size":"15px","background-color":"#00000000"},
-            unlocked(){return player.c.checker},
+            unlocked(){return true},
             onClick(){
                 player.tab='p'
             },
@@ -5793,7 +5776,7 @@ addLayer("c", {
         63:{
             display(){return `Spin to super prestige tab`},
             style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#217782","color":"#217782","font-size":"15px","background-color":"#00000000"},
-            unlocked(){return player.c.checker},
+            unlocked(){return true},
             onClick(){
                 player.tab='sp'
             },
@@ -5802,7 +5785,7 @@ addLayer("c", {
         64:{
             display(){return `Spin to prestige upgrader tab`},
             style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#14CEA3","color":"#14CEA3","font-size":"15px","background-color":"#00000000"},
-            unlocked(){return player.c.checker},
+            unlocked(){return true},
             onClick(){
                 player.tab='pu'
             },
@@ -5811,7 +5794,7 @@ addLayer("c", {
         65:{
             display(){return `Spin to hyper prestige tab`},
             style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#0068A5","color":"#0068A5","font-size":"15px","background-color":"#00000000"},
-            unlocked(){return player.c.checker},
+            unlocked(){return true},
             onClick(){
                 player.tab='hp'
             },
@@ -6103,6 +6086,7 @@ addLayer("up", {
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
         exp = new Decimal(1)
+        if(player.r.rc1&&player.r.rcbegun&&player.up.best.gte(1)) exp=exp.times(0.75)
         return exp
     },
     row: 3, // Row the layer is in on the tree (0 is the first row)
@@ -6849,6 +6833,11 @@ addLayer("r", {
         dim4mul:new Decimal(1),
         dim5mul:new Decimal(1),
         dim6mul:new Decimal(1),
+        rc1:false,
+        rc1fin:false,
+        rcbegun:false,
+        goal:new Decimal(0),
+        rct:0,
     }},
     color: "#EF25EF",
     requires: new Decimal("1e100000"), // Can be a function that takes requirement increases into account
@@ -6928,6 +6917,30 @@ addLayer("r", {
             ],
             unlocked(){return hasMilestone("r",4)}
         },
+        "Reincarnation challenges":{
+            content:[
+                ["display-text",function() { return `You have <h2 style="color:#EF25EF">${format(player.r.points)}</h2> reincarnation points, which produce ${format(tmp.r.getrp)} Rein power/s.`},
+                { "font-size":"17.5px","text-shadow" : "0 0 10px #EF25EF"},],
+                "blank",
+                ["display-text",function() { return `Click the picture below to see the info of each challenge!<br>
+                                                    All the challenges have a time limit, if you can't complete the challenge in the limit, you will be failed!<br>
+                                                    Starting a challenge will remove all the progress of early layers!<br>
+                                                    TIME LEFT:<h2 style="color:red;text-shadow: 0 0 10px red;font-family:MS serif">${formatTime(player.r.rct)}</h2>`},
+                    { "font-size":"17.5px"},],
+                "blank",
+                ["clickables",[6,7]],
+                "blank",
+                ["clickables",[8]],
+                "blank",
+                ["display-text",function() { return player.r.rc1? `<h3 style="color:#FE0000">[1]Absolute dilation</h3><br>
+                                                                    <strong>·This challenge must be completed in</strong> <h2 style="font-family:MS serif;color:red;text-shadow : 0 0 10px red;"> 12:30 </h2><br>
+                                                                    ·Point gain will raised to ^0.85<br>
+                                                                    ·After the first UP reset, P,SP,HP and UP gain will raised to ^0.75<br>
+                                                                    Goal:1e45000 points`:`.....`},
+                    { "font-size":"17.5px"},],
+            ],
+            unlocked(){return hasMilestone("r",6)}
+        },
     },
     update(diff){
         player.r.rp=player.r.rp.add(tmp.r.getrp.times(diff))
@@ -6935,6 +6948,12 @@ addLayer("r", {
         if(player.r.rngseed2[0]=='2'||player.r.rngseed2[0]=='5') player.r.r2dynamicboost=player.r.r2dynamicboost.times(Decimal.pow((Math.floor(player.r.rngseed1[1]/2*8)/100+1),diff))
         player.r.re=player.r.re.add(player.r.dim1.times(player.r.dim1mul.times(tmp.r.getremult)).times(diff))
         player.r.dim1=player.r.dim1.add(player.r.dim2.times(player.r.dim2mul).times(diff))
+        if(player.r.rcbegun) player.r.rct-=diff;
+        if(player.r.rct==0&&player.r.rcbegun){
+            doReset("r")
+            player.r.rcbegun=false
+        }
+        if(player.r.rc1) player.r.goal=new Decimal("1e45000")
     },
     calclvreq(){
         return Decimal.pow(Decimal.pow(5,player.r.coreLv),player.r.coreLv.div(15).add(1)).times(200)
@@ -6963,7 +6982,7 @@ addLayer("r", {
     getreboost(){
         let boost=new Decimal(1)
         boost=player.r.re.pow(player.r.re.add(1).log10().add(1).ln().add(2))
-        return boost
+        return boost.add(1)
     },
     rngseed1(){
         s=Math.floor(Math.random()*100).toString()
@@ -7214,6 +7233,37 @@ addLayer("r", {
             },
             canClick(){return true}
         },
+        61:{
+            display(){return !player.r.rc1fin? `<img src="js/cpic/RC1.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`:`<img src="js/cpic/RC1finish.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`},
+            style:{"height":"161px","width":"161px","border-radius":"0%","border":"6px solid","border-color"(){return player.r.rc1 ? "red":"#DDDDDD"},"color":"red","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return hasMilestone("r",6)},
+            onClick(){
+                player.r.rc1=!player.r.rc1
+                if(player.r.rc1)player.r.rct=750
+                else player.r.rct=0
+            },
+            canClick(){return !player.r.rcbegun}
+        },
+        81:{
+            display(){return player.r.rcbegun? player.points.gte(player.r.goal) ? `Complete the challenge`:`Exit the challenge`:`Begin the challenge`},
+            style:{"height":"50px","width":"125px","border-radius":"0%","border":"6px solid","border-color":"#DDDDDD","color":"white","font-size":"15px","background-color"(){return ((player.points.gte(player.r.goal))&&player.r.rcbegun)?"gold":"#FFFFFF25"}},
+            unlocked(){return hasMilestone("r",6)},
+            onClick(){
+                player.r.rcbegun=!player.r.rcbegun
+                layerDataReset("up")
+                layerDataReset("pt")
+                layerDataReset("su")
+                layerDataReset("hp")
+                layerDataReset("c")
+                layerDataReset("pu")
+                layerDataReset("sp")
+                layerDataReset("p")
+                doReset("r")
+                player.points=new Decimal(0)
+                if(player.r.rc1) player.r.rct=750
+            },
+            canClick(){return true}
+        }
     },
     milestones:{
         0: {
@@ -7226,7 +7276,7 @@ addLayer("r", {
             requirementDescription: "Core level 2",
             done() { return player.r.coreLv.gte(2)},
             style:{"width":"500px"},
-            effectDescription(){return `Boost point gain based on reincarnation times, Currently:x${format(Decimal.pow(1.3,player.r.rt))}`},
+            effectDescription(){return `Boost point gain based on reincarnation times, Currently:x${format(Decimal.pow(1.5,player.r.rt))}`},
         },
         2: {
             requirementDescription: "Core level 3",
@@ -7256,8 +7306,8 @@ addLayer("r", {
             requirementDescription: "Core level 7",
             done() { return player.r.coreLv.gte(7)},
             style:{"width":"500px"},
-            effectDescription(){return `Keep challenge shards on all resets. Unlock depth 4.`},
-        },
+            effectDescription(){return `Keep challenge shards on all resets. Unlock Reincarnation challenges.`},
+        }, 
     },
     buyables:{
         11:{
