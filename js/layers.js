@@ -3816,6 +3816,7 @@ addLayer("p", {
         mult=mult.times(tmp.pu.effect)
         mult=mult.times(tmp.up.calcupboost)
         if((player.r.rngseed1[1]=='3'||player.r.rngseed1[1]=='5'||player.r.rngseed1[1]=='8')&&player.r.allowrng1) mult=mult.times(tmp.r.calcrng1boost[4])
+        if((player.r.rngseed1[0]=='6'||player.r.rngseed1[0]=='2')&&player.r.allowrng1) mult=mult.times(player.r.r1dynamicboost)
         if(player.c.choose33&&player.c.isbegun) mult=mult.times(0)
         return mult
     },
@@ -4245,11 +4246,11 @@ addLayer("p", {
         11:{
             title:"Point booster",
             cost(x) { return Decimal.pow(5,Decimal.pow(x,1.1)).times(1e20)},
-            effect(x) { return ((player.r.rngseed1[1]=='0'&&player.r.rngseed1[0]!='0'&&player.r.allowrng1)?x.add(tmp.r.calcrng1boost[2]):x).pow(new Decimal(hasMilestone("hp",6) ? 8 : hasUpgrade("hp",25) ? 4 : hasUpgrade("sp",33) ? 3 : 2).add(hasUpgrade("hp",32)?upgradeEffect("hp",32):0)).add(1)},
+            effect(x) { return (player.r.rc2&&player.r.rcbegun)? Decimal.pow(0.99,x):((player.r.rngseed1[1]=='0'&&player.r.rngseed1[0]!='0'&&player.r.allowrng1)?x.add(tmp.r.calcrng1boost[2]):x).pow(new Decimal(hasMilestone("hp",6) ? 8 : hasUpgrade("hp",25) ? 4 : hasUpgrade("sp",33) ? 3 : 2).add(hasUpgrade("hp",32)?upgradeEffect("hp",32):0)).add(1)},
             display() { return `Boost point gain.
                                 Cost: ${format(this.cost())} points
-                                Amount: ${format(getBuyableAmount("p",11))}
-                                Effect: x${format(this.effect())}` },
+                                Amount: ${format(getBuyableAmount("p",11))}<br>`+((player.r.rc2&&player.r.rcbegun)?
+                                `Effect: /${format(new Decimal(1).div(this.effect()))}`:`Effect: x${format(this.effect())}`) },
             canAfford() { return player.points.gte(this.cost()) },
             buy(){
                 if(!tmp.p.buyables[11].canAfford) return
@@ -4825,11 +4826,12 @@ addLayer("pu", {
         if(hasUpgrade("pu",22)) base=new Decimal(17.5)
         if(hasUpgrade("pu",23)) base=new Decimal(25)
         if((player.r.rngseed3[0]=='3'||player.r.rngseed3[0]=='4')&&player.r.allowrng3) base=base.add(tmp.r.calcrng3boost[2])
+        if(player.r.rc2&&player.r.rcbegun) base=new Decimal(0.6)
         return base
     },
     effect() {
         if ((!player.pu.unlocked)||(player.c.choose22&&player.c.isbegun)) return new Decimal(1);
-        return Decimal.pow(tmp.pu.effectBase,player.pu.points)
+        return Decimal.pow(tmp.pu.effectBase,(player.pu.points.add(hasUpgrade("hp",41)?player.su.points.times(10):0)))
     },
     startData() { return {
         unlocked: false,
@@ -4847,7 +4849,7 @@ addLayer("pu", {
     tabFormat:{
         "Main":{
             content:[
-                ["display-text",function() { return `You have <h2 style="color:#14CEA3">${player.pu.points}</h2> prestige upgraders, which boost prestige points gain by <h2 style="color:#14CEA3">${format(tmp.pu.effect)}</h2>.`},
+                ["display-text",function() { return `You have <h2 style="color:#14CEA3">${player.pu.points}</h2>`+(hasUpgrade("hp",41)?`<h2 style="color:#04AE83">(+${player.su.points.times(10)})</h2>`:``)+` prestige upgraders, `+((player.r.rc2&&player.r.rcbegun)?`which divides prestige points gain by <h2 style="color:#14CEA3">${format(new Decimal(1).div(tmp.pu.effect))}</h2>.`:`which boost prestige points gain by <h2 style="color:#14CEA3">${format(tmp.pu.effect)}</h2>.`)},
                 { "font-size":"17.5px","text-shadow" : "0 0 10px #14CEA3"},],
                 "blank",
                 "prestige-button",
@@ -4951,6 +4953,16 @@ addLayer("pu", {
             },
             canAfford(){return player.pu.points.gte(40)},
             pay(){return player.pu.points=player.pu.points.minus(40)},
+        },
+        24:{
+            title:"Prestige Anti-dilate",
+            description(){return `HP gain is raised to ^1.2.`},
+            cost(){return new Decimal(1187)},
+            unlocked(){ 
+                return player.r.rc1fin
+            },
+            canAfford(){return player.pu.points.gte(1187)},
+            pay(){return player.pu.points=player.pu.points.minus(1187)},
         },
     },
     milestones:{
@@ -5108,6 +5120,7 @@ addLayer("hp", {
     gainExp() { // Calculate the exponent on main currency from bonuses
         exp = new Decimal(1)
         if(hasMilestone("hp",6)) exp=exp.times(tmp.c.calcshardboost)
+        if(hasUpgrade("pu",24)) exp=exp.times(1.2)
         if(player.r.rc1&&player.r.rcbegun&&player.up.best.gte(1)) exp=exp.times(0.75)
         return exp
     },
@@ -5323,6 +5336,16 @@ addLayer("hp", {
             pay(){return player.hp.points=player.hp.points.minus(1e30)},
             effect(){return player.points.add(1).log10().pow(2).add(1)},
             effectDisplay(){return `x${format(upgradeEffect("hp",35))}`},
+        },
+        41:{
+            title:"Not included",
+            description(){return `Every super upgrader gives 10 free prestige upgraders.`},
+            cost(){return new Decimal("1e13110")},
+            unlocked(){ 
+                return player.r.rc1fin
+            },
+            canAfford(){return player.hp.points.gte("1e13110")},
+            pay(){return player.hp.points=player.hp.points.minus("1e13110")},
         },
     },
     milestones:{
@@ -5889,7 +5912,7 @@ addLayer("su", {
         "Main":{
             content:[
                 ["display-text",function() { return `You have <h2 style="color:#04AE83">${player.su.points}</h2> super upgraders, prestige upgrader's cost is raised to <h2 style="color:#04AE83">^${format(tmp.su.effect)}</h2>.`},
-                { "font-size":"17.5px","text-shadow" : "0 0 10px #14CEA3"},],
+                { "font-size":"17.5px","text-shadow" : "0 0 10px #04AE83"},],
                 "blank",
                 "prestige-button",
                 ["display-text",function() { return `You have ${format(player.hp.points)} hyper prestige points.`},],
@@ -6814,7 +6837,7 @@ addLayer("r", {
         coreLv:new Decimal(0),
         rngseed1:"00",
         rngseed2:"00",
-        rngseed3:"0",
+        rngseed3:'0',
         r1dynamicboost:new Decimal(1),
         r2dynamicboost:new Decimal(1),
         allowrng1:false,
@@ -6833,8 +6856,11 @@ addLayer("r", {
         dim4mul:new Decimal(1),
         dim5mul:new Decimal(1),
         dim6mul:new Decimal(1),
+        remult:new Decimal(1),
         rc1:false,
         rc1fin:false,
+        rc2:false,
+        rc2fin:false,
         rcbegun:false,
         goal:new Decimal(0),
         rct:0,
@@ -6933,10 +6959,17 @@ addLayer("r", {
                 ["clickables",[8]],
                 "blank",
                 ["display-text",function() { return player.r.rc1? `<h3 style="color:#FE0000">[1]Absolute dilation</h3><br>
-                                                                    <strong>·This challenge must be completed in</strong> <h2 style="font-family:MS serif;color:red;text-shadow : 0 0 10px red;"> 12:30 </h2><br>
+                                                                    <strong>·This challenge must be completed in</strong> <h2 style="font-family:MS serif;color:red;text-shadow : 0 0 10px red;"> 7:00 </h2><br>
                                                                     ·Point gain will raised to ^0.85<br>
                                                                     ·After the first UP reset, P,SP,HP and UP gain will raised to ^0.75<br>
-                                                                    Goal:1e45000 points`:`.....`},
+                                                                    Goal:1e315 points<br>
+                                                                    Reward:Unlock 5 upgrades in different layers`:
+                                                    player.r.rc2? `<h3 style="color:#FE5400">[2]Out of charge</h3><br>
+                                                                    <strong>·This challenge must be completed in</strong> <h2 style="font-family:MS serif;color:orange;text-shadow : 0 0 10px red;"> 7:00 </h2><br>
+                                                                    ·"Point booster" effect base is 0.99<br>
+                                                                    ·PU effect base is 0.6<br>
+                                                                    Goal:1e1650 points<br>
+                                                                    Reward:Unlock 5 upgrades in different layers`:`.....`},
                     { "font-size":"17.5px"},],
             ],
             unlocked(){return hasMilestone("r",6)}
@@ -6948,12 +6981,15 @@ addLayer("r", {
         if(player.r.rngseed2[0]=='2'||player.r.rngseed2[0]=='5') player.r.r2dynamicboost=player.r.r2dynamicboost.times(Decimal.pow((Math.floor(player.r.rngseed1[1]/2*8)/100+1),diff))
         player.r.re=player.r.re.add(player.r.dim1.times(player.r.dim1mul.times(tmp.r.getremult)).times(diff))
         player.r.dim1=player.r.dim1.add(player.r.dim2.times(player.r.dim2mul).times(diff))
+        player.r.dim2=player.r.dim2.add(player.r.dim3.times(player.r.dim3mul).times(diff))
         if(player.r.rcbegun) player.r.rct-=diff;
-        if(player.r.rct==0&&player.r.rcbegun){
+        if(player.r.rct<=0&&player.r.rcbegun){
             doReset("r")
             player.r.rcbegun=false
+            player.r.rct=0
         }
-        if(player.r.rc1) player.r.goal=new Decimal("1e45000")
+        if(player.r.rc1) player.r.goal=new Decimal("1e315")
+        if(player.r.rc2) player.r.goal=new Decimal("1e1650")
     },
     calclvreq(){
         return Decimal.pow(Decimal.pow(5,player.r.coreLv),player.r.coreLv.div(15).add(1)).times(200)
@@ -6976,7 +7012,8 @@ addLayer("r", {
     },
     getremult(){
         let mult=new Decimal(1)
-        if ((player.r.rngseed3='9')&&player.r.allowrng3) mult=mult.times(10)
+        if ((player.r.rngseed3=='9')&&player.r.allowrng3) mult=mult.times(10)
+        mult=mult.times(Decimal.pow(2,player.r.remult))
         return mult
     },
     getreboost(){
@@ -6999,7 +7036,7 @@ addLayer("r", {
         return s
     },
     rngseed3(){
-        s=Math.floor(Math.random()*9.5).toString()
+        s=Math.floor(Math.random()*10).toString()
         return s;
     },
     calcrng1boost(){
@@ -7239,30 +7276,49 @@ addLayer("r", {
             unlocked(){return hasMilestone("r",6)},
             onClick(){
                 player.r.rc1=!player.r.rc1
-                if(player.r.rc1)player.r.rct=750
+                if(player.r.rc1)player.r.rct=420
                 else player.r.rct=0
             },
-            canClick(){return !player.r.rcbegun}
+            canClick(){return (!player.r.rcbegun)&&(!player.r.rc2)}
+        },
+        62:{
+            display(){return !player.r.rc2fin? `<img src="js/cpic/RC2.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`:`<img src="js/cpic/RC2finish.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`},
+            style:{"height":"161px","width":"161px","border-radius":"0%","border":"6px solid","border-color"(){return player.r.rc2 ? "orange":"#DDDDDD"},"color":"red","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return hasMilestone("r",6)},
+            onClick(){
+                player.r.rc2=!player.r.rc2
+                if(player.r.rc2)player.r.rct=900
+                else player.r.rct=0
+            },
+            canClick(){return (!player.r.rcbegun)&&(!player.r.rc1)}
         },
         81:{
             display(){return player.r.rcbegun? player.points.gte(player.r.goal) ? `Complete the challenge`:`Exit the challenge`:`Begin the challenge`},
             style:{"height":"50px","width":"125px","border-radius":"0%","border":"6px solid","border-color":"#DDDDDD","color":"white","font-size":"15px","background-color"(){return ((player.points.gte(player.r.goal))&&player.r.rcbegun)?"gold":"#FFFFFF25"}},
             unlocked(){return hasMilestone("r",6)},
             onClick(){
+                if(player.r.rcbegun&&player.points.gte(player.r.goal)){
+                    player.r.rc1fin=true
+                    player.r.rc2fin=true
+                }
                 player.r.rcbegun=!player.r.rcbegun
-                layerDataReset("up")
-                layerDataReset("pt")
-                layerDataReset("su")
-                layerDataReset("hp")
-                layerDataReset("c")
-                layerDataReset("pu")
-                layerDataReset("sp")
-                layerDataReset("p")
-                doReset("r")
+                if(player.r.rcbegun){
+                    player.points=new Decimal(0)
+                    layerDataReset("up")
+                    layerDataReset("pt")
+                    layerDataReset("su")
+                    layerDataReset("hp")
+                    layerDataReset("c")
+                    layerDataReset("pu")
+                    layerDataReset("sp")
+                    layerDataReset("p")
+                    doReset("r")
+                    player.points=new Decimal(0)
+                }
                 player.points=new Decimal(0)
-                if(player.r.rc1) player.r.rct=750
+                if(player.r.rc1) player.r.rct=420
             },
-            canClick(){return true}
+            canClick(){return player.r.rc1||player.r.rc2}
         }
     },
     milestones:{
@@ -7329,7 +7385,7 @@ addLayer("r", {
         },
         12:{
             title:"Dim 2",
-            cost(x) { return Decimal.pow(15,x).times(5)},
+            cost(x) { return Decimal.pow(10,x).times(5)},
             effect(x) { return x},
             display() { return `Cost: ${format(this.cost())} RP
                                 Amount: ${format(player.r.dim2,0)}(${format(getBuyableAmount("r",12),0)})
@@ -7341,6 +7397,40 @@ addLayer("r", {
                 setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
                 player.r.dim2=player.r.dim2.add(1)
                 player.r.dim2mul=Decimal.pow(2,(getBuyableAmount("r",12)).minus(1)).max(1)
+            },
+            style:{"height":"150px","width":"150px","font-size":"12.5px"}
+        },
+        13:{
+            title:"Dim 3",
+            cost(x) { return Decimal.pow(15,x).times(25)},
+            effect(x) { return x},
+            display() { return `Cost: ${format(this.cost())} RP
+                                Amount: ${format(player.r.dim3,0)}(${format(getBuyableAmount("r",13),0)})
+                                x${format(player.r.dim3mul)}` },
+            canAfford() { return player.r.points.gte(this.cost()) },
+            buy(){
+                if(!tmp.r.buyables[13].canAfford) return
+                player.r.points = player.r.points.sub(this.cost())
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+                player.r.dim3=player.r.dim3.add(1)
+                player.r.dim3mul=Decimal.pow(2,(getBuyableAmount("r",13)).minus(1)).max(1)
+            },
+            style:{"height":"150px","width":"150px","font-size":"12.5px"}
+        },
+        31:{
+            title:"RE booster",
+            cost(x) { return Decimal.pow(100,x).times(1000)},
+            effect(x) { return x},
+            display() { return `Boost to RE gain.
+                                Cost: ${format(this.cost())} RE
+                                Amount: ${format(player.r.remult,0)}(${format(getBuyableAmount("r",31),0)})
+                                Effect:x${format(Decimal.pow(2,player.r.remult))}` },
+            canAfford() { return player.r.re.gte(this.cost()) },
+            buy(){
+                if(!tmp.r.buyables[31].canAfford) return
+                player.r.re = player.r.re.sub(this.cost())
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+                player.r.remult=player.r.remult.add(1)
             },
             style:{"height":"150px","width":"150px","font-size":"12.5px"}
         },
