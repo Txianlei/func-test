@@ -3841,7 +3841,7 @@ addLayer("p", {
         if((hasMilestone("sp",0)&&resettingLayer=="sp")||hasMilestone("r",0)) keep.push("milestones")
         if(hasMilestone("sp",2)&&resettingLayer=="sp") keep.push("upgrades")
         if(hasMilestone("pu",0)) keep.push("milestones")
-        if(hasMilestone("pu",0)) keep.push("upgrades")
+        if(hasMilestone("pu",0)||hasMilestone("r",0)) keep.push("upgrades")
         if (layers[resettingLayer].row > this.row) layerDataReset("p", keep)
     },
     layerShown(){return hasUpgrade("f",332)},
@@ -4445,7 +4445,7 @@ addLayer("sp", {
         player.points=new Decimal(0)
         let keep = [];
         if(hasMilestone("hp",0)||hasMilestone("r",2)) keep.push("milestones")
-        if(hasMilestone("hp",2)) keep.push("upgrades")
+        if(hasMilestone("hp",2)||hasMilestone("r",2)) keep.push("upgrades")
         if (layers[resettingLayer].row > this.row) layerDataReset("sp",keep)
     },
     tabFormat:{
@@ -6503,11 +6503,11 @@ addLayer("pt", {
         }
     },
     update(diff){
-        if(player.pt.ischoose[1])player.pt.cst[1]=player.pt.cst[1].minus(Decimal.pow(tmp.pt.calcboost5.times(1.5),player.pt.work[1]).minus(1).max(0).times(diff))
-        if(player.pt.ischoose[2])player.pt.cst[2]=player.pt.cst[2].minus(Decimal.pow(tmp.pt.calcboost5.times(1.5),player.pt.work[2]).minus(1).max(0).times(diff))
-        if(player.pt.ischoose[3])player.pt.cst[3]=player.pt.cst[3].minus(Decimal.pow(tmp.pt.calcboost5.times(1.5),player.pt.work[3]).minus(1).max(0).times(diff))
-        if(player.pt.ischoose[4])player.pt.cst[4]=player.pt.cst[4].minus(Decimal.pow(tmp.pt.calcboost5.times(1.5),player.pt.work[4]).minus(1).max(0).times(diff))
-        if(player.pt.ischoose[5])player.pt.cst[5]=player.pt.cst[5].minus(Decimal.pow(tmp.pt.calcboost5.times(1.5),player.pt.work[5]).minus(1).max(0).times(diff))
+        if(player.pt.ischoose[1])player.pt.cst[1]=player.pt.cst[1].minus(Decimal.pow(tmp.pt.calcboost5.times(1.5),player.pt.work[1].times(hasMilestone("r",7)?5:1)).minus(1).max(0).times(diff))
+        if(player.pt.ischoose[2])player.pt.cst[2]=player.pt.cst[2].minus(Decimal.pow(tmp.pt.calcboost5.times(1.5),player.pt.work[2].times(hasMilestone("r",7)?5:1)).minus(1).max(0).times(diff))
+        if(player.pt.ischoose[3])player.pt.cst[3]=player.pt.cst[3].minus(Decimal.pow(tmp.pt.calcboost5.times(1.5),player.pt.work[3].times(hasMilestone("r",7)?5:1)).minus(1).max(0).times(diff))
+        if(player.pt.ischoose[4])player.pt.cst[4]=player.pt.cst[4].minus(Decimal.pow(tmp.pt.calcboost5.times(1.5),player.pt.work[4].times(hasMilestone("r",7)?5:1)).minus(1).max(0).times(diff))
+        if(player.pt.ischoose[5])player.pt.cst[5]=player.pt.cst[5].minus(Decimal.pow(tmp.pt.calcboost5.times(1.5),player.pt.work[5].times(hasMilestone("r",7)?5:1)).minus(1).max(0).times(diff))
     },
     calcblv(){
         if(player.pt.cst[1].lte(0)){
@@ -6992,7 +6992,7 @@ addLayer("r", {
         if(player.r.rc2) player.r.goal=new Decimal("1e1650")
     },
     calclvreq(){
-        return Decimal.pow(Decimal.pow(5,player.r.coreLv),player.r.coreLv.div(15).add(1)).times(200)
+        return Decimal.pow(Decimal.pow(5,player.r.coreLv),player.r.coreLv.div(25).add(1)).times(125)
     },
     getrp(){
         let gain=new Decimal(1)
@@ -7003,6 +7003,7 @@ addLayer("r", {
         if((player.r.rngseed1=="99")&&player.r.allowrng1) t=t.times(10)
         if((player.r.rngseed2=="99")&&player.r.allowrng2) t=t.times(10)
         if((player.r.rngseed3=="9")&&player.r.allowrng3) t=t.times(25)
+        if(hasMilestone("r",2)) t=t.times(Decimal.pow(1.2,player.r.rt))
         return player.r.unlocked?gain.times(t):new Decimal(0)
     },
     calcrpboost(){
@@ -7076,7 +7077,7 @@ addLayer("r", {
             eff5=(a/10000)+(b/10000)
         }
         if(a+b=="99"||a+b=="01"){
-            h=`Boost rp gain based on <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">log10(log10(prestige points))</h2> `
+            h=`Boost rein power gain based on <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">log10(log10(prestige points))</h2> `
             eff6=player.p.points.add(1).log10().add(1).log10().add(1)
         }
         if(b=='6'||a=='3'){
@@ -7134,7 +7135,7 @@ addLayer("r", {
             m=`10x Rein power and 2x RP gain.`
         }
         let lst=[c+((c||d)?`<br>`:``)+d+((d||e)?`<br>`:``)+e+((e||f)?`<br>`:``)+f+((f||g)?`<br>`:``)+g+((g||m)?'<br>':``)+m+((m||k)?`<br>`:``)+k,eff1,eff2,eff3,eff4,eff5];
-        player.r.allowrng2=true
+        if(hasMilestone("r",2)) player.r.allowrng2=true
         return lst
     },
     calcrng3boost(){
@@ -7164,7 +7165,7 @@ addLayer("r", {
             f=`25x Rein power and 10x RE gain.`
         }
         let lst=[c+((c||d)?`<br>`:``)+d+((d||e)?`<br>`:``)+e+((e||f)?`<br>`:``)+f,eff1,eff2,eff3,eff4]
-        player.r.allowrng3=true
+        if(hasMilestone("r",5)) player.r.allowrng3=true
         return lst
     },
     clickables:{
@@ -7326,7 +7327,7 @@ addLayer("r", {
             requirementDescription: "Core level 1",
             done() { return player.r.coreLv.gte(1)},
             style:{"width":"500px"},
-            effectDescription: "Keep prestige milestones on all resets, Double Rein power gain.Unlock upgrade generator.",
+            effectDescription: "Keep prestige milestones and upgrades on all resets, Double Rein power gain. Unlock upgrade generator.",
         },
         1: {
             requirementDescription: "Core level 2",
@@ -7338,7 +7339,8 @@ addLayer("r", {
             requirementDescription: "Core level 3",
             done() { return player.r.coreLv.gte(3)},
             style:{"width":"500px"},
-            effectDescription(){return `Keep SP milestones on all resets. Unlock a new seed.`},
+            effectDescription(){return `Keep SP milestones and upgrades on all resets. Unlock a new seed.<br>
+                                        The effect of level 2 affects rein power but a little weaker.`},
         },
         3: {
             requirementDescription: "Core level 4",
@@ -7363,7 +7365,13 @@ addLayer("r", {
             done() { return player.r.coreLv.gte(7)},
             style:{"width":"500px"},
             effectDescription(){return `Keep challenge shards on all resets. Unlock Reincarnation challenges.`},
-        }, 
+        },
+        7: {
+            requirementDescription: "Core level 8",
+            done() { return player.r.coreLv.gte(7)},
+            style:{"width":"500px"},
+            effectDescription(){return `Unlock a new seed, workers are 500% stronger.`},
+        },
     },
     buyables:{
         11:{
