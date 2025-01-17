@@ -412,6 +412,7 @@ addLayer("f", {
         if(hasUpgrade("pu",15)) m=m.times(upgradeEffect("pu",15))
         if(hasUpgrade("up",23)) m=m.times(upgradeEffect("up",23))
         if(hasUpgrade("su",14)) m=m.times("1e576")
+        if(hasUpgrade("su",15)) m=m.times(upgradeEffect("su",15))
         m=m.times(buyableEffect("p",11))
         m=m.times(tmp.sp.calcspboost)
         m=m.times(tmp.r.getreboost)
@@ -437,6 +438,7 @@ addLayer("f", {
         m=m.pow(tmp.c.calcshardboost)
         if(player.c.choose32&&player.c.isbegun) m=m.pow(0.3)
         if(player.r.rc1&&player.r.rcbegun) m=m.pow(0.85)
+        if(player.r.rc3&&player.r.rcbegun) m=m.pow(Math.abs(Math.sin((player.r.points.min(1e300).toNumber())))*0.75)
         return m
     },
     calctmult(){
@@ -3826,6 +3828,7 @@ addLayer("p", {
         if(hasUpgrade("p",42)) exp=exp.times(1.025)
         if(hasUpgrade("sp",35)) exp=exp.times(1.025)
         if(hasMilestone("sp",7)) exp=exp.times(tmp.c.calcshardboost)
+        if(player.r.rngseed4=='1'&&player.r.allowrng4) exp=exp.times(tmp.r.calcrng4boost[1])
         if(player.c.choose11&&player.c.isbegun) exp=exp.times(0.5)
         if(player.r.rc1&&player.r.rcbegun&&player.up.best.gte(1)) exp=exp.times(0.75)
         exp=exp.times(tmp.r.calcrpboost)
@@ -4432,6 +4435,7 @@ addLayer("sp", {
         if(hasMilestone("hp",5)) exp=exp.times(tmp.c.calcshardboost)
         if(player.c.choose21&&player.c.isbegun) exp=exp.times(0.6)
         if(player.r.rngseed2[0]=='1'||player.r.rngseed2[0]=='5') exp=exp.times(1.01)
+        if(player.r.rngseed4=='3'&&player.r.allowrng4) exp=exp.times(tmp.r.calcrng4boost[2])
         if(player.r.rc1&&player.r.rcbegun&&player.up.best.gte(1)) exp=exp.times(0.75)
         return exp
     },
@@ -5121,6 +5125,7 @@ addLayer("hp", {
         exp = new Decimal(1)
         if(hasMilestone("hp",6)) exp=exp.times(tmp.c.calcshardboost)
         if(hasUpgrade("pu",24)) exp=exp.times(1.2)
+        if(player.r.rngseed4=='5'&&player.r.allowrng4) exp=exp.times(tmp.r.calcrng4boost[3])
         if(player.r.rc1&&player.r.rcbegun&&player.up.best.gte(1)) exp=exp.times(0.75)
         return exp
     },
@@ -5520,8 +5525,8 @@ addLayer("c", {
     doReset(resettingLayer){
         let keep=[]
         keep.push("checker")
-        if(hasMilestone("up",0)&&resettingLayer!='r') keep.push("points")
         if(hasMilestone("r",6)) keep.push("points")
+        if(hasMilestone("up",0)&&resettingLayer!='r') keep.push("points")
         if (layers[resettingLayer].row > this.row) layerDataReset("c",keep)
     },
     tabFormat:{
@@ -5908,6 +5913,7 @@ addLayer("su", {
         if (layers[resettingLayer].row > this.row&&!hasMilestone("up",2)) layerDataReset("su")
     },
     autoPrestige(){return hasMilestone("su",1)},
+    resetsNothing(){return hasMilestone("su",2)},
     tabFormat:{
         "Main":{
             content:[
@@ -5983,6 +5989,20 @@ addLayer("su", {
             canAfford(){return player.su.points.gte(25)},
             pay(){return player.su.points=player.su.points.minus(25)},
         },
+        15:{
+            title:"Point generation growth",
+            description(){return `Boost point gain based on rein points.`},
+            cost(){return new Decimal(36)},
+            unlocked(){ 
+                return player.r.rc1fin
+            },
+            canAfford(){return player.su.points.gte(36)},
+            pay(){return player.su.points=player.su.points.minus(36)},
+            effect(){
+                return Decimal.pow(25,(player.r.points.add(1).ln()))
+            },
+            effectDisplay(){return `x${format(upgradeEffect("su",15))}`}
+        },
     },
     milestones:{
         0: {
@@ -5996,6 +6016,12 @@ addLayer("su", {
             done() { return player.su.points.gte(10)},
             style:{"width":"500px"},
             effectDescription: "Auto reset for SU,PU is cheaper.",
+        },
+        2: {
+            requirementDescription: "36 super Upgraders",
+            done() { return player.su.points.gte(36)},
+            style:{"width":"500px"},
+            effectDescription: "SU resets nothing. Gain 100% of ultra prestige points on reset per second.",
         },
     },
     clickables:{
@@ -6105,10 +6131,12 @@ addLayer("up", {
         if(hasUpgrade("up",15)) mult=mult.times(2)
         if(hasUpgrade("up",24)) mult=mult.times(upgradeEffect("up",24))
         mult=mult.times(tmp.pt.calcboost1)
+        if(player.r.rc3&&player.r.rcbegun) m=m.div(Decimal.pow(1e25,player.pt.blv[5]))
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
         exp = new Decimal(1)
+        if(player.r.rngseed4=='7'&&player.r.allowrng4) exp=exp.times(tmp.r.calcrng4boost[4])
         if(player.r.rc1&&player.r.rcbegun&&player.up.best.gte(1)) exp=exp.times(0.75)
         return exp
     },
@@ -6125,6 +6153,7 @@ addLayer("up", {
         if(hasMilestone("r",5)) keep.push("milestones")
         if (layers[resettingLayer].row > this.row) layerDataReset("up", keep)
     },
+    passiveGeneration(){return hasMilestone("su",2)?1:0},
     branches:["p","hp"],
     tabFormat:{
         "Main":{
@@ -6838,11 +6867,13 @@ addLayer("r", {
         rngseed1:"00",
         rngseed2:"00",
         rngseed3:'0',
+        rngseed4:'0',
         r1dynamicboost:new Decimal(1),
         r2dynamicboost:new Decimal(1),
         allowrng1:false,
         allowrng2:false,
         allowrng3:false,
+        allowrng4:false,
         re:new Decimal(0),
         dim1:new Decimal(0),
         dim2:new Decimal(0),
@@ -6861,6 +6892,8 @@ addLayer("r", {
         rc1fin:false,
         rc2:false,
         rc2fin:false,
+        rc3:false,
+        rc3fin:false,
         rcbegun:false,
         goal:new Decimal(0),
         rct:0,
@@ -6922,11 +6955,11 @@ addLayer("r", {
                 ["display-text",function() { return `You have <h2 style="color:#EF25EF">${format(player.r.points)}</h2> reincarnation points, which produce ${format(tmp.r.getrp)} Rein power/s.`},
                 { "font-size":"17.5px","text-shadow" : "0 0 10px #EF25EF"},],
                 "blank",
-                ["display-text",function() { return `Seed: <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">${player.r.rngseed1}</h2>`+(hasMilestone("r",2)?`<h2 style="color:#217782;text-shadow : 0 0 10px #217782">${player.r.rngseed2}</h2>`:``)+(hasMilestone("r",5)?`<h2 style="color:#14CEA3;text-shadow : 0 0 10px #14CEA3">${player.r.rngseed3}</h2>`:``)},
+                ["display-text",function() { return `Seed: <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">${player.r.rngseed1}</h2>`+(hasMilestone("r",2)?`<h2 style="color:#217782;text-shadow : 0 0 10px #217782">${player.r.rngseed2}</h2>`:``)+(hasMilestone("r",5)?`<h2 style="color:#14CEA3;text-shadow : 0 0 10px #14CEA3">${player.r.rngseed3}</h2>`:``)+(hasMilestone("r",7)?`<h2 style="color:#45AC68;text-shadow : 0 0 10px #45AC68">${player.r.rngseed4}</h2>`:``)},
                     { "font-size":"17.5px"},],
                 "blank",
                 ["clickables",[2]],
-                ["display-text",function() { return `${tmp.r.calcrng1boost[0]}`+(hasMilestone("r",2)?`<br>${tmp.r.calcrng2boost[0]}`:``)+(hasMilestone("r",5)?`<br>${tmp.r.calcrng3boost[0]}`:``)},
+                ["display-text",function() { return `${tmp.r.calcrng1boost[0]}`+(hasMilestone("r",2)?`<br>${tmp.r.calcrng2boost[0]}`:``)+(hasMilestone("r",5)?`<br>${tmp.r.calcrng3boost[0]}`:``)+(hasMilestone("r",7)?`<br>${tmp.r.calcrng4boost[0]}`:``)},
                     { "font-size":"17.5px"},],     
             ],
             unlocked(){return hasMilestone("r",0)}
@@ -6959,17 +6992,23 @@ addLayer("r", {
                 ["clickables",[8]],
                 "blank",
                 ["display-text",function() { return player.r.rc1? `<h3 style="color:#FE0000">[1]Absolute dilation</h3><br>
-                                                                    <strong>·This challenge must be completed in</strong> <h2 style="font-family:MS serif;color:red;text-shadow : 0 0 10px red;"> 7:00 </h2><br>
+                                                                    <strong>·This challenge must be completed in</strong> <h2 style="font-family:MS serif;color:red;text-shadow : 0 0 10px red;"> 3:20 </h2><br>
                                                                     ·Point gain will raised to ^0.85<br>
                                                                     ·After the first UP reset, P,SP,HP and UP gain will raised to ^0.75<br>
                                                                     Goal:1e315 points<br>
                                                                     Reward:Unlock 5 upgrades in different layers`:
                                                     player.r.rc2? `<h3 style="color:#FE5400">[2]Out of charge</h3><br>
-                                                                    <strong>·This challenge must be completed in</strong> <h2 style="font-family:MS serif;color:orange;text-shadow : 0 0 10px red;"> 7:00 </h2><br>
+                                                                    <strong>·This challenge must be completed in</strong> <h2 style="font-family:MS serif;color:orange;text-shadow : 0 0 10px orange;"> 3:00 </h2><br>
                                                                     ·"Point booster" effect base is 0.99<br>
                                                                     ·PU effect base is 0.6<br>
                                                                     Goal:1e1650 points<br>
-                                                                    Reward:Unlock 5 upgrades in different layers`:`.....`},
+                                                                    Reward:Unlock a new dimension`:
+                                                    player.r.rc3? `<h3 style="color:#FEEF00">[3]Cosmic wave</h3><br>
+                                                                    <strong>·This challenge must be completed in</strong> <h2 style="font-family:MS serif;color:yellow;text-shadow : 0 0 10px yellow;"> 10:00 </h2><br>
+                                                                    ·Point gain is raised to an exponent based on 0.75abs(sin(Rein points))<br>
+                                                                    ·Each level of building V divides UP gain by 1e25<br>
+                                                                    Goal:1e1650 points<br>
+                                                                    Reward:NAN`:`.....`},
                     { "font-size":"17.5px"},],
             ],
             unlocked(){return hasMilestone("r",6)}
@@ -6982,6 +7021,7 @@ addLayer("r", {
         player.r.re=player.r.re.add(player.r.dim1.times(player.r.dim1mul.times(tmp.r.getremult)).times(diff))
         player.r.dim1=player.r.dim1.add(player.r.dim2.times(player.r.dim2mul).times(diff))
         player.r.dim2=player.r.dim2.add(player.r.dim3.times(player.r.dim3mul).times(diff))
+        player.r.dim3=player.r.dim3.add(player.r.dim4.times(player.r.dim4mul).times(diff))
         if(player.r.rcbegun) player.r.rct-=diff;
         if(player.r.rct<=0&&player.r.rcbegun){
             doReset("r")
@@ -7014,6 +7054,7 @@ addLayer("r", {
     getremult(){
         let mult=new Decimal(1)
         if ((player.r.rngseed3=='9')&&player.r.allowrng3) mult=mult.times(10)
+        if (player.r.rngseed4=='9'&&player.r.allowrng4) mult=mult.pow(tmp.r.calcrng4boost[5])
         mult=mult.times(Decimal.pow(2,player.r.remult))
         return mult
     },
@@ -7037,6 +7078,10 @@ addLayer("r", {
         return s
     },
     rngseed3(){
+        s=Math.floor(Math.random()*10).toString()
+        return s;
+    },
+    rngseed4(){
         s=Math.floor(Math.random()*10).toString()
         return s;
     },
@@ -7168,6 +7213,43 @@ addLayer("r", {
         if(hasMilestone("r",5)) player.r.allowrng3=true
         return lst
     },
+    calcrng4boost(){
+        let a=player.r.rngseed4[0]
+        let c=""
+        let d=""
+        let e=""
+        let f=""
+        let g=""
+        let eff1=new Decimal(1)
+        let eff2=new Decimal(1)
+        let eff3=new Decimal(1)
+        let eff4=new Decimal(1)
+        let eff5=new Decimal(1)
+        player.r.allowrng4=false
+        if(a=='1'){
+            c=`Each challenge shard boosts prestige gain for additional <h2 style="color: #45AC68;text-shadow : 0 0 10px #45AC68">+^0.01</h2>`
+            eff1=player.c.points.times(0.01).add(1)
+        }
+        if(a=='3'){
+            d=`Each challenge shard boosts SP gain for additional <h2 style="color: #45AC68;text-shadow : 0 0 10px #45AC68">+^0.015</h2>`
+            eff2=player.c.points.times(0.015).add(1)
+        }
+        if(a=='5'){
+            e=`Each challenge shard boosts HP gain for additional <h2 style="color: #45AC68;text-shadow : 0 0 10px #45AC68">+^0.015</h2>`
+            eff3=player.c.points.times(0.015).add(1)
+        }
+        if(a=='7'){
+            f=`Each challenge shard boosts UP gain for additional <h2 style="color: #45AC68;text-shadow : 0 0 10px #45AC68">+^0.005</h2>`
+            eff4=player.c.points.times(0.005).add(1)
+        }
+        if(a=='9'){
+            g=`Each challenge shard boosts RE gain for additional <h2 style="color: #45AC68;text-shadow : 0 0 10px #45AC68">+^0.005</h2>`
+            eff5=player.c.points.times(0.005).add(1)
+        }
+        let lst=[c+((c||d)?`<br>`:``)+d+((d||e)?`<br>`:``)+e+((e||f)?`<br>`:``)+f+((f||g)?`<br>`:``)+g,eff1,eff2,eff3,eff4,eff5]
+        if(hasMilestone("r",7)) player.r.allowrng4=true
+        return lst
+    },
     clickables:{
         11:{
             display(){return `Increase core level(${player.r.coreLv}->${player.r.coreLv.add(1)})<br>Require:${format(tmp.r.calclvreq,precision = 2)} RP`},
@@ -7185,6 +7267,7 @@ addLayer("r", {
                 player.r.rngseed1=tmp.r.rngseed1
                 player.r.rngseed2=tmp.r.rngseed2
                 player.r.rngseed3=tmp.r.rngseed3
+                player.r.rngseed4=tmp.r.rngseed4
                 if(player.r.rngseed1[0]=='6'||player.r.rngseed1[0]=='2') player.r.r1dynamicboost=new Decimal(1)
                 if(player.r.rngseed1[0]=='2'||player.r.rngseed1[0]=='5') player.r.r2dynamicboost=new Decimal(1)
             },
@@ -7277,21 +7360,32 @@ addLayer("r", {
             unlocked(){return hasMilestone("r",6)},
             onClick(){
                 player.r.rc1=!player.r.rc1
-                if(player.r.rc1)player.r.rct=420
+                if(player.r.rc1)player.r.rct=200
                 else player.r.rct=0
             },
-            canClick(){return (!player.r.rcbegun)&&(!player.r.rc2)}
+            canClick(){return (!player.r.rcbegun)&&(!player.r.rc2)&&(!player.r.rc3)}
         },
         62:{
             display(){return !player.r.rc2fin? `<img src="js/cpic/RC2.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`:`<img src="js/cpic/RC2finish.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`},
-            style:{"height":"161px","width":"161px","border-radius":"0%","border":"6px solid","border-color"(){return player.r.rc2 ? "orange":"#DDDDDD"},"color":"red","font-size":"15px","background-color":"#00000000"},
+            style:{"height":"161px","width":"161px","border-radius":"0%","border":"6px solid","border-color"(){return player.r.rc2 ? "orange":"#DDDDDD"},"color":"orange","font-size":"15px","background-color":"#00000000"},
             unlocked(){return hasMilestone("r",6)},
             onClick(){
                 player.r.rc2=!player.r.rc2
-                if(player.r.rc2)player.r.rct=900
+                if(player.r.rc2)player.r.rct=180
                 else player.r.rct=0
             },
-            canClick(){return (!player.r.rcbegun)&&(!player.r.rc1)}
+            canClick(){return (!player.r.rcbegun)&&(!player.r.rc1)&&(!player.r.rc3)}
+        },
+        63:{
+            display(){return !player.r.rc3fin? `<img src="js/cpic/RC3.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`:`<img src="js/cpic/RC3finish.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`},
+            style:{"height":"161px","width":"161px","border-radius":"0%","border":"6px solid","border-color"(){return player.r.rc3 ? "yellow":"#DDDDDD"},"color":"yellow","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return hasMilestone("r",7)},
+            onClick(){
+                player.r.rc3=!player.r.rc3
+                if(player.r.rc3)player.r.rct=600
+                else player.r.rct=0
+            },
+            canClick(){return (!player.r.rcbegun)&&(!player.r.rc1)&&(!player.r.rc2)}
         },
         81:{
             display(){return player.r.rcbegun? player.points.gte(player.r.goal) ? `Complete the challenge`:`Exit the challenge`:`Begin the challenge`},
@@ -7299,8 +7393,9 @@ addLayer("r", {
             unlocked(){return hasMilestone("r",6)},
             onClick(){
                 if(player.r.rcbegun&&player.points.gte(player.r.goal)){
-                    player.r.rc1fin=true
-                    player.r.rc2fin=true
+                    if(player.r.rc1)player.r.rc1fin=true
+                    if(player.r.rc2)player.r.rc2fin=true
+                    if(player.r.rc3)player.r.rc3fin=true
                 }
                 player.r.rcbegun=!player.r.rcbegun
                 if(player.r.rcbegun){
@@ -7317,9 +7412,11 @@ addLayer("r", {
                     player.points=new Decimal(0)
                 }
                 player.points=new Decimal(0)
-                if(player.r.rc1) player.r.rct=420
+                if(player.r.rc2) player.r.rct=200
+                if(player.r.rc2) player.r.rct=180
+                if(player.r.rc3) player.r.rct=600
             },
-            canClick(){return player.r.rc1||player.r.rc2}
+            canClick(){return player.r.rc1||player.r.rc2||player.r.rc3}
         }
     },
     milestones:{
@@ -7368,9 +7465,9 @@ addLayer("r", {
         },
         7: {
             requirementDescription: "Core level 8",
-            done() { return player.r.coreLv.gte(7)},
+            done() { return player.r.coreLv.gte(8)},
             style:{"width":"500px"},
-            effectDescription(){return `Unlock a new seed, workers are 500% stronger.`},
+            effectDescription(){return `Unlock a new seed and a new challenge, workers are 500% stronger.`},
         },
     },
     buyables:{
@@ -7425,6 +7522,24 @@ addLayer("r", {
             },
             style:{"height":"150px","width":"150px","font-size":"12.5px"}
         },
+        21:{
+            title:"Dim 4",
+            cost(x) { return Decimal.pow(20,x).times(50)},
+            unlocked(){return player.r.rc2fin},
+            effect(x) { return x},
+            display() { return `Cost: ${format(this.cost())} RP
+                                Amount: ${format(player.r.dim4,0)}(${format(getBuyableAmount("r",21),0)})
+                                x${format(player.r.dim3mul)}` },
+            canAfford() { return player.r.points.gte(this.cost()) },
+            buy(){
+                if(!tmp.r.buyables[21].canAfford) return
+                player.r.points = player.r.points.sub(this.cost())
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+                player.r.dim4=player.r.dim4.add(1)
+                player.r.dim4mul=Decimal.pow(2,(getBuyableAmount("r",21)).minus(1)).max(1)
+            },
+            style:{"height":"150px","width":"150px","font-size":"12.5px","margin-top":"12.5px"}
+        },
         31:{
             title:"RE booster",
             cost(x) { return Decimal.pow(100,x).times(1000)},
@@ -7440,7 +7555,7 @@ addLayer("r", {
                 setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
                 player.r.remult=player.r.remult.add(1)
             },
-            style:{"height":"150px","width":"150px","font-size":"12.5px"}
+            style:{"height":"150px","width":"150px","font-size":"12.5px","margin-top":"12.5px"}
         },
     }
 }),

@@ -215,6 +215,7 @@ function getPointGen() {
 			if(hasUpgrade("pu",15)) m=m.times(upgradeEffect("pu",15))
 			if(hasUpgrade("up",23)) m=m.times(upgradeEffect("up",23))
 			if(hasUpgrade("su",14)) m=m.times("1e576")
+			if(hasUpgrade("su",15)) m=m.times(upgradeEffect("su",15))
 			m=m.times(buyableEffect("p",11))
 			m=m.times(tmp.sp.calcspboost)
 			m=m.times(tmp.r.getreboost)
@@ -240,6 +241,7 @@ function getPointGen() {
 			m=m.pow(tmp.c.calcshardboost)
 			if(player.c.choose32&&player.c.isbegun) m=m.pow(0.3)
 			if(player.r.rc1&&player.r.rcbegun) m=m.pow(0.85)
+			if(player.r.rc3&&player.r.rcbegun) m=m.pow(Math.abs(Math.sin((player.r.points.min(1e300).toNumber())))*0.75)
 
 	let gain = player.f.ftype>=4 ? new Decimal(1) : new Decimal(1.1)
 	gain=gain.plus(a)
