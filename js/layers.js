@@ -406,6 +406,7 @@ addLayer("f", {
         if(hasUpgrade("p",11)) m=m.times(upgradeEffect("p",11))
         if(hasUpgrade("p",12)) m=m.times(upgradeEffect("p",12))
         if(hasUpgrade("p",22)) m=m.times(upgradeEffect("p",22))
+        if(hasUpgrade("p",45)) m=m.times(upgradeEffect("p",45))
         if(hasUpgrade("sp",12)) m=m.times(2)
         if(hasUpgrade("sp",14)) m=m.times(upgradeEffect("sp",14))
         if(hasUpgrade("hp",34)) m=m.times(upgradeEffect("hp",34))
@@ -4105,6 +4106,18 @@ addLayer("p", {
             },
             canAfford(){return player.p.points.gte(2e10)},
             pay(){return player.p.points=player.p.points.minus(2e10)},
+        },
+        45:{
+            title:"How did you get there?",
+            description(){return `Boost point gain based on Rein points and prestige points.`},
+            cost(){return new Decimal("1e134000")},
+            unlocked(){ 
+                return player.r.rc1fin
+            },
+            canAfford(){return player.p.points.gte("1e134000")},
+            pay(){return player.p.points=player.p.points.minus("1e134000")},
+            effect(){return player.p.points.add(1).ln().times(player.r.points).pow(100).add(1)},
+            effectDisplay(){return `x${format(upgradeEffect("p",45))}`},
         }
     },
     clickables:{
@@ -6131,7 +6144,7 @@ addLayer("up", {
         if(hasUpgrade("up",15)) mult=mult.times(2)
         if(hasUpgrade("up",24)) mult=mult.times(upgradeEffect("up",24))
         mult=mult.times(tmp.pt.calcboost1)
-        if(player.r.rc3&&player.r.rcbegun) m=m.div(Decimal.pow(1e25,player.pt.blv[5]))
+        if(player.r.rc3&&player.r.rcbegun) mult=mult.div(Decimal.pow(1e25,player.pt.blv[5]))
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -6909,6 +6922,7 @@ addLayer("r", {
         mult = new Decimal(1)
         if((player.r.rngseed1=="99")&&player.r.allowrng1) mult=mult.times(2)
         if((player.r.rngseed2=="99")&&player.r.allowrng2) mult=mult.times(2)
+        if(player.r.rc3fin) mult=mult.times(Decimal.pow(1.025,player.pt.blv[3]))
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -7004,11 +7018,11 @@ addLayer("r", {
                                                                     Goal:1e1650 points<br>
                                                                     Reward:Unlock a new dimension`:
                                                     player.r.rc3? `<h3 style="color:#FEEF00">[3]Cosmic wave</h3><br>
-                                                                    <strong>·This challenge must be completed in</strong> <h2 style="font-family:MS serif;color:yellow;text-shadow : 0 0 10px yellow;"> 10:00 </h2><br>
+                                                                    <strong>·This challenge must be completed in</strong> <h2 style="font-family:MS serif;color:yellow;text-shadow : 0 0 10px yellow;"> 15:00 </h2><br>
                                                                     ·Point gain is raised to an exponent based on 0.75abs(sin(Rein points))<br>
                                                                     ·Each level of building V divides UP gain by 1e25<br>
-                                                                    Goal:1e1650 points<br>
-                                                                    Reward:NAN`:`.....`},
+                                                                    Goal:1e115000 points<br>
+                                                                    Reward:Each level of building III boosts Rein points gain by x1.025`:`.....`},
                     { "font-size":"17.5px"},],
             ],
             unlocked(){return hasMilestone("r",6)}
@@ -7030,6 +7044,7 @@ addLayer("r", {
         }
         if(player.r.rc1) player.r.goal=new Decimal("1e315")
         if(player.r.rc2) player.r.goal=new Decimal("1e1650")
+        if(player.r.rc3) player.r.goal=new Decimal("1e115000")
     },
     calclvreq(){
         return Decimal.pow(Decimal.pow(5,player.r.coreLv),player.r.coreLv.div(25).add(1)).times(125)
@@ -7382,7 +7397,7 @@ addLayer("r", {
             unlocked(){return hasMilestone("r",7)},
             onClick(){
                 player.r.rc3=!player.r.rc3
-                if(player.r.rc3)player.r.rct=600
+                if(player.r.rc3)player.r.rct=900
                 else player.r.rct=0
             },
             canClick(){return (!player.r.rcbegun)&&(!player.r.rc1)&&(!player.r.rc2)}
@@ -7414,7 +7429,7 @@ addLayer("r", {
                 player.points=new Decimal(0)
                 if(player.r.rc2) player.r.rct=200
                 if(player.r.rc2) player.r.rct=180
-                if(player.r.rc3) player.r.rct=600
+                if(player.r.rc3) player.r.rct=900
             },
             canClick(){return player.r.rc1||player.r.rc2||player.r.rc3}
         }

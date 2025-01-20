@@ -209,6 +209,7 @@ function getPointGen() {
 			if(hasUpgrade("p",11)) m=m.times(upgradeEffect("p",11))
 			if(hasUpgrade("p",12)) m=m.times(upgradeEffect("p",12))
 			if(hasUpgrade("p",22)) m=m.times(upgradeEffect("p",22))
+			if(hasUpgrade("p",45)) m=m.times(upgradeEffect("p",45))
 			if(hasUpgrade("sp",12)) m=m.times(2)
 			if(hasUpgrade("sp",14)) m=m.times(upgradeEffect("sp",14))
 			if(hasUpgrade("hp",34)) m=m.times(upgradeEffect("hp",34))
