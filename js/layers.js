@@ -7564,7 +7564,7 @@ addLayer("r", {
         },
         9: {
             requirementDescription: "Core level 12",
-            done() { return player.r.coreLv.gte(10)&&player.r.rc3fin},
+            done() { return player.r.coreLv.gte(12)},
             style:{"width":"500px"},
             effectDescription(){return `Unlock a new seed.`},
         },
