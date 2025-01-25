@@ -244,6 +244,7 @@ function getPointGen() {
 			if(player.c.choose32&&player.c.isbegun) m=m.pow(0.3)
 			if(player.r.rc1&&player.r.rcbegun) m=m.pow(0.85)
 			if(player.r.rc3&&player.r.rcbegun) m=m.pow(Math.abs(Math.sin((player.r.points.min(1e300).toNumber())))*0.75)
+			if((player.r.rngseeda=='4'||player.r.rngseeda=='9')&&player.r.allowrnga) m=m.pow(0.4)
 
 	let gain = player.f.ftype>=4 ? new Decimal(1) : new Decimal(1.1)
 	gain=gain.plus(a)

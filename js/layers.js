@@ -441,6 +441,7 @@ addLayer("f", {
         if(player.c.choose32&&player.c.isbegun) m=m.pow(0.3)
         if(player.r.rc1&&player.r.rcbegun) m=m.pow(0.85)
         if(player.r.rc3&&player.r.rcbegun) m=m.pow(Math.abs(Math.sin((player.r.points.min(1e300).toNumber())))*0.75)
+        if((player.r.rngseeda=='4'||player.r.rngseeda=='9')&&player.r.allowrnga) m=m.pow(0.4)
         return m
     },
     calctmult(){
@@ -4849,7 +4850,7 @@ addLayer("pu", {
     },
     effect() {
         if ((!player.pu.unlocked)||(player.c.choose22&&player.c.isbegun)) return new Decimal(1);
-        return Decimal.pow(tmp.pu.effectBase,(player.pu.points.add(hasUpgrade("hp",41)?player.su.points.times((player.r.rngseed5[0]==player.r.rngseed5[1])&&player.r.rngseed5!="00"?12:10):0)))
+        return Decimal.pow(tmp.pu.effectBase,(player.pu.points.add(hasUpgrade("hp",41)?player.su.points.times((player.r.rngseed5[0]==player.r.rngseed5[1])&&player.r.rngseed5!="00"?12:10):0))).pow(((player.r.rngseeda=='0'||player.r.rngseeda=='5')&&player.r.allowrnga)?0.05:1)
     },
     startData() { return {
         unlocked: false,
@@ -5638,7 +5639,7 @@ addLayer("c", {
         player.c.goal=g.pow(new Decimal(1).div(cnt.max(1)))
     },
     calcshardboost(){
-        return player.c.points.times(0.03).add(1)
+        return player.c.points.times(((player.r.rngseeda=='2'||player.r.rngseeda=='7')&&player.r.allowrnga)?0.01:0.03).add(1)
     },
     infoboxes: {
         c_intro: {
@@ -6200,7 +6201,7 @@ addLayer("up", {
         let boost= Decimal.pow(exp8,player.up.points.add(1).ln())
         let sc2=new Decimal(1e50)
         player.up.sc=sc2
-        if(boost.gte(1e75)) return boost.minus(1e75).add(1).cbrt().times(1e75)
+        if(boost.gte(1e75)) return boost.minus(1e75).add(1).cbrt().times(1e75).pow(((player.rngseeda=='1'||player.r.rngseeda=='6')&&player.r.allowrnga)?0.125:1)
         return boost
     },
     upgrades:{
@@ -6898,6 +6899,7 @@ addLayer("r", {
         rngseed3:'0',
         rngseed4:'0',
         rngseed5:"00",
+        rngseeda:'0',
         r1dynamicboost:new Decimal(1),
         r2dynamicboost:new Decimal(1),
         allowrng1:false,
@@ -6905,6 +6907,8 @@ addLayer("r", {
         allowrng3:false,
         allowrng4:false,
         allowrng5:false,
+        allowrnga:false,
+        allowauto:false,
         re:new Decimal(0),
         dim1:new Decimal(0),
         dim2:new Decimal(0),
@@ -6925,9 +6929,12 @@ addLayer("r", {
         rc2fin:false,
         rc3:false,
         rc3fin:false,
+        rc4:false,
+        rc4fin:false,
         rcbegun:false,
         goal:new Decimal(0),
         rct:0,
+        rc4tick:0,
     }},
     color: "#EF25EF",
     requires: new Decimal("1e100000"), // Can be a function that takes requirement increases into account
@@ -6989,11 +6996,11 @@ addLayer("r", {
                 ["display-text",function() { return `You have <h2 style="color:#EF25EF">${format(player.r.points)}</h2> reincarnation points, which produce ${format(tmp.r.getrp)} Rein power/s.`},
                 { "font-size":"17.5px","text-shadow" : "0 0 10px #EF25EF"},],
                 "blank",
-                ["display-text",function() { return `Seed: <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">${player.r.rngseed1}</h2>`+(hasMilestone("r",2)?`<h2 style="color:#217782;text-shadow : 0 0 10px #217782">${player.r.rngseed2}</h2>`:``)+(hasMilestone("r",5)?`<h2 style="color:#14CEA3;text-shadow : 0 0 10px #14CEA3">${player.r.rngseed3}</h2>`:``)+(hasMilestone("r",7)?`<h2 style="color:#45AC68;text-shadow : 0 0 10px #45AC68">${player.r.rngseed4}</h2>`:``)+(hasMilestone("r",9)?`<h2 style="color:#0068A5;text-shadow : 0 0 10px #0068A5">${player.r.rngseed5}</h2>`:``)},
+                ["display-text",function() { return `Seed: <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">${player.r.rngseed1}</h2>`+(hasMilestone("r",2)?`<h2 style="color:#217782;text-shadow : 0 0 10px #217782">${player.r.rngseed2}</h2>`:``)+(hasMilestone("r",5)?`<h2 style="color:#14CEA3;text-shadow : 0 0 10px #14CEA3">${player.r.rngseed3}</h2>`:``)+(hasMilestone("r",7)?`<h2 style="color:#45AC68;text-shadow : 0 0 10px #45AC68">${player.r.rngseed4}</h2>`:``)+(hasMilestone("r",9)?`<h2 style="color:#0068A5;text-shadow : 0 0 10px #0068A5">${player.r.rngseed5}</h2>`:``)+((player.r.rc4&&player.r.rcbegun)?`<h2 style="color:#00EF00;text-shadow : 0 0 10px #00EF00">${player.r.rngseeda}</h2>`:``)},
                     { "font-size":"17.5px"},],
                 "blank",
                 ["clickables",[2]],
-                ["display-text",function() { return `${tmp.r.calcrng1boost[0]}`+(hasMilestone("r",2)?`<br>${tmp.r.calcrng2boost[0]}`:``)+(hasMilestone("r",5)?`<br>${tmp.r.calcrng3boost[0]}`:``)+(hasMilestone("r",7)?`<br>${tmp.r.calcrng4boost[0]}`:``)+(hasMilestone("r",9)?`<br>${tmp.r.calcrng5boost[0]}`:``)},
+                ["display-text",function() { return ((player.r.rc4&&player.r.rcbegun)?`<br>${tmp.r.calcrngaboost[0]}`:``)+`${tmp.r.calcrng1boost[0]}`+(hasMilestone("r",2)?`<br>${tmp.r.calcrng2boost[0]}`:``)+(hasMilestone("r",5)?`<br>${tmp.r.calcrng3boost[0]}`:``)+(hasMilestone("r",7)?`<br>${tmp.r.calcrng4boost[0]}`:``)+(hasMilestone("r",9)?`<br>${tmp.r.calcrng5boost[0]}`:``)},
                     { "font-size":"17.5px"},],     
             ],
             unlocked(){return hasMilestone("r",0)}
@@ -7003,7 +7010,7 @@ addLayer("r", {
                 ["display-text",function() { return `You have <h2 style="color:#EF25EF">${format(player.r.points)}</h2> reincarnation points, which produce ${format(tmp.r.getrp)} Rein power/s.`},
                 { "font-size":"17.5px","text-shadow" : "0 0 10px #EF25EF"},],
                 "blank",
-                ["display-text",function() { return `You have <h2 style="color:#EF25EF;text-shadow : 0 0 10px #EF25EF">${format(player.r.re)}</h2> rein energy.\nWhich boost your points by <h2 style="color:#EF25EF;text-shadow : 0 0 10px #EF25EF">${format(tmp.r.getreboost)}</h2>`},
+                ["display-text",function() { return `You have <h2 style="color:#EF25EF;text-shadow : 0 0 10px #EF25EF">${format(player.r.re)}</h2> rein energy.\nWhich `+(((player.r.rngseeda=='3'||player.r.rngseeda=='8')&&player.r.allowrnga)?`divides`:`boosts`)+` your points by <h2 style="color:#EF25EF;text-shadow : 0 0 10px #EF25EF">${format((player.r.rngseeda=='3'&&player.r.allowrnga)?new Decimal(1).div(tmp.r.getreboost):tmp.r.getreboost)}</h2>`},
                     { "font-size":"17.5px"},],
                 "blank",
                 "buyables"
@@ -7042,7 +7049,14 @@ addLayer("r", {
                                                                     ·Point gain is raised to an exponent based on 0.75abs(sin(Rein points))<br>
                                                                     ·Each level of building V divides UP gain by 1e25<br>
                                                                     Goal:1e115000 points<br>
-                                                                    Reward:Each level of building III boosts Rein points gain by x1.025`:`.....`},
+                                                                    Reward:Each level of building III boosts Rein points gain by x1.025`:
+                                                    player.r.rc4? `<h3 style="color:#00EF00">[4]Wrong RNG generation</h3><br>
+                                                                    <strong>·This challenge must be completed in</strong> <h2 style="font-family:MS serif;color:#00EF00;text-shadow : 0 0 10px #00EF00;"> 5:30 </h2><br>
+                                                                    ·Auotmatically generate a seed every 4 tick.<br>
+                                                                    ·A bad seed in this challenge which gives debuffs(You need to change it by yourself).<br>
+                                                                    ·Clicking "Generate seed" will divide your Rein points by 2(if Rein points is 0 already, won't create a new seed).<br>
+                                                                    Goal:1e115000 points<br>
+                                                                    Reward:You can automatically generate a seed every 4 tick, Rein power gain is raised to ^1.25`:`.....`},
                     { "font-size":"17.5px"},],
             ],
             unlocked(){return hasMilestone("r",6)}
@@ -7067,6 +7081,17 @@ addLayer("r", {
         if(player.r.rc1) player.r.goal=new Decimal("1e315")
         if(player.r.rc2) player.r.goal=new Decimal("1e1650")
         if(player.r.rc3) player.r.goal=new Decimal("1e115000")
+        if(player.r.rc4) player.r.goal=new Decimal("1e260000")
+        if((player.r.rc4tick+1)%4==0&&((player.r.rc4&&player.r.rcbegun)||player.r.allowauto)){
+            player.r.rngseed1=tmp.r.rngseed1
+            player.r.rngseed2=tmp.r.rngseed2
+            player.r.rngseed3=tmp.r.rngseed3
+            player.r.rngseed4=tmp.r.rngseed4
+            player.r.rngseed5=tmp.r.rngseed5
+            player.r.rc4tick=0
+        }else{
+            player.r.rc4tick++
+        }
     },
     calclvreq(){
         return Decimal.pow(Decimal.pow(5,player.r.coreLv),player.r.coreLv.div(25).add(1)).times(125)
@@ -7081,7 +7106,7 @@ addLayer("r", {
         if((player.r.rngseed2=="99")&&player.r.allowrng2) t=t.times(10)
         if((player.r.rngseed3=="9")&&player.r.allowrng3) t=t.times(25)
         if(hasMilestone("r",2)) t=t.times(Decimal.pow(1.2,player.r.rt))
-        return player.r.unlocked?gain.times(t):new Decimal(0)
+        return player.r.unlocked?gain.times(t).pow(player.r.rc4fin?1.25:1):new Decimal(0)
     },
     calcrpboost(){
         let boost=new Decimal(1)
@@ -7100,7 +7125,7 @@ addLayer("r", {
     getreboost(){
         let boost=new Decimal(1)
         boost=player.r.re.pow(player.r.re.add(1).log10().pow(hasMilestone("r",8)?(player.r.re.add(1).log10().div(100).add(1)):new Decimal(1)).add(1).ln().add(2))
-        return boost.add(1)
+        return ((player.r.rngseeda=='3'||player.r.rngseeda=='8')&&player.r.allowrnga)?(new Decimal(1).div(boost.add(1).pow(5))) : boost.add(1)
     },
     rngseed1(){
         s=Math.floor(Math.random()*100).toString()
@@ -7131,6 +7156,10 @@ addLayer("r", {
         }
         return s
     },
+    rngseeda(){
+        s=Math.floor(Math.random()*10).toString()
+        return s
+    },
     calcrng1boost(){
         let a=player.r.rngseed1[0]
         let b=player.r.rngseed1[1]
@@ -7148,40 +7177,40 @@ addLayer("r", {
         let eff7=new Decimal(1)
         player.r.allowrng1=false
         if(a=='0'&&b!="0"){
-            c=`Prestige boost is raised to <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">^1.0`+b+`</h2>`
+            c=`Prestige boost is raised to <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">^1.0`+b+`</h2><br>`
             eff1=1+(b/100)
         }
         if(b=='0'&&a!="0"){
-            d=`Get <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">${format(a/3)}</h2>`+` free "Point booster"`
+            d=`Get <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">${format(a/3)}</h2>`+` free "Point booster"<br>`
             eff2=a/3
         }
         if(a=='1'||a=='4'||a=='7'){
-            e=`Boost point gain based on <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">log`+Math.floor((10-(b/10))*10)/10+`(prestige points+1)^`+Math.floor(a/2*10)/10+`</h2>`
+            e=`Boost point gain based on <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">log`+Math.floor((10-(b/10))*10)/10+`(prestige points+1)^`+Math.floor(a/2*10)/10+`</h2><br>`
             eff3=player.p.points.add(1).log(Math.floor((10-(b/10))*10)/10).pow(a/2).add(1)
         }
         if(b=='3'||b=='5'||b=='8'){
-            f=`Boost prestige point gain based on <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">log10(points^`+Math.floor(a/2*10)/10+`+1)</h2>`
+            f=`Boost prestige point gain based on <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">log10(points^`+Math.floor(a/2*10)/10+`+1)</h2><br>`
             eff4=player.points.pow(a/2).add(1).log10().add(1)
         }
         if(((a/1)+(b/1)>=17)||((a/1)+(b/1)<=3)){
-            g=`Add <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">`+(format((a/10000)+(b/10000),precision = 4))+`</h2> to prestige gain exp `
+            g=`Add <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">`+(format((a/10000)+(b/10000),precision = 4))+`</h2> to prestige gain exp<br>`
             eff5=(a/10000)+(b/10000)
         }
         if(a+b=="99"||a+b=="01"){
-            h=`Boost rein power gain based on <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">log10(log10(prestige points))</h2> `
+            h=`Boost rein power gain based on <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">log10(log10(prestige points))</h2><br>`
             eff6=player.p.points.add(1).log10().add(1).log10().add(1)
         }
         if(b=='6'||a=='3'){
-            i=`SU upgrade 3 is raised to <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">^1.0`+a+b+`</h2>`
+            i=`SU upgrade 3 is raised to <h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">^1.0`+a+b+`</h2><br>`
             eff7=1+(a/100)+(b/1000)
         }
         if(a=='6'||a=='2'){
-            k=`Get a prestige point dynamic boost:<h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">x${format(player.r.r1dynamicboost)}</h2>(<h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">x${format(Math.floor((b/2)*10)/100+1)}</h2> per second).`
+            k=`Get a prestige point dynamic boost:<h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">x${format(player.r.r1dynamicboost)}</h2>(<h2 style="color:#31AEB0;text-shadow : 0 0 10px #31AEB0">x${format(Math.floor((b/2)*10)/100+1)}</h2> per second).<br>`
         }
         if(a+b=="99"){
-            m=`10x Rein power and 2x RP gain.`
+            m=`10x Rein power and 2x RP gain.<br>`
         }
-        let lst=[c+((c||d)?`<br>`:``)+d+((d||e)?`<br>`:``)+e+((e||f)?`<br>`:``)+f+((f||g)?`<br>`:``)+g+((g||h)?`<br>`:``)+h+((h||i)?`<br>`:``)+i+((i||k)?`<br>`:``)+k+((k||m)?`<br>`:``)+m,eff1,eff2,eff3,eff4,eff5,eff6,eff7];
+        let lst=[c+d+e+f+g+h+i+k+m,eff1,eff2,eff3,eff4,eff5,eff6,eff7];
         player.r.allowrng1=true
         return lst
         
@@ -7200,32 +7229,32 @@ addLayer("r", {
         let eff5=new Decimal(1)
         player.r.allowrng2=false
         if(a=='1'||a=='5'){
-            c=`Super prestige gain is raised to <h2 style="color:#217782;text-shadow : 0 0 10px #217782">^1.01</h2>`
+            c=`Super prestige gain is raised to <h2 style="color:#217782;text-shadow : 0 0 10px #217782">^1.01</h2><br>`
             eff1=1.01
         }
         if((a/1)>=4&&(b/1)<=5){
-            d=`SP boost is raised to <h2 style="color:#217782;text-shadow : 0 0 10px #217782">^1.0${Math.floor(a/3)}</h2>`
+            d=`SP boost is raised to <h2 style="color:#217782;text-shadow : 0 0 10px #217782">^1.0${Math.floor(a/3)}</h2><br>`
             eff2=((a/100)/3)+1
         }
         if(a=='2'||a=='3'||a=='8'){
-            e=`Get <h2 style="color:#217782;text-shadow : 0 0 10px #217782">${format(a/5+1)}</h2> free "Super booster"`
+            e=`Get <h2 style="color:#217782;text-shadow : 0 0 10px #217782">${format(a/5+1)}</h2> free "Super booster"<br>`
             eff3=(a/5)+1
         }
         if(b=='5'||b=='7'||b=='9'){
-            f=`Boost SP gain based on <h2 style="color:#217782;text-shadow : 0 0 10px #217782">log10(SP)^${a}</h2>.`
+            f=`Boost SP gain based on <h2 style="color:#217782;text-shadow : 0 0 10px #217782">log10(SP)^${a}</h2>.<br>`
             eff4=player.sp.points.add(1).log10().pow(a).add(1)
         }
         if(((a/1)>=5)&&((b/1)<=6)){
-            g=`Boost point gain based on <h2 style="color:#217782;text-shadow : 0 0 10px #217782">ln(SP)^${Math.floor((b/2)*10)/10}</h2>.`
+            g=`Boost point gain based on <h2 style="color:#217782;text-shadow : 0 0 10px #217782">ln(SP)^${Math.floor((b/2)*10)/10}</h2>.<br>`
             eff5=player.sp.points.add(1).ln().pow(b/2).add(1)
         }
         if(a=='2'||a=='5'){
-            k=`Get a SP dynamic boost:<h2 style="color:#217782;text-shadow : 0 0 10px #217782">x${format(player.r.r2dynamicboost)}</h2>(<h2 style="color:#217782;text-shadow : 0 0 10px #217782">x${format(Math.floor((b/2)*8)/100+1)}</h2> per second).`
+            k=`Get a SP dynamic boost:<h2 style="color:#217782;text-shadow : 0 0 10px #217782">x${format(player.r.r2dynamicboost)}</h2>(<h2 style="color:#217782;text-shadow : 0 0 10px #217782">x${format(Math.floor((b/2)*8)/100+1)}</h2> per second).<br>`
         }
         if(a+b=="99"){
-            m=`10x Rein power and 2x RP gain.`
+            m=`10x Rein power and 2x RP gain.<br>`
         }
-        let lst=[c+((c||d)?`<br>`:``)+d+((d||e)?`<br>`:``)+e+((e||f)?`<br>`:``)+f+((f||g)?`<br>`:``)+g+((g||m)?'<br>':``)+m+((m||k)?`<br>`:``)+k,eff1,eff2,eff3,eff4,eff5];
+        let lst=[c+d+e+f+g+k+m,eff1,eff2,eff3,eff4,eff5];
         if(hasMilestone("r",2)) player.r.allowrng2=true
         return lst
     },
@@ -7241,21 +7270,21 @@ addLayer("r", {
         let eff4=new Decimal(1)
         player.r.allowrng3=false
         if(a=='1'||a=='6'||a=='9'){
-            c=`PU are <h2 style="color:#14CEA3;text-shadow : 0 0 10px #14CEA3">^0.85</h2> cheaper.`
+            c=`PU are <h2 style="color:#14CEA3;text-shadow : 0 0 10px #14CEA3">^0.85</h2> cheaper.<br>`
             eff1=0.85
         }
         if(a=='3'||a=='4'){
-            d=`Add <h2 style="color:#14CEA3;text-shadow : 0 0 10px #14CEA3">ln(PT^3)^0.2</h2> to PU boost base`
+            d=`Add <h2 style="color:#14CEA3;text-shadow : 0 0 10px #14CEA3">ln(PT^3)^0.2</h2> to PU boost base<br>`
             eff2=player.pt.points.pow(3).add(1).ln().pow(0.2)
         }
         if(a=='2'||a=='5'||a=='8'){
-            e=`Boost point gain based on <h2 style="color:#14CEA3;text-shadow : 0 0 10px #14CEA3">(PU effect)^0.5</h2>`
+            e=`Boost point gain based on <h2 style="color:#14CEA3;text-shadow : 0 0 10px #14CEA3">(PU effect)^0.5</h2><br>`
             eff3=tmp.pu.effect.pow(0.5)
         }
         if(a=='9'){
-            f=`25x Rein power and 10x RE gain.`
+            f=`25x Rein power and 10x RE gain.<br>`
         }
-        let lst=[c+((c||d)?`<br>`:``)+d+((d||e)?`<br>`:``)+e+((e||f)?`<br>`:``)+f,eff1,eff2,eff3,eff4]
+        let lst=[c+d+e+f,eff1,eff2,eff3,eff4]
         if(hasMilestone("r",5)) player.r.allowrng3=true
         return lst
     },
@@ -7273,26 +7302,26 @@ addLayer("r", {
         let eff5=new Decimal(1)
         player.r.allowrng4=false
         if(a=='1'){
-            c=`Each challenge shard boosts prestige gain for additional <h2 style="color: #45AC68;text-shadow : 0 0 10px #45AC68">+^0.01</h2>`
+            c=`Each challenge shard boosts prestige gain for additional <h2 style="color: #45AC68;text-shadow : 0 0 10px #45AC68">+^0.01</h2><br>`
             eff1=player.c.points.times(0.01).add(1)
         }
         if(a=='3'){
-            d=`Each challenge shard boosts SP gain for additional <h2 style="color: #45AC68;text-shadow : 0 0 10px #45AC68">+^0.015</h2>`
+            d=`Each challenge shard boosts SP gain for additional <h2 style="color: #45AC68;text-shadow : 0 0 10px #45AC68">+^0.015</h2><br>`
             eff2=player.c.points.times(0.015).add(1)
         }
         if(a=='5'){
-            e=`Each challenge shard boosts HP gain for additional <h2 style="color: #45AC68;text-shadow : 0 0 10px #45AC68">+^0.015</h2>`
+            e=`Each challenge shard boosts HP gain for additional <h2 style="color: #45AC68;text-shadow : 0 0 10px #45AC68">+^0.015</h2><br>`
             eff3=player.c.points.times(0.015).add(1)
         }
         if(a=='7'){
-            f=`Each challenge shard boosts UP gain for additional <h2 style="color: #45AC68;text-shadow : 0 0 10px #45AC68">+^0.005</h2>`
+            f=`Each challenge shard boosts UP gain for additional <h2 style="color: #45AC68;text-shadow : 0 0 10px #45AC68">+^0.005</h2><br>`
             eff4=player.c.points.times(0.005).add(1)
         }
         if(a=='9'){
-            g=`Each challenge shard boosts RE gain for additional <h2 style="color: #45AC68;text-shadow : 0 0 10px #45AC68">+^0.005</h2>`
+            g=`Each challenge shard boosts RE gain for additional <h2 style="color: #45AC68;text-shadow : 0 0 10px #45AC68">+^0.005</h2><br>`
             eff5=player.c.points.times(0.005).add(1)
         }
-        let lst=[c+((c||d)?`<br>`:``)+d+((d||e)?`<br>`:``)+e+((e||f)?`<br>`:``)+f+((f||g)?`<br>`:``)+g,eff1,eff2,eff3,eff4,eff5]
+        let lst=[c+d+e+f+g,eff1,eff2,eff3,eff4,eff5]
         if(hasMilestone("r",7)) player.r.allowrng4=true
         return lst
     },
@@ -7310,30 +7339,56 @@ addLayer("r", {
         let eff5=new Decimal(1)
         player.r.allowrng5=false
         if(a=='1'||a=='3'||a=='5'||a=='7'){
-            c=`Boost HP gain based on <h2 style="color: #0068A5;text-shadow : 0 0 10px #0068A5">SP^0.02</h2>`
-            eff1=player.sp.points.pow(0.02)
+            c=`Boost HP gain based on <h2 style="color: #0068A5;text-shadow : 0 0 10px #0068A5">SP^0.02</h2><br>`
+            eff1=player.sp.points.pow(0.02).add(1)
         }
         if(b=='1'||b=='3'||b=='5'||b=='7'){
-            d=`Boost HP boost base based on <h2 style="color: #0068A5;text-shadow : 0 0 10px #0068A5">Rpoint^${format((b/10)+2)}</h2>`
+            d=`Boost HP boost base based on <h2 style="color: #0068A5;text-shadow : 0 0 10px #0068A5">Rpoint^${format((b/10)+2)}</h2><br>`
             eff2=player.r.points.pow((b/10)+2)
         }
         if(a==b&&player.r.rngseed5!="00"){
-            e=`Add <h2 style="color: #0068A5;text-shadow : 0 0 10px #0068A5">2</h2> to "Not included" base`
+            e=`Add <h2 style="color: #0068A5;text-shadow : 0 0 10px #0068A5">2</h2> to "Not included" base<br>`
             eff3=new Decimal(2)
         }
         if(a=='2'||b=='5'||a=='6'||b=='8'){
-            f=`Boost UP gain based on <h2 style="color: #0068A5;text-shadow : 0 0 10px #0068A5">log10(HP+1)^${Math.floor(a/2)}</h2>`
-            eff4=player.hp.points.add(1).log10().pow(Math.floor(a/2))
+            f=`Boost UP gain based on <h2 style="color: #0068A5;text-shadow : 0 0 10px #0068A5">log10(HP+1)^${Math.floor(a/2)}+1</h2><br>`
+            eff4=player.hp.points.add(1).log10().pow(Math.floor(a/2)).add(1)
         }
         if(a>='7'&&b<='4'){
-            g=`Boost point gain based on <h2 style="color: #0068A5;text-shadow : 0 0 10px #0068A5">ln(HP^${a}+1)^${b}+1</h2>`
+            g=`Boost point gain based on <h2 style="color: #0068A5;text-shadow : 0 0 10px #0068A5">ln(HP^${a}+1)^${b}+1</h2><br>`
             eff5=player.hp.points.pow(a/1).add(1).ln().pow(b/1).add(1)
         }
         if(player.r.rngseed5=="99"){
-            m="5x rein points gain and 25x RE gain."
+            m="5x rein points gain and 25x RE gain.<br>"
         }
-        let lst=[c+((c||d)?`<br>`:``)+d+((d||e)?`<br>`:``)+e+((e||f)?`<br>`:``)+f+((f||g)?`<br>`:``)+g+((g||m)?'<br>':``)+m+((m||k)?`<br>`:``)+k,eff1,eff2,eff3,eff4,eff5];
+        let lst=[c+d+e+f+g+m,eff1,eff2,eff3,eff4,eff5];
         if(hasMilestone("r",9)) player.r.allowrng5=true
+        return lst
+    },
+    calcrngaboost(){
+        let a=player.r.rngseeda[0]
+        let c=""
+        let d=""
+        let e=""
+        let f="",g="",m="",k="",l=""
+        player.r.allowrnga=false
+        if(player.r.rngseeda=='0'||player.r.rngseeda=='5'){
+            c=`PU effect is raised to <h2 style="color: #00EF00;text-shadow : 0 0 10px #00EF00">^0.05</h2><br>`
+        }
+        if(player.r.rngseeda=='1'||player.r.rngseeda=='6'){
+            d=`UP effect is raised to <h2 style="color: #00EF00;text-shadow : 0 0 10px #00EF00">^0.125</h2><br>`
+        }
+        if(player.r.rngseeda=='2'||player.r.rngseeda=='7'){
+            e=`Each Challenge shard only gives <h2 style="color: #00EF00;text-shadow : 0 0 10px #00EF00">+^0.01</h2> to the multiplier of x<br>`
+        }
+        if(player.r.rngseeda=='3'||player.r.rngseeda=='8'){
+            f=`RE boost is <h2 style="color: #00EF00;text-shadow : 0 0 10px #00EF00">(1/RE boost^5)</h2><br>`
+        }
+        if(player.r.rngseeda=='4'||player.r.rngseeda=='9'){
+            g=`Point gain is raised to <h2 style="color: #00EF00;text-shadow : 0 0 10px #00EF00">^0.4</h2><br>If you want to generate a new seed, your rein points will be divided by <h2 style="color: #00EF00;text-shadow : 0 0 10px #00EF00">1e6</h2><br>(if you have 0, you can't gengrate a new seed)<br>`
+        }
+        let lst=[c+d+e+f+g+m+k+l];
+        if(player.r.rc4&&player.r.rcbegun) player.r.allowrnga=true
         return lst
     },
     clickables:{
@@ -7349,21 +7404,44 @@ addLayer("r", {
         21:{
             display(){return `Generate a random seed`},
             style:{"height":"100px","width":"150px","border-radius":"2%","border":"6px solid","border-color":"#EF25EF","font-size":"14px","color":"#EF25EF","background-color":"#DF35EF33"},
-            onClick(){
-                player.r.rngseed1=tmp.r.rngseed1
-                player.r.rngseed2=tmp.r.rngseed2
-                player.r.rngseed3=tmp.r.rngseed3
-                player.r.rngseed4=tmp.r.rngseed4
-                player.r.rngseed5=tmp.r.rngseed5
-                if(player.r.rngseed1[0]=='6'||player.r.rngseed1[0]=='2') player.r.r1dynamicboost=new Decimal(1)
-                if(player.r.rngseed1[0]=='2'||player.r.rngseed1[0]=='5') player.r.r2dynamicboost=new Decimal(1)
+            onClick(){                
+                if(player.r.rc4&&player.r.rcbegun&&player.r.points.gt(0)){
+                    if(player.r.rngseeda=='4'||player.r.rngseeda=='9') player.r.points=player.r.points.div(1e6).floor()
+                    else player.r.points=player.r.points.div(2).floor()
+                    player.r.rngseed1=tmp.r.rngseed1
+                    player.r.rngseed2=tmp.r.rngseed2
+                    player.r.rngseed3=tmp.r.rngseed3
+                    player.r.rngseed4=tmp.r.rngseed4
+                    player.r.rngseed5=tmp.r.rngseed5
+                    player.r.rngseeda=tmp.r.rngseeda
+                    if(player.r.rngseed1[0]=='6'||player.r.rngseed1[0]=='2') player.r.r1dynamicboost=new Decimal(1)
+                    if(player.r.rngseed1[0]=='2'||player.r.rngseed1[0]=='5') player.r.r2dynamicboost=new Decimal(1)
+                }
+                if(!(player.r.rcbegun&&player.r.rc4)){
+                    player.r.rngseed1=tmp.r.rngseed1
+                    player.r.rngseed2=tmp.r.rngseed2
+                    player.r.rngseed3=tmp.r.rngseed3
+                    player.r.rngseed4=tmp.r.rngseed4
+                    player.r.rngseed5=tmp.r.rngseed5
+                    player.r.rngseeda=tmp.r.rngseeda
+                    if(player.r.rngseed1[0]=='6'||player.r.rngseed1[0]=='2') player.r.r1dynamicboost=new Decimal(1)
+                    if(player.r.rngseed1[0]=='2'||player.r.rngseed1[0]=='5') player.r.r2dynamicboost=new Decimal(1)
+                }
             },
             canClick(){return true}
+        },
+        22:{
+            display(){return `Auto Generate seed<br>`+((player.r.allowauto)?`ON`:`OFF`)},
+            style:{"height":"100px","width":"150px","border-radius":"2%","border":"6px solid","border-color"(){return player.r.allowauto? "#00EF00":"red"},"font-size":"14px","color"(){return player.r.allowauto?"#00EF00":"red"},"background-color"(){return player.r.allowauto?"#00EF0033":"#FF000033"}},            onClick(){                
+                player.r.allowauto=!player.r.allowauto
+            },
+            canClick(){return true},
+            unlocked(){return player.r.rc4fin}
         },
         41:{
             display(){return `Spin to function tab`},
             style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#EEEEEE","color":"#DDDDDD","font-size":"15px","background-color":"#00000000"},
-            unlocked(){return player.pt.unlocked},
+            unlocked(){return player.r.unlocked},
             onClick(){
                 player.tab='f'
             },
@@ -7372,7 +7450,7 @@ addLayer("r", {
         42:{
             display(){return `Spin to prestige tab`},
             style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#31aeb0","color":"#31aeb0","font-size":"15px","background-color":"#00000000"},
-            unlocked(){return player.pt.unlocked},
+            unlocked(){return player.r.unlocked},
             onClick(){
                 player.tab='p'
             },
@@ -7381,7 +7459,7 @@ addLayer("r", {
         43:{
             display(){return `Spin to super prestige tab`},
             style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#217782","color":"#217782","font-size":"15px","background-color":"#00000000"},
-            unlocked(){return player.pt.unlocked},
+            unlocked(){return player.r.unlocked},
             onClick(){
                 player.tab='sp'
             },
@@ -7390,7 +7468,7 @@ addLayer("r", {
         44:{
             display(){return `Spin to prestige upgrader tab`},
             style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#14CEA3","color":"#14CEA3","font-size":"15px","background-color":"#00000000"},
-            unlocked(){return player.pt.unlocked},
+            unlocked(){return player.r.unlocked},
             onClick(){
                 player.tab='pu'
             },
@@ -7399,7 +7477,7 @@ addLayer("r", {
         45:{
             display(){return `Spin to hyper prestige tab`},
             style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#0068A5","color":"#0068A5","font-size":"15px","background-color":"#00000000"},
-            unlocked(){return player.pt.unlocked},
+            unlocked(){return player.r.unlocked},
             onClick(){
                 player.tab='hp'
             },
@@ -7408,7 +7486,7 @@ addLayer("r", {
         51:{
             display(){return `Spin to challenge tab`},
             style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#45AC68","color":"#45AC68","font-size":"15px","background-color":"#00000000"},
-            unlocked(){return player.pt.unlocked},
+            unlocked(){return player.r.unlocked},
             onClick(){
                 player.tab='c'
             },
@@ -7417,7 +7495,7 @@ addLayer("r", {
         52:{
             display(){return `Spin to super upgrader tab`},
             style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#04AE83","color":"#04AE83","font-size":"15px","background-color":"#00000000"},
-            unlocked(){return player.pt.unlocked},
+            unlocked(){return player.r.unlocked},
             onClick(){
                 player.tab='su'
             },
@@ -7426,7 +7504,7 @@ addLayer("r", {
         53:{
             display(){return `Spin to ultra prestige tab`},
             style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#5C00CC","color":"#5C00CC","font-size":"15px","background-color":"#00000000"},
-            unlocked(){return player.pt.unlocked},
+            unlocked(){return player.r.unlocked},
             onClick(){
                 player.tab='up'
             },
@@ -7435,7 +7513,7 @@ addLayer("r", {
         54:{
             display(){return `Spin to prestium tab`},
             style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#EEDB05","color":"#EEDB05","font-size":"15px","background-color":"#00000000"},
-            unlocked(){return player.pt.unlocked},
+            unlocked(){return player.r.unlocked},
             onClick(){
                 player.tab='pt'
             },
@@ -7450,7 +7528,7 @@ addLayer("r", {
                 if(player.r.rc1)player.r.rct=200
                 else player.r.rct=0
             },
-            canClick(){return (!player.r.rcbegun)&&(!player.r.rc2)&&(!player.r.rc3)}
+            canClick(){return (!player.r.rcbegun)&&(!player.r.rc2)&&(!player.r.rc3)&&(!player.r.rc4)}
         },
         62:{
             display(){return !player.r.rc2fin? `<img src="js/cpic/RC2.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`:`<img src="js/cpic/RC2finish.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`},
@@ -7461,7 +7539,7 @@ addLayer("r", {
                 if(player.r.rc2)player.r.rct=180
                 else player.r.rct=0
             },
-            canClick(){return (!player.r.rcbegun)&&(!player.r.rc1)&&(!player.r.rc3)}
+            canClick(){return (!player.r.rcbegun)&&(!player.r.rc1)&&(!player.r.rc3)&&(!player.r.rc4)}
         },
         63:{
             display(){return !player.r.rc3fin? `<img src="js/cpic/RC3.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`:`<img src="js/cpic/RC3finish.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`},
@@ -7472,7 +7550,18 @@ addLayer("r", {
                 if(player.r.rc3)player.r.rct=900
                 else player.r.rct=0
             },
-            canClick(){return (!player.r.rcbegun)&&(!player.r.rc1)&&(!player.r.rc2)}
+            canClick(){return (!player.r.rcbegun)&&(!player.r.rc1)&&(!player.r.rc2)&&(!player.r.rc4)}
+        },
+        71:{
+            display(){return !player.r.rc4fin? `<img src="js/cpic/RC4.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`:`<img src="js/cpic/RC4finish.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`},
+            style:{"height":"161px","width":"161px","border-radius":"0%","border":"6px solid","border-color"(){return player.r.rc4 ? "#00EF00":"#DDDDDD"},"color":"#00EF00","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return hasMilestone("r",10)},
+            onClick(){
+                player.r.rc4=!player.r.rc4
+                if(player.r.rc4)player.r.rct=330
+                else player.r.rct=0
+            },
+            canClick(){return (!player.r.rcbegun)&&(!player.r.rc1)&&(!player.r.rc2)&&(!player.r.rc3)}
         },
         81:{
             display(){return player.r.rcbegun? player.points.gte(player.r.goal) ? `Complete the challenge`:`Exit the challenge`:`Begin the challenge`},
@@ -7483,6 +7572,7 @@ addLayer("r", {
                     if(player.r.rc1)player.r.rc1fin=true
                     if(player.r.rc2)player.r.rc2fin=true
                     if(player.r.rc3)player.r.rc3fin=true
+                    if(player.r.rc4)player.r.rc4fin=true
                 }
                 player.r.rcbegun=!player.r.rcbegun
                 if(player.r.rcbegun){
@@ -7499,11 +7589,12 @@ addLayer("r", {
                     player.points=new Decimal(0)
                 }
                 player.points=new Decimal(0)
-                if(player.r.rc2) player.r.rct=200
+                if(player.r.rc1) player.r.rct=200
                 if(player.r.rc2) player.r.rct=180
                 if(player.r.rc3) player.r.rct=900
+                if(player.r.rc4) player.r.rct=330
             },
-            canClick(){return player.r.rc1||player.r.rc2||player.r.rc3}
+            canClick(){return player.r.rc1||player.r.rc2||player.r.rc3||player.r.rc4}
         }
     },
     milestones:{
@@ -7567,6 +7658,12 @@ addLayer("r", {
             done() { return player.r.coreLv.gte(12)},
             style:{"width":"500px"},
             effectDescription(){return `Unlock a new seed.`},
+        },
+        10: {
+            requirementDescription: "Core level 18",
+            done() { return player.r.coreLv.gte(18)},
+            style:{"width":"500px"},
+            effectDescription(){return `Unlock a new challenge.`},
         },
     },
     buyables:{
@@ -7696,7 +7793,7 @@ addLayer("r", {
             title:"UR booster",
             cost(x) { return Decimal.pow(1e10,Decimal.pow(x,1.05)).times(1e20)},
             effect(x) { return this.unlocked? Decimal.pow(10,Decimal.pow(x,1.25)) : new Decimal(1) },
-            unlocked() {return hasUpgrade("up",33)},
+            unlocked() {return hasUpgrade("up",33)||getBuyableAmount("r",32).gt(0)},
             display() { return `Boost to Rein points gain.
                                 Cost: ${format(this.cost())} RE
                                 Amount: ${format(getBuyableAmount("r",32),0)}
