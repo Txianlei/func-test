@@ -223,7 +223,8 @@ function getPointGen() {
 			m=m.times(Decimal.pow(1.5,player.r.rt))
 			if((player.r.rngseed1[0]=='1'||player.r.rngseed1[0]=='4'||player.r.rngseed1[0]=='7')&&player.r.allowrng1) m=m.times(tmp.r.calcrng1boost[3])
 			if(((player.r.rngseed2[0]/1)>=5&&(player.r.rngseed2[1]/1)<=6)&&player.r.allowrng2) m=m.times(tmp.r.calcrng2boost[5])
-			if(((player.r.rngseed3[0]=='2')||(player.r.rngseed3[0]=='5')||(player.r.rngseed3[0]=='8'))&&player.r.allowrng3) m=m.times(tmp.r.calcrng3boost[3])   
+			if(((player.r.rngseed3[0]=='2')||(player.r.rngseed3[0]=='5')||(player.r.rngseed3[0]=='8'))&&player.r.allowrng3) m=m.times(tmp.r.calcrng3boost[3])  
+			if((player.r.rngseed5[0]>='7'&&player.r.rngseed5[1]<='4')&&player.r.allowrng5) m=m.times(tmp.r.calcrng5boost[5]) 
 			//stage 0 ^
 			if(hasUpgrade("f",33)) m=m.pow(upgradeEffect("f",33))
 			if(inChallenge("f",11)) m=m.sqrt()
