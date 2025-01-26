@@ -338,6 +338,8 @@ addLayer("f", {
         //stage 4 ^
         if(hasUpgrade("up",25)) a=a.pow(1.001)
         player.f.adder=a
+        //stage 4 cap
+        if(player.f.ftype==4) a=a.min("e2e7")
     },
     getCube(){
         let scal3=new Decimal(1.8)
@@ -442,6 +444,8 @@ addLayer("f", {
         if(player.r.rc1&&player.r.rcbegun) m=m.pow(0.85)
         if(player.r.rc3&&player.r.rcbegun) m=m.pow(Math.abs(Math.sin((player.r.points.min(1e300).toNumber())))*0.75)
         if((player.r.rngseeda=='4'||player.r.rngseeda=='9')&&player.r.allowrnga) m=m.pow(0.4)
+        //stage 4 cap
+        if(player.f.ftype==4) m=m.min("e2e7")
         return m
     },
     calctmult(){
@@ -6935,6 +6939,7 @@ addLayer("r", {
         goal:new Decimal(0),
         rct:0,
         rc4tick:0,
+        unstext:"unstable"
     }},
     color: "#EF25EF",
     requires: new Decimal("1e100000"), // Can be a function that takes requirement increases into account
@@ -6966,6 +6971,7 @@ addLayer("r", {
         player.points=new Decimal(0)
         player.r.rt=player.r.rt.add(1)
     },
+    canReset(){return (!player.r.rcbegun)&&player.points.gte("1e100000")},
     branches:["up"],
     tabFormat:{
         "Core":{
@@ -6976,9 +6982,18 @@ addLayer("r", {
                 "prestige-button",
                 ["display-text",function() { return `You have reincarnation for ${format(player.r.rt)} times.`},],
                 ["display-text",function() { return `You have ${format(player.points)} points.`},],
+                ["display-text",function() { return player.r.points.gte(5e307) ? `Rein points gain is capped at <p style="color:#EF25EF">1.8e308</p>`:``},
+                    { "font-size":"17.5px","text-shadow" : "0 0 10px #EF25EF"},],
+                ["display-text",function() { return player.points.gte("e2e7") ?  `Point gain is capped at <p style="color:#EF25EF">e2e7</p>`:``},
+                    { "font-size":"17.5px","text-shadow" : "0 0 10px #EF25EF"},],
                 "blank",
                 ["display-text",function() { return `You have <h2 style="color:#EF25EF">${format(player.r.rp)}</h2> reincarnation power, prestige point gain is raised to <h2 style="color:#EF25EF">${format(tmp.r.calcrpboost,precision = 4)}</h2> .`},
                     { "font-size":"17.5px","text-shadow" : "0 0 10px #EF25EF"},],
+                "blank",
+                ["display-text",function() { return player.r.coreLv.gte(24)? `The core is becoming more and more <p style="color:#EF0000">unstable</p>`:``},
+                    { "font-size":"17.5px"},],
+                ["display-text",function() { return player.r.coreLv.gte(24)? `The reqiurement of core level over 25 is raised to <p style="color:#EF0000">^${format(Decimal.pow(1.0875,Decimal.pow(player.r.coreLv.minus(24).max(0),1.0875)),4)}</p>`:``},
+                    { "font-size":"17.5px"},],
                 "blank",
                 ["clickables",[1,4,5]],
             ]
@@ -7063,6 +7078,7 @@ addLayer("r", {
         },
     },
     update(diff){
+        player.r.points=player.r.points.min("1.8e308")
         player.r.rp=player.r.rp.add(tmp.r.getrp.times(diff))
         if(player.r.rngseed1[0]=='6'||player.r.rngseed1[0]=='2') player.r.r1dynamicboost=player.r.r1dynamicboost.times(Decimal.pow((Math.floor(player.r.rngseed1[1]/2*10)/100+1),diff))
         if(player.r.rngseed2[0]=='2'||player.r.rngseed2[0]=='5') player.r.r2dynamicboost=player.r.r2dynamicboost.times(Decimal.pow((Math.floor(player.r.rngseed1[1]/2*8)/100+1),diff))
@@ -7094,11 +7110,13 @@ addLayer("r", {
         }
     },
     calclvreq(){
-        return Decimal.pow(Decimal.pow(5,player.r.coreLv),player.r.coreLv.div(25).add(1)).times(125)
+        p=new Decimal(1)
+        if(player.r.coreLv.gte(25)) p=Decimal.pow(1.0875,Decimal.pow(player.r.coreLv.minus(24).max(0),1.0875))
+        return Decimal.pow(Decimal.pow(5,player.r.coreLv),player.r.coreLv.div(25).add(1)).times(125).pow(p)
     },
     getrp(){
         let gain=new Decimal(1)
-        gain=player.r.points.sqrt().div(3).pow(1.25).times(1.5).add(player.pt.blv[4]).times(hasMilestone("r",8)?(player.r.re.add(1).log10().div(2)):new Decimal(1))
+        gain=player.r.points.min("1.8e308").sqrt().div(3).pow(1.25).times(1.5).add(player.pt.blv[4]).times(hasMilestone("r",8)?(player.r.re.add(1).log10().div(2)):new Decimal(1))
         let t=new Decimal(1)
         if(hasMilestone("r",0)) t=t.times(2)
         if((player.r.rngseed1=="99"||player.r.rngseed1=="01")&&player.r.allowrng1) t=t.times(tmp.r.calcrng1boost[6])
@@ -7664,6 +7682,13 @@ addLayer("r", {
             done() { return player.r.coreLv.gte(18)},
             style:{"width":"500px"},
             effectDescription(){return `Unlock a new challenge.`},
+        },
+        11: {
+            requirementDescription: "Core level 40",
+            done() { return player.r.coreLv.gte(40)},
+            unlocked() {return player.r.coreLv.gte(40)},
+            style:{"width":"500px"},
+            effectDescription(){return `Unlock THE FINAL CHALLENGE.`},
         },
     },
     buyables:{
