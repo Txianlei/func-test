@@ -6970,14 +6970,19 @@ addLayer("r", {
         remult:new Decimal(1),
         rc1:false,
         rc1fin:false,
+        rc1time:200,
         rc2:false,
         rc2fin:false,
+        rc2time:180,
         rc3:false,
         rc3fin:false,
+        rc3time:900,
         rc4:false,
         rc4fin:false,
+        rc4time:330,
         rc5:false,
         rc5fin:false,
+        rc5time:142,
         rcbegun:false,
         goal:new Decimal(0),
         rct:0,
@@ -7095,32 +7100,37 @@ addLayer("r", {
                                                                     ·Point gain will raised to ^0.85<br>
                                                                     ·After the first UP reset, P,SP,HP and UP gain will raised to ^0.75<br>
                                                                     Goal:1e315 points<br>
-                                                                    Reward:Unlock 5 upgrades in different layers`:
+                                                                    Reward:Unlock 5 upgrades in different layers<br>
+                                                                    Best finish time:<h2 style="font-family:MS serif;color:red;text-shadow : 0 0 10px red;"> ${formatTime(player.r.rc1time)} </h2>`:
                                                     player.r.rc2? `<h3 style="color:#FE5400">[2]Out of charge</h3><br>
                                                                     <strong>·This challenge must be completed in</strong> <h2 style="font-family:MS serif;color:orange;text-shadow : 0 0 10px orange;"> 3:00 </h2><br>
                                                                     ·"Point booster" effect base is 0.99<br>
                                                                     ·PU effect base is 0.6<br>
                                                                     Goal:1e1650 points<br>
-                                                                    Reward:Unlock a new dimension`:
+                                                                    Reward:Unlock a new dimension<br>
+                                                                    Best finish time:<h2 style="font-family:MS serif;color:orange;text-shadow : 0 0 10px orange;"> ${formatTime(player.r.rc2time)} </h2>`:
                                                     player.r.rc3? `<h3 style="color:#FEEF00">[3]Cosmic wave</h3><br>
                                                                     <strong>·This challenge must be completed in</strong> <h2 style="font-family:MS serif;color:yellow;text-shadow : 0 0 10px yellow;"> 15:00 </h2><br>
                                                                     ·Point gain is raised to an exponent based on 0.75abs(sin(Rein points))<br>
                                                                     ·Each level of building V divides UP gain by 1e25<br>
                                                                     Goal:1e115000 points<br>
-                                                                    Reward:Each level of building III boosts Rein points gain by x1.025`:
-                                                                    player.r.rc4? `<h3 style="color:#00EF00">[4]Wrong RNG generation</h3><br>
+                                                                    Reward:Each level of building III boosts Rein points gain by x1.025<br>
+                                                                    Best finish time:<h2 style="font-family:MS serif;color:yellow;text-shadow : 0 0 10px yellow;"> ${formatTime(player.r.rc3time)} </h2>`:
+                                                    player.r.rc4? `<h3 style="color:#00EF00">[4]Wrong RNG generation</h3><br>
                                                                     <strong>·This challenge must be completed in</strong> <h2 style="font-family:MS serif;color:#00EF00;text-shadow : 0 0 10px #00EF00;"> 5:30 </h2><br>
                                                                     ·Auotmatically generate a seed every 4 tick.<br>
                                                                     ·A bad seed in this challenge which gives debuffs(You need to change it by yourself).<br>
                                                                     ·Clicking "Generate seed" will divide your Rein points by 2(if Rein points is 0 already, won't create a new seed).<br>
                                                                     Goal:1e260000 points<br>
-                                                                    Reward:You can automatically generate a seed every 4 tick, Rein power gain is raised to ^1.25`:
+                                                                    Reward:You can automatically generate a seed every 4 tick, Rein power gain is raised to ^1.25<br>
+                                                                    Best finish time:<h2 style="font-family:MS serif;color:#00EF00;text-shadow : 0 0 10px #00EF00;"> ${formatTime(player.r.rc4time)} </h2>`:
                                                     player.r.rc5? `<h3 style="color:rgb(65,205,225)">[5]Broke the chain</h3><br>
-                                                                    <strong>·This challenge must be completed in</strong> <h2 style="font-family:MS serif;color:rgb(65,205,225);text-shadow : 0 0 10px rgb(65,205,225);"> 2:00 </h2><br>
+                                                                    <strong>·This challenge must be completed in</strong> <h2 style="font-family:MS serif;color:rgb(65,205,225);text-shadow : 0 0 10px rgb(65,205,225);"> 2:22 </h2><br>
                                                                     ·Auto seed generate is disabled.<br>
                                                                     Are you fast enough to enter stage 5?<br>
                                                                     Goal:e2e7 points<br>
-                                                                    Reward:You can upgrade your function....?`:`.....`},
+                                                                    Reward:You can upgrade your function....?<br>
+                                                                    Best finish time:<h2 style="font-family:MS serif;color:rgb(65,205,255);text-shadow : 0 0 10px rgb(65,205,255);"> ${formatTime(player.r.rc5time)} </h2>`:`.....`},
                     { "font-size":"17.5px"},],
             ],
             unlocked(){return hasMilestone("r",6)}
@@ -7638,7 +7648,7 @@ addLayer("r", {
             unlocked(){return hasMilestone("r",12)},
             onClick(){
                 player.r.rc5=!player.r.rc5
-                if(player.r.rc5)player.r.rct=120
+                if(player.r.rc5)player.r.rct=142
                 else player.r.rct=0
             },
             canClick(){return (!player.r.rcbegun)&&(!player.r.rc1)&&(!player.r.rc2)&&(!player.r.rc3)&&(!player.r.rc4)}
@@ -7649,11 +7659,26 @@ addLayer("r", {
             unlocked(){return hasMilestone("r",6)},
             onClick(){
                 if(player.r.rcbegun&&player.points.gte(player.r.goal)){
-                    if(player.r.rc1)player.r.rc1fin=true
-                    if(player.r.rc2)player.r.rc2fin=true
-                    if(player.r.rc3)player.r.rc3fin=true
-                    if(player.r.rc4)player.r.rc4fin=true
-                    if(player.r.rc5)player.r.rc5fin=true
+                    if(player.r.rc1){
+                        player.r.rc1fin=true
+                        player.r.rc1time=Math.min(player.r.rc1time,200-player.r.rct)
+                    }
+                    if(player.r.rc2){
+                        player.r.rc2fin=true
+                        player.r.rc2time=Math.min(player.r.rc2time,180-player.r.rct)
+                    }
+                    if(player.r.rc3){
+                        player.r.rc3fin=true
+                        player.r.rc3time=Math.min(player.r.rc3time,900-player.r.rct)
+                    }
+                    if(player.r.rc4){
+                        player.r.rc4fin=true
+                        player.r.rc4time=Math.min(player.r.rc4time,330-player.r.rct)
+                    }
+                    if(player.r.rc5){
+                        player.r.rc5fin=true
+                        player.r.rc5time=Math.min(player.r.rc5time,142-player.r.rct)
+                    }
                 }
                 player.r.rcbegun=!player.r.rcbegun
                 if(player.r.rcbegun){
@@ -7674,7 +7699,7 @@ addLayer("r", {
                 if(player.r.rc2) player.r.rct=180
                 if(player.r.rc3) player.r.rct=900
                 if(player.r.rc4) player.r.rct=330
-                if(player.r.rc5) player.r.rct=120
+                if(player.r.rc5) player.r.rct=142
             },
             canClick(){return player.r.rc1||player.r.rc2||player.r.rc3||player.r.rc4||player.r.rc5}
         }
