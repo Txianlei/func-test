@@ -40,6 +40,8 @@ addLayer("f", {
         y:new Decimal(1000),
         k:new Decimal(0.02),
         kmult:new Decimal(1),
+        code:"",
+        codeac:false,
     }},
     color: "#DDDDDD",
     requires: new Decimal(10), // Can be a function that takes requirement increases into account
@@ -230,6 +232,22 @@ addLayer("f", {
             ],
             unlocked(){return player.f.ftype==4}
         }, 
+        "Code":{
+            content:[
+                ["display-text",
+                function() { return player.f.code=="ACCEPTED"?`<h2 style="color:rgb(4, 205, 4);text-shadow:0 0 5px rgb(4, 205, 4)">${player.f.code}</h2>`:player.f.code=="DECLINED"?`<h2 style="color:rgb(226, 0, 0);text-shadow:0 0 5px rgb(226,0,0)">${player.f.code}</h2>`:`<h2 style="color:rgb(255,255,255);text-shadow:0 0 5px rgb(255,255,255)">${player.f.code}</h2>`},{ "font-size": "30px", "font-family": "Consolas"}],
+                "blank",
+                ["clickables",[7]],
+                ["display-text",
+                function() {return `You need to input a 4-digit code to upgrade your function, here are the hints.<br>
+                                    1.These hints doesn't tell the order of the code, you need to find it by yourself.<br>
+                                    2.For one of the code, you need to find the differencies between the upside down, the number on the left of the different will tell the order.<br>
+                                    3.For one of the code, you need to find the dark text under the chains<br>
+                                    4.For one of the code, you need to check the progress you've got, what's the meaning of their name?<br>
+                                    5.For one of the code, you need to go deeper when you found changes, the order will be told after you know other three.`},{ "font-size": "15px"}],
+            ],
+            unlocked(){return player.f.ftype==4&&player.r.rc5fin}
+        }, 
     },
     update(diff){
         player.f.points=player.points
@@ -337,9 +355,10 @@ addLayer("f", {
         if(player.f.inneutrondil) a=a.pow(0.2)
         //stage 4 ^
         if(hasUpgrade("up",25)) a=a.pow(1.001)
-        player.f.adder=a
         //stage 4 cap
         if(player.f.ftype==4) a=a.min("e2e7")
+        player.f.adder=a
+
     },
     getCube(){
         let scal3=new Decimal(1.8)
@@ -3134,7 +3153,7 @@ addLayer("f", {
         55:{
             display(){return `Spin to challenge tab`},
             style:{"height":"150px","width":"150px","border-radius":"0%","border":"6px solid","border-color":"#45AC68","color":"#45AC68","font-size":"15px","background-color":"#00000000"},
-            unlocked(){return player.c.checker},
+            unlocked(){return hasUpgrade("f",341)},
             onClick(){
                 player.tab='c'
             },
@@ -3175,6 +3194,28 @@ addLayer("f", {
                 player.tab='r'
             },
             canClick(){return true}
+        },
+        71:{
+            display(){return `Input your code`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","font-size":"15px"},
+            unlocked(){return player.r.rc5fin},
+            onClick(){
+                player.f.code=prompt("Enter your code below:")
+            },
+            canClick(){return (!player.f.codeac)}
+        },
+        72:{
+            display(){return `Confirm your code`},
+            style:{"height":"150px","width":"150px","border-radius":"0%","font-size":"15px"},
+            unlocked(){return player.r.rc5fin},
+            onClick(){
+                if(player.f.code=="7598"){
+                    player.f.code="ACCEPTED"
+                    player.f.codeac=true
+                }
+                else player.f.code="DECLINED"
+            },
+            canClick(){return player.f.code.length==4}
         },
     },
     challenges:{
@@ -4872,7 +4913,7 @@ addLayer("pu", {
     tabFormat:{
         "Main":{
             content:[
-                ["display-text",function() { return `You have <h2 style="color:#14CEA3">${player.pu.points}</h2>`+(hasUpgrade("hp",41)?`<h2 style="color:#04AE83">(+${player.su.points.times((player.r.rngseed5[0]==player.r.rngseed5[1])&&player.r.rngseed5!="00" ? 12:10)})</h2>`:``)+` prestige upgraders, `+((player.r.rc2&&player.r.rcbegun)?`which divides prestige points gain by <h2 style="color:#14CEA3">${format(new Decimal(1).div(tmp.pu.effect))}</h2>.`:`which boost prestige points gain by <h2 style="color:#14CEA3">${format(tmp.pu.effect)}</h2>.`)},
+                ["display-text",function() { return `You have <h2 style="color:#14CEA3">${format(player.pu.points)}</h2>`+(hasUpgrade("hp",41)?`<h2 style="color:#04AE83">(+${format(player.su.points.times((player.r.rngseed5[0]==player.r.rngseed5[1])&&player.r.rngseed5!="00" ? 12:10))})</h2>`:``)+` prestige upgraders, `+((player.r.rc2&&player.r.rcbegun)?`which divides prestige points gain by <h2 style="color:#14CEA3">${format(new Decimal(1).div(tmp.pu.effect))}</h2>.`:`which boost prestige points gain by <h2 style="color:#14CEA3">${format(tmp.pu.effect)}</h2>.`)},
                 { "font-size":"17.5px","text-shadow" : "0 0 10px #14CEA3"},],
                 "blank",
                 "prestige-button",
@@ -6935,6 +6976,8 @@ addLayer("r", {
         rc3fin:false,
         rc4:false,
         rc4fin:false,
+        rc5:false,
+        rc5fin:false,
         rcbegun:false,
         goal:new Decimal(0),
         rct:0,
@@ -6969,7 +7012,7 @@ addLayer("r", {
     doReset(resettingLayer){
         player.f.multiplier=new Decimal(0)
         player.points=new Decimal(0)
-        player.r.rt=player.r.rt.add(1)
+        player.r.rt=player.r.rt.add(hasMilestone("r",11)? 10:1)
     },
     canReset(){return (!player.r.rcbegun)&&player.points.gte("1e100000")},
     branches:["up"],
@@ -6992,7 +7035,7 @@ addLayer("r", {
                 "blank",
                 ["display-text",function() { return player.r.coreLv.gte(24)? `The core is becoming more and more <p style="color:#EF0000">unstable</p>`:``},
                     { "font-size":"17.5px"},],
-                ["display-text",function() { return player.r.coreLv.gte(24)? `The reqiurement of core level over 25 is raised to <p style="color:#EF0000">^${format(Decimal.pow(1.0875,Decimal.pow(player.r.coreLv.minus(24).max(0),1.0875)),4)}</p>`:``},
+                ["display-text",function() { return player.r.coreLv.gte(24)? `The requirement of core level over 25 is raised to <p style="color:#EF0000">^${format(Decimal.pow(1.0875,Decimal.pow(player.r.coreLv.minus(24).max(0),1.0875)),4)}</p>`:``},
                     { "font-size":"17.5px"},],
                 "blank",
                 ["clickables",[1,4,5]],
@@ -7065,13 +7108,19 @@ addLayer("r", {
                                                                     ·Each level of building V divides UP gain by 1e25<br>
                                                                     Goal:1e115000 points<br>
                                                                     Reward:Each level of building III boosts Rein points gain by x1.025`:
-                                                    player.r.rc4? `<h3 style="color:#00EF00">[4]Wrong RNG generation</h3><br>
+                                                                    player.r.rc4? `<h3 style="color:#00EF00">[4]Wrong RNG generation</h3><br>
                                                                     <strong>·This challenge must be completed in</strong> <h2 style="font-family:MS serif;color:#00EF00;text-shadow : 0 0 10px #00EF00;"> 5:30 </h2><br>
                                                                     ·Auotmatically generate a seed every 4 tick.<br>
                                                                     ·A bad seed in this challenge which gives debuffs(You need to change it by yourself).<br>
                                                                     ·Clicking "Generate seed" will divide your Rein points by 2(if Rein points is 0 already, won't create a new seed).<br>
-                                                                    Goal:1e115000 points<br>
-                                                                    Reward:You can automatically generate a seed every 4 tick, Rein power gain is raised to ^1.25`:`.....`},
+                                                                    Goal:1e260000 points<br>
+                                                                    Reward:You can automatically generate a seed every 4 tick, Rein power gain is raised to ^1.25`:
+                                                    player.r.rc5? `<h3 style="color:rgb(65,205,225)">[5]Broke the chain</h3><br>
+                                                                    <strong>·This challenge must be completed in</strong> <h2 style="font-family:MS serif;color:rgb(65,205,225);text-shadow : 0 0 10px rgb(65,205,225);"> 2:00 </h2><br>
+                                                                    ·Auto seed generate is disabled.<br>
+                                                                    Are you fast enough to enter stage 5?<br>
+                                                                    Goal:e2e7 points<br>
+                                                                    Reward:You can upgrade your function....?`:`.....`},
                     { "font-size":"17.5px"},],
             ],
             unlocked(){return hasMilestone("r",6)}
@@ -7098,6 +7147,8 @@ addLayer("r", {
         if(player.r.rc2) player.r.goal=new Decimal("1e1650")
         if(player.r.rc3) player.r.goal=new Decimal("1e115000")
         if(player.r.rc4) player.r.goal=new Decimal("1e260000")
+        if(player.r.rc5) player.r.goal=new Decimal("e2e7")
+        if(player.r.rc5&&player.r.rcbegun) player.r.allowauto=false
         if((player.r.rc4tick+1)%4==0&&((player.r.rc4&&player.r.rcbegun)||player.r.allowauto)){
             player.r.rngseed1=tmp.r.rngseed1
             player.r.rngseed2=tmp.r.rngseed2
@@ -7449,11 +7500,11 @@ addLayer("r", {
             canClick(){return true}
         },
         22:{
-            display(){return `Auto Generate seed<br>`+((player.r.allowauto)?`ON`:`OFF`)},
+            display(){return `Auto Generate seed<br>`+((player.r.rc5&&player.r.rcbegun)? `DISABLED` : ((player.r.allowauto)?`ON`:`OFF`))},
             style:{"height":"100px","width":"150px","border-radius":"2%","border":"6px solid","border-color"(){return player.r.allowauto? "#00EF00":"red"},"font-size":"14px","color"(){return player.r.allowauto?"#00EF00":"red"},"background-color"(){return player.r.allowauto?"#00EF0033":"#FF000033"}},            onClick(){                
                 player.r.allowauto=!player.r.allowauto
             },
-            canClick(){return true},
+            canClick(){return !(player.r.rc5&&player.r.rcbegun)},
             unlocked(){return player.r.rc4fin}
         },
         41:{
@@ -7546,7 +7597,7 @@ addLayer("r", {
                 if(player.r.rc1)player.r.rct=200
                 else player.r.rct=0
             },
-            canClick(){return (!player.r.rcbegun)&&(!player.r.rc2)&&(!player.r.rc3)&&(!player.r.rc4)}
+            canClick(){return (!player.r.rcbegun)&&(!player.r.rc2)&&(!player.r.rc3)&&(!player.r.rc4)&&(!player.r.rc5)}
         },
         62:{
             display(){return !player.r.rc2fin? `<img src="js/cpic/RC2.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`:`<img src="js/cpic/RC2finish.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`},
@@ -7557,7 +7608,7 @@ addLayer("r", {
                 if(player.r.rc2)player.r.rct=180
                 else player.r.rct=0
             },
-            canClick(){return (!player.r.rcbegun)&&(!player.r.rc1)&&(!player.r.rc3)&&(!player.r.rc4)}
+            canClick(){return (!player.r.rcbegun)&&(!player.r.rc1)&&(!player.r.rc3)&&(!player.r.rc4)&&(!player.r.rc5)}
         },
         63:{
             display(){return !player.r.rc3fin? `<img src="js/cpic/RC3.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`:`<img src="js/cpic/RC3finish.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`},
@@ -7568,7 +7619,7 @@ addLayer("r", {
                 if(player.r.rc3)player.r.rct=900
                 else player.r.rct=0
             },
-            canClick(){return (!player.r.rcbegun)&&(!player.r.rc1)&&(!player.r.rc2)&&(!player.r.rc4)}
+            canClick(){return (!player.r.rcbegun)&&(!player.r.rc1)&&(!player.r.rc2)&&(!player.r.rc4)&&(!player.r.rc5)}
         },
         71:{
             display(){return !player.r.rc4fin? `<img src="js/cpic/RC4.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`:`<img src="js/cpic/RC4finish.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`},
@@ -7579,7 +7630,18 @@ addLayer("r", {
                 if(player.r.rc4)player.r.rct=330
                 else player.r.rct=0
             },
-            canClick(){return (!player.r.rcbegun)&&(!player.r.rc1)&&(!player.r.rc2)&&(!player.r.rc3)}
+            canClick(){return (!player.r.rcbegun)&&(!player.r.rc1)&&(!player.r.rc2)&&(!player.r.rc3)&&(!player.r.rc5)}
+        },
+        72:{
+            display(){return !player.r.rc5fin? `<img src="js/cpic/RC5.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`:`<img src="js/cpic/RC5finish.jpg" width="150" height="150" style="margin-left:-6px;margin-top:-1px">`},
+            style:{"height":"161px","width":"161px","border-radius":"0%","border":"6px solid","border-color"(){return player.r.rc5 ? "rgb(65,205,225)":"#DDDDDD"},"color":"rgb(65,205,225","font-size":"15px","background-color":"#00000000"},
+            unlocked(){return hasMilestone("r",12)},
+            onClick(){
+                player.r.rc5=!player.r.rc5
+                if(player.r.rc5)player.r.rct=120
+                else player.r.rct=0
+            },
+            canClick(){return (!player.r.rcbegun)&&(!player.r.rc1)&&(!player.r.rc2)&&(!player.r.rc3)&&(!player.r.rc4)}
         },
         81:{
             display(){return player.r.rcbegun? player.points.gte(player.r.goal) ? `Complete the challenge`:`Exit the challenge`:`Begin the challenge`},
@@ -7591,6 +7653,7 @@ addLayer("r", {
                     if(player.r.rc2)player.r.rc2fin=true
                     if(player.r.rc3)player.r.rc3fin=true
                     if(player.r.rc4)player.r.rc4fin=true
+                    if(player.r.rc5)player.r.rc5fin=true
                 }
                 player.r.rcbegun=!player.r.rcbegun
                 if(player.r.rcbegun){
@@ -7611,8 +7674,9 @@ addLayer("r", {
                 if(player.r.rc2) player.r.rct=180
                 if(player.r.rc3) player.r.rct=900
                 if(player.r.rc4) player.r.rct=330
+                if(player.r.rc5) player.r.rct=120
             },
-            canClick(){return player.r.rc1||player.r.rc2||player.r.rc3||player.r.rc4}
+            canClick(){return player.r.rc1||player.r.rc2||player.r.rc3||player.r.rc4||player.r.rc5}
         }
     },
     milestones:{
@@ -7684,6 +7748,12 @@ addLayer("r", {
             effectDescription(){return `Unlock a new challenge.`},
         },
         11: {
+            requirementDescription: "Core level 37",
+            done() { return player.r.coreLv.gte(18)},
+            style:{"width":"500px"},
+            effectDescription(){return `You can get 10 reincarnation times on reincarnation.`},
+        },
+        12: {
             requirementDescription: "Core level 40",
             done() { return player.r.coreLv.gte(40)},
             unlocked() {return player.r.coreLv.gte(40)},

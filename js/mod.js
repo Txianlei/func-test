@@ -13,13 +13,20 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.9",
-	name: "Dilation",
+	num: "1.0",
+	name: "True-release",
 }
 
 let changelog = `
-	<h1><b>Current endgame: Reach stage 4.</h1><br><br>
+	<h1><b>Current endgame: Code accepted.</h1><br><br>
 	<h1>Changelog:</h1><br><br>
+	<h3>v1.0</h3><br>
+		-Added 9 layers.<br>
+		-Added lots of upgrades.<br>
+		-Added lots of challenges.<br>
+		-Added lots of buyables.<br>
+		-Fixed lots of bugs.<br>
+		-Added 30 achievements.<br><br>
 	<h3>v0.9</h3><br>
 		-Added dilation.<br>
 		-Added 18 upgrades.<br>
@@ -72,7 +79,21 @@ let changelog = `
 		- Added 10 upgrades.<br><br>
 	<h3>v0.0</h3><br>
 		- Added function.<br>
-		- Added 5 upgrades.`
+		- Added 5 upgrades.<br>
+		<br><br><br><br>
+		<br><br><br><br>
+		<br><br><br><br>
+		<br><br><br><br>
+		<br><br><br><br>
+		<br><br><br><br>
+		<br><br><br><br>
+		<br><br><br><br>
+		<br><br><br><br>
+		<br><br><br><br>
+		<br><br><br><br>
+		<br><br>5<br><br>
+		<br><br><br><br>
+		<br><br><br><br>`
 
 let winText = `You've reach the current end of game,congrats!`
 
