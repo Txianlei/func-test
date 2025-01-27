@@ -7749,7 +7749,7 @@ addLayer("r", {
         },
         11: {
             requirementDescription: "Core level 37",
-            done() { return player.r.coreLv.gte(18)},
+            done() { return player.r.coreLv.gte(37)},
             style:{"width":"500px"},
             effectDescription(){return `You can get 10 reincarnation times on reincarnation.`},
         },
