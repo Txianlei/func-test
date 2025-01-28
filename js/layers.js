@@ -42,6 +42,15 @@ addLayer("f", {
         kmult:new Decimal(1),
         code:"",
         codeac:false,
+        isspeedrun:false,
+        speedruntime:0,
+        currenttime:0,
+        st0time:9999999999,
+        st1time:9999999999,
+        st2time:9999999999,
+        st3time:9999999999,
+        st4time:9999999999,
+        besttime:9999999999,
     }},
     color: "#DDDDDD",
     requires: new Decimal(10), // Can be a function that takes requirement increases into account
@@ -241,15 +250,43 @@ addLayer("f", {
                 ["display-text",
                 function() {return `You need to input a 4-digit code to upgrade your function, here are the hints.<br>
                                     1.These hints doesn't tell the order of the code, you need to find it by yourself.<br>
-                                    2.For one of the code, you need to find the differencies between the upside down, the number on the left of the different will tell the order.<br>
+                                    2.For one of the code, you need to find the difference between the upside down, the number on the left of the different will tell the order.<br>
                                     3.For one of the code, you need to find the dark text under the chains<br>
                                     4.For one of the code, you need to check the progress you've got, what's the meaning of their name?<br>
-                                    5.For one of the code, you need to go deeper when you found changes, the order will be told after you know other three.`},{ "font-size": "15px"}],
+                                    5.For one of the code, you need to go deeper when you found changes, the order will be told after you know other three.<br>
+                                    6.If you confirm the right code, you will get a challenge achievement which is quite useful.<br>
+                                    7.If you don't know the code, that's OK, input <em>The function tree</> to skip this one.`},{ "font-size": "15px"}],
+                ["clickables",[8]]
             ],
             unlocked(){return player.f.ftype==4&&player.r.rc5fin}
         }, 
+        "Speedrun":{
+            content:[
+                ["display-text",
+                    function() { return `Current speedrun total time:<h2 style="color:rgb(255,255,255);text-shadow:0 0 5px rgb(255,255,255);font-family:MS Serif">${formatTime(player.f.speedruntime)}</h2>`},{ "font-size": "20px"}],
+                "blank",
+                ["display-text",
+                    function() { return player.f.ftype==0?`Current stage time:<h2 style="color:rgb(200,100,120);text-shadow:0 0 5px rgb(200,100,120);font-family:MS Serif">${formatTime(player.f.currenttime)}</h2>`:
+                                        player.f.ftype==1?`Current stage time:<h2 style="color:orange;text-shadow:0 0 5px orange;font-family:MS Serif">${formatTime(player.f.currenttime)}</h2>`:
+                                        player.f.ftype==2?`Current stage time:<h2 style="color:rgb(250,180,0);text-shadow:0 0 5px rgb(250,180,0);font-family:MS Serif">${formatTime(player.f.currenttime)}</h2>`:
+                                        player.f.ftype==3?`Current stage time:<h2 style="color:rgb(50,205,50);text-shadow:0 0 5px rgb(50,205,50);font-family:MS Serif">${formatTime(player.f.currenttime)}</h2>`:
+                                        player.f.ftype==4?`Current stage time:<h2 style="color:rgb(65,205,225);text-shadow:0 0 5px rgb(65,205,225);font-family:MS Serif">${formatTime(player.f.currenttime)}</h2>`:"..."},{ "font-size": "20px"}],
+                "blank",
+                ["display-text",
+                    function() { return `-Best time-<br>
+                                stage 0:<h2 style="color:rgb(200,100,120);text-shadow:0 0 5px rgb(200,100,120);font-family:MS Serif">${formatTime(player.f.st0time)}</h2><br>
+                                stage 1:<h2 style="color:orange;text-shadow:0 0 5px orange;font-family:MS Serif">${formatTime(player.f.st1time)}</h2><br>
+                                stage 2:<h2 style="color:rgb(250,180,0);text-shadow:0 0 5px rgb(250,180,0);font-family:MS Serif">${formatTime(player.f.st2time)}</h2><br>
+                                stage 3:<h2 style="color:rgb(50,205,50);text-shadow:0 0 5px rgb(50,205,50);font-family:MS Serif">${formatTime(player.f.st3time)}</h2><br>
+                                stage 4:<h2 style="color:rgb(65,205,225);text-shadow:0 0 5px rgb(65,205,225);font-family:MS Serif">${formatTime(player.f.st4time)}</h2><br>
+                                total:<h2 style="color:rgb(255,255,255);text-shadow:0 0 5px rgb(255,255,255);font-family:MS Serif">${formatTime(player.f.besttime)}</h2>`},{ "font-size": "17.5px"}],
+            ],
+            unlocked(){return player.f.isspeedrun}
+        }, 
     },
     update(diff){
+        player.f.speedruntime+=diff
+        player.f.currenttime+=diff
         player.f.points=player.points
         player.f.multiplier=tmp.f.calctimer
         player.f.y=tmp.f.calcgamma
@@ -3001,6 +3038,19 @@ addLayer("f", {
                 }
             },
             onClick(){
+                if(player.f.ftype==0){
+                    player.f.st0time=Math.min(player.f.st0time,player.f.currenttime)
+                }
+                if(player.f.ftype==1){
+                    player.f.st1time=Math.min(player.f.st1time,player.f.currenttime)
+                }
+                if(player.f.ftype==2){
+                    player.f.st2time=Math.min(player.f.st2time,player.f.currenttime)
+                }
+                if(player.f.ftype==3){
+                    player.f.st3time=Math.min(player.f.st3time,player.f.currenttime)
+                }
+                player.f.currenttime=0
                 player.f.ftype+=1
                 player.points=new Decimal(1)
                 player.f.upgrades=[]
@@ -3040,6 +3090,24 @@ addLayer("f", {
                 setBuyableAmount("f",41,new Decimal(0))
                 setBuyableAmount("f",42,new Decimal(0))
                 setBuyableAmount("f",43,new Decimal(0))
+                layerDataReset("r")
+                layerDataReset("su")
+                layerDataReset("up")
+                layerDataReset("pt")
+                layerDataReset("hp")
+                layerDataReset("c")
+                layerDataReset("pu")
+                layerDataReset("sp")
+                layerDataReset("p")
+                layerDataReset("r")
+                layerDataReset("sp")
+                layerDataReset("p")
+                layerDataReset("su")
+                layerDataReset("up")
+                layerDataReset("c")
+                layerDataReset("pu")
+                layerDataReset("pt")
+                layerDataReset("hp")
             },
             canClick(){return true}
         },
@@ -3213,9 +3281,91 @@ addLayer("f", {
                     player.f.code="ACCEPTED"
                     player.f.codeac=true
                 }
+                if(player.f.code=="The function tree"){
+                    player.f.code="ACCEPTED"
+                }
                 else player.f.code="DECLINED"
             },
-            canClick(){return player.f.code.length==4}
+            canClick(){return player.f.code!="ACCEPTED"}
+        },
+        81:{
+            title() {return `Stage speedrun`},
+            display(){return `By clicking this completly reset all your pregress so far include stages!<br>
+                              Try to reach this place in a shorter time!<br>
+                              (Also unlock a new tab:speedrun)<br>`},
+            style:{"height":"350px","width":"350px","border-radius":"0%","border":"6px solid","border-color":"#EEEEEE","color":"#EEEEEE","font-size":"15px","background-color":"#eeeeee25"},
+            unlocked(){return player.f.code=="ACCEPTED"},
+            onClick(){
+                let check=confirm("Are you sure to start the speedrun? You'd better export your savefile first...")
+                if(check){
+                    if(player.f.ftype==4){
+                        player.f.st4time=Math.min(player.f.st4time,player.f.currenttime)
+                        player.f.besttime=Math.min(player.f.besttime,player.f.speedruntime)
+                    }
+                    player.f.currenttime=0
+                    player.f.ftype=0
+                    player.f.isspeedrun=true
+                    player.f.speedruntime=0
+                    player.points=new Decimal(1)
+                    player.f.upgrades=[]
+                    player.f.adder=new Decimal(0)
+                    player.f.multiplier=new Decimal(1)
+                    player.f.exp=new Decimal(1)
+                    player.f.calevel=new Decimal(0)
+                    player.f.capoints=new Decimal(0)
+                    player.f.cmlevel=new Decimal(0)
+                    player.f.cmpoints=new Decimal(0)
+                    player.f.challenges[31]=0
+                    player.f.challenges[32]=0
+                    player.f.funcpower=new Decimal(0)
+                    player.f.totalpower=new Decimal(0)
+                    player.f.cubereq=new Decimal(100)
+                    player.f.proton=new Decimal(0)
+                    player.f.neutron=new Decimal(0)
+                    player.f.ne=new Decimal(0)
+                    player.f.challenges[51]=0
+                    player.f.challenges[52]=0
+                    player.f.challenges[71]=0
+                    player.f.challenges[72]=0
+                    player.f.challenges[81]=0
+                    player.f.challenges[82]=0
+                    player.f.challenges[91]=0
+                    player.f.challenges[92]=0
+                    player.f.challenges[93]=0
+                    setBuyableAmount("f",11,new Decimal(0))
+                    setBuyableAmount("f",12,new Decimal(0))
+                    setBuyableAmount("f",13,new Decimal(0))
+                    setBuyableAmount("f",21,new Decimal(0))
+                    setBuyableAmount("f",22,new Decimal(0))
+                    setBuyableAmount("f",23,new Decimal(0))
+                    setBuyableAmount("f",31,new Decimal(0))
+                    setBuyableAmount("f",32,new Decimal(0))
+                    setBuyableAmount("f",33,new Decimal(0))
+                    setBuyableAmount("f",41,new Decimal(0))
+                    setBuyableAmount("f",42,new Decimal(0))
+                    setBuyableAmount("f",43,new Decimal(0))
+                    layerDataReset("r")
+                    layerDataReset("su")
+                    layerDataReset("up")
+                    layerDataReset("pt")
+                    layerDataReset("hp")
+                    layerDataReset("c")
+                    layerDataReset("pu")
+                    layerDataReset("sp")
+                    layerDataReset("p")
+                    layerDataReset("r")
+                    layerDataReset("sp")
+                    layerDataReset("p")
+                    layerDataReset("su")
+                    layerDataReset("up")
+                    layerDataReset("c")
+                    layerDataReset("pu")
+                    layerDataReset("pt")
+                    layerDataReset("hp")
+                    player.tab="none"
+                }
+            },
+            canClick(){return player.f.ftype==4}
         },
     },
     challenges:{
@@ -3861,6 +4011,7 @@ addLayer("p", {
         if(hasUpgrade("up",11)) mult=mult.times(upgradeEffect("up",11))
         if(hasUpgrade("su",13)) mult=mult.times(upgradeEffect("su",13)[1])
         if(hasUpgrade("sp",11)) mult=mult.times(2)
+        if(hasAchievement("a",125)) mult=mult.times(2)
         if(hasMilestone("p",1)) mult=mult.times(3)
         mult=mult.times(buyableEffect("p",13))
         mult=mult.times(tmp.pu.effect)
@@ -3958,17 +4109,17 @@ addLayer("p", {
         return getBuyableAmount("p",11).add(getBuyableAmount("p",12).add(getBuyableAmount("p",13).add(getBuyableAmount("p",21).add(getBuyableAmount("p",22).add(getBuyableAmount("p",23)))))).times(multi)
     },
     update(diff){
-        if(hasUpgrade("up",15)) layers.p.buyables[11].buyMax()
+        if(hasUpgrade("up",15)&&hasAchievement("a",165)) layers.p.buyables[11].buyMax()
         else if(hasUpgrade("hp",14)) layers.p.buyables[11].buy()
-        if(hasUpgrade("up",15)) layers.p.buyables[12].buyMax()
+        if(hasUpgrade("up",15)&&hasAchievement("a",165)) layers.p.buyables[12].buyMax()
         else if(hasUpgrade("hp",14)) layers.p.buyables[12].buy()
-        if(hasUpgrade("up",15)) layers.p.buyables[13].buyMax()
+        if(hasUpgrade("up",15)&&hasAchievement("a",165)) layers.p.buyables[13].buyMax()
         else if(hasUpgrade("hp",14)) layers.p.buyables[13].buy()
-        if(hasUpgrade("up",15)) layers.p.buyables[21].buyMax()
+        if(hasUpgrade("up",15)&&hasAchievement("a",165)) layers.p.buyables[21].buyMax()
         else if(hasUpgrade("hp",14)) layers.p.buyables[21].buy()
-        if(hasUpgrade("up",15)) layers.p.buyables[22].buyMax()
+        if(hasUpgrade("up",15)&&hasAchievement("a",165)) layers.p.buyables[22].buyMax()
         else if(hasUpgrade("hp",14)) layers.p.buyables[22].buy()
-        if(hasUpgrade("up",15)) layers.p.buyables[23].buyMax()
+        if(hasUpgrade("up",15)&&hasAchievement("a",165)) layers.p.buyables[23].buyMax()
         else if(hasUpgrade("hp",14)) layers.p.buyables[23].buy()
     },
     upgrades:{
@@ -4481,6 +4632,7 @@ addLayer("sp", {
         if(hasUpgrade("up",12)) mult=mult.times(upgradeEffect("up",12))
         if(hasMilestone("p",5)) mult=mult.times(2)
         if(hasMilestone("hp",4)) mult=mult.times(3)
+        if(hasAchievement("a",135)) mult=mult.times(5)
         mult=mult.times(buyableEffect("p",22))
         mult=mult.times(tmp.up.calcupboost)
         if(player.hp.unlocked) mult=mult.times(tmp.hp.calchpboost)
@@ -4875,6 +5027,7 @@ addLayer("pu", {
         let mult = new Decimal(1);
         if(hasUpgrade("pu",13)) mult=mult.div(upgradeEffect("pu",13))
         if(hasUpgrade("hp",31)) mult=mult.div(upgradeEffect("hp",31))
+        if(hasAchievement("a",145)) mult=mult.div(25)
         mult=mult.pow(new Decimal(1).div(tmp.su.effect))
         if((player.r.rngseed3[0]=='1'||player.r.rngseed3[0]=='6'||player.r.rngseed3[0]=='9')&&player.r.allowrng3) mult=mult.pow(new Decimal(1).div(tmp.r.calcrng3boost[1]))
         return mult;
@@ -5178,6 +5331,7 @@ addLayer("hp", {
         if(hasUpgrade("hp",35)) mult=mult.times(upgradeEffect("hp",35))
         if(hasUpgrade("up",14)) mult=mult.times(upgradeEffect("up",14))
         if(hasMilestone("hp",4)) mult=mult.times(3)
+        if(hasAchievement("a",155)) mult=mult.times(10)
         if((player.r.rngseed5[0]=='1'||player.r.rngseed5[0]=='3'||player.r.rngseed5[0]=='5'||player.r.rngseed5[0]=='7')&&player.r.allowrng5) mult=mult.times(tmp.r.calcrng5boost[1])
         mult=mult.times(tmp.up.calcupboost)
         return mult
@@ -5948,6 +6102,7 @@ addLayer("su", {
     },
     gainMult() { 
         let mult = new Decimal(1);
+        if(hasAchievement("a",175)) mult=mult.div(101)
         return mult;
     },
     row: 2, // Row the layer is in on the tree (0 is the first row)
@@ -7001,6 +7156,7 @@ addLayer("r", {
         if((player.r.rngseed1=="99")&&player.r.allowrng1) mult=mult.times(2)
         if((player.r.rngseed2=="99")&&player.r.allowrng2) mult=mult.times(2)
         if((player.r.rngseed5=="99")&&player.r.allowrng5) mult=mult.times(5)
+        if(hasAchievement("a",185)) mult=mult.times(5)
         if(player.r.rc3fin) mult=mult.times(Decimal.pow(1.025,player.pt.blv[3]))
         mult=mult.times(buyableEffect("r",32))
         return mult
@@ -7967,11 +8123,7 @@ addLayer("a", {
             name: `VA==`,
             style:{"border-radius":"0%","border-color":"red"},
             done() {return player.points.gte(10)&&player.f.multiplier.eq(1)},
-            tooltip(){ return (hasAchievement("a",15) ? `Get 10 points without having any multiplier in stage 0.` : `R2V0IDEwI
-            HBvaW50cyB3aXRo
-            b3V0IGhhdmluZyBhbnkgb
-            XVsdGlwbGllci4=`)+
-            `\nreward: Add 1 to the base adder of x only in stage 0.`},
+            tooltip(){ return `Get 10 points without having any multiplier in stage 0.<br>reward: Add 1 to the base adder of x only in stage 0.`},
         },
         21: {
             name: "Gods are pleased",
@@ -8001,10 +8153,7 @@ addLayer("a", {
             name: `SA==`,
             style:{"border-radius":"0%","border-color":"red"},
             done() {return player.f.exp.gt(1.685)&&player.f.exp.lt(1.694)},
-            tooltip() { return (hasAchievement("a",25) ? `Make the exponent of x exactly 1.69.` : `TWFrZSB0aGUgZXhwb25lb
-            nQgb2YgeCBleGFjdGx
-            5IDEuNjku`)+
-            `\nreward: Add 0.01 to sacrifice bonus only in stage 0.`},
+            tooltip() { return `Make the exponent of x exactly 1.69.<br>reward: Add 0.01 to sacrifice bonus only in stage 0.`},
         },
         31: {
             name: "A challenging day",
@@ -8034,9 +8183,7 @@ addLayer("a", {
             name: `RQ==`,
             style:{"border-radius":"0%","border-color":"red"},
             done() {return player.f.exp.gte("1eeeeeeeeeeeeeeeeeee20")||hasAchievement("a",92)},
-            tooltip(){ return (hasAchievement("a",35) ? `Make the exponent of x 1F20.` : `TWFrZSB0aGUgZXhwb25l
-            bnQgb2YgeCAxRjIwLg==`)+
-            `\nreward: 1.05x Point gain.`},
+            tooltip(){ return `Make the exponent of x 1F20.<br>reward: 1.05x Point gain.`},
         },
         41: {
             name: "A new function",
@@ -8099,10 +8246,7 @@ addLayer("a", {
             name: `SA==`,
             style:{"border-radius":"0%","border-color":"orange"},
             done() {return inChallenge("f",22)&&player.f.ftype>=1&&tmp.f.clickables[21].unlocked},
-            tooltip(){ return (hasAchievement("a",55) ? `Find a place you can't charge.` : `RmluZCBhIHBsYWNlIHdoZ
-            XJlIHlvdSBjYW4ndCBj
-            aGFyZ2Uu`)+
-            `\nreward: The factor of x is raised to ^1.05 in stage 1.`},
+            tooltip(){ return `Find a place you can't charge.<br>reward: The factor of x is raised to ^1.05 in stage 1.`},
         },
         61: {
             name: "Eight in a row.",
@@ -8132,9 +8276,7 @@ addLayer("a", {
             name: `SQ==`,
             style:{"border-radius":"0%","border-color":"orange"},
             done() {return player.points.gte(100)&&player.f.calevel.eq(0)&&player.f.cmlevel.eq(0)&&player.f.ftype>=1},
-            tooltip(){ return (hasAchievement("a",65) ? `Reach 100 points without charging.` : `R2V0IDEwMCBwb2ludHMgd2
-            l0aG91dCBjaGFyZ2luZy4=`)+
-            `\nreward: Reduce the cost of charging factor a bit.`},
+            tooltip(){ return `Reach 100 points without charging.<br>reward: Reduce the cost of charging factor a bit.`},
         },
         71: {
             name: "let gamma=new Decimal(10)",
@@ -8164,9 +8306,7 @@ addLayer("a", {
             name: "Ug==.",
             style:{"border-radius":"0%","border-color":"yellow"},
             done() {return hasUpgrade("f",132)},
-            tooltip(){ return (hasAchievement("a",75) ? `Find the secret one.` : `RmluZCB0aGUg
-            c2VjcmV0IG9uZS4=`)+
-            `\nreward: Add 1 to the base multiplier of x only in stage 2`},
+            tooltip(){ return `Find the secret one.<br>reward: Add 1 to the base multiplier of x only in stage 2`},
         },
         81: {
             name: "It's called funity challenges",
@@ -8196,11 +8336,7 @@ addLayer("a", {
             name: "RA==.",
             style:{"border-radius":"0%","border-color":"yellow"},
             done() {return !hasUpgrade("f",241)&&player.points.gte(400000)},
-            tooltip(){ return (hasAchievement("a",85) ? `Get 400000 points without buying study 121.` : `R2V0IDQwMDA
-            wMCBwb2ludHMgd2l
-            0aG91dCBidXlpbmcgc
-            3R1ZHkgMTIxLg==.`)+
-            `\nreward: Reduce the base cube req by 1 points`},
+            tooltip(){ return `Get 400000 points without buying study 121.<br>reward: Reduce the base cube req by 1 points`},
         },
         91: {
             name: "Finally a normal game...?",
@@ -8218,7 +8354,7 @@ addLayer("a", {
             name: "KkKkKkKk",
             style:{"border-radius":"0%"},
             done() {return player.f.k.gt(0.05)},
-            tooltip: "Make k greater the 0.05.",
+            tooltip: "Make k greater than 0.05.",
         },
         94: {
             name: "Kept study",
@@ -8230,8 +8366,7 @@ addLayer("a", {
             name: "Qw==.",
             style:{"border-radius":"0%","border-color":"green"},
             done() {return player.f.kmult.gte(2.5)},
-            tooltip(){ return (hasAchievement("a",95) ? `Reach expand hardcap.` : `UmVhY2ggZXhwYW5kIGhhcmRjYXAu.`)+
-            `\nreward: Add 0.001 to base k`},
+            tooltip(){ return `Reach expand hardcap.<br>reward: Add 0.001 to base k`},
         },
         101: {
             name: "I've been charged",
@@ -8261,8 +8396,7 @@ addLayer("a", {
             name: "Tw==.",
             style:{"border-radius":"0%","border-color":"green"},
             done() {return tmp.f.getproton.gte(100)&&!hasUpgrade("f",131)},
-            tooltip(){ return (hasAchievement("a",105) ? `Get 100 proton without buying studies.` : `R2V0IDEwMCBwcm90b24gd2l0aG9\n1dCBidXlpbmcgc3R1ZGllcy4=`)+
-            `\nreward: 1.05x proton gain.`},
+            tooltip(){ return `Get 100 proton without buying studies.<br>reward: 1.05x proton gain.`},
         },
         111: {
             name: "1e15 is too much",
@@ -8292,8 +8426,277 @@ addLayer("a", {
             name: "RA==.",
             style:{"border-radius":"0%","border-color":"green"},
             done() {return player.points.gte("1e2000")},
-            tooltip(){ return (hasAchievement("a",115) ? `Get 1e2000 points.` : `R2V0IDFlMjAwMCBwb2ludHM=`)+
-            `\nreward: 1.05x proton gain.`},
+            tooltip(){ return `Get 1e2000 points.<br>reward: 1.05x proton gain.`},
+        },
+        121: {
+            name: "You can get these achievements later, trust me.",
+            style:{"border-radius":"0%"},
+            done() {return player.f.ftype==4},
+            tooltip: "Reach stage 4.",
+        }, 
+        122: {
+            name: "Pre-stage",
+            style:{"border-radius":"0%"},
+            done() {return hasUpgrade("f",332)},
+            tooltip: "Unlock prestige.",
+        }, 
+        123: {
+            name: "10000 points seem like a lot",
+            style:{"border-radius":"0%"},
+            done() {return player.points.gte(1e4)&&player.f.ftype==4},
+            tooltip: "Get 10000 points in stage 4.",
+        },
+        124: {
+            name: "Tier II prestige boost",
+            style:{"border-radius":"0%"},
+            done() {return player.p.points.gte(2e6)},
+            tooltip: "Get 2e6 prestige points",
+        },
+        125: {
+            name: "RQ==.",
+            style:{"border-radius":"0%","border-color":"rgb(65,205,225)"},
+            done() {return player.p.points.gte(1e8)&&player.sp.points.eq(0)},
+            tooltip(){ return `Get 1e8 prestige with 0 SP.<br>reward:Double prestige gain.`},
+        },
+        131: {
+            name: "Super pre-stage",
+            style:{"border-radius":"0%"},
+            done() {return hasUpgrade("f",333)},
+            tooltip: "Unlock super prestige.",
+        },
+        132: {
+            name: "Milestones are based on the best",
+            style:{"border-radius":"0%"},
+            done() {return player.sp.points.gte(10)},
+            tooltip: "Get 10 SP points.",
+        },
+        133: {
+            name: "Going up per-grade",
+            style:{"border-radius":"0%"},
+            done() {return hasUpgrade("f",334)},
+            tooltip: "Unlock prestige upgraders.",
+        },
+        134: {
+            name: "40 disagrees with infinity",
+            style:{"border-radius":"0%"},
+            done() {return player.points.gte(1e40)&&player.f.ftype==4},
+            tooltip: "Get 1e40 points in stage 4.",
+        },
+        135: {
+            name: "SQ==.",
+            style:{"border-radius":"0%","border-color":"rgb(65,205,225)"},
+            done() {return player.p.points.gte(1e52)&&player.hp.points.eq(0)&&player.f.ftype==4},
+            tooltip(){ return `Get 1e52 points with 0 HP.<br>reward:5x SP gain.`},
+        },
+        141: {
+            name: "Once upon a hyper-blue-moon....",
+            style:{"border-radius":"0%"},
+            done() {return hasUpgrade("f",335)},
+            tooltip: "Unlock hyper prestige.",
+        },
+        142: {
+            name: "Cant hold all these prestiges",
+            style:{"border-radius":"0%"},
+            done() {return player.p.points.gte(1e75)},
+            tooltip: "Get over 1e75 prestige points.",
+        },
+        143: {
+            name: "Bot Boost Booster",
+            style:{"border-radius":"0%"},
+            done() {return hasUpgrade("hp",14)},
+            tooltip: `Buy "why auto".`,
+        },
+        144: {
+            name: "Some challenges await",
+            style:{"border-radius":"0%"},
+            done() {return hasUpgrade("f",341)},
+            tooltip: `Unlock challenges.`,
+        },
+        145: {
+            name: "Uw==",
+            style:{"border-radius":"0%","border-color":"rgb(65,205,225)"},
+            done() {return player.points.gte(player.c.goal.times(1e5))&&player.c.isbegun},
+            tooltip: `Get points over 1e5 times than the goal in a challenge.<br>reward:Divide PU cost by 25.`,
+        },
+        151: {
+            name: "The last but not the least",
+            style:{"border-radius":"0%"},
+            done() {return player.c.points.gte(20)},
+            tooltip: `Get 20 challenge shards.`,
+        },
+        152: {
+            name: "Chalack Jack",
+            style:{"border-radius":"0%"},
+            done() {return player.c.points.gte(21)},
+            tooltip: `Get 21 challenge shards.`,
+        },
+        153: {
+            name: "Prestige depends on super",
+            style:{"border-radius":"0%"},
+            done() {return hasUpgrade("f",342)},
+            tooltip: `Unlock super upgraders.`,
+        },
+        154: {
+            name: "6561!",
+            style:{"border-radius":"0%"},
+            done() {return player.su.points.gte(4)},
+            tooltip: `Get 4 super upgraders.`,
+        },
+        155: {
+            name: "Tg==",
+            style:{"border-radius":"0%","border-color":"rgb(65,205,225)"},
+            done() {return player.hp.points.gte(1e45)&&player.up.points.eq(0)&&player.f.ftype==4},
+            tooltip: `Get 1e45 HP points with 0 UP.<br>reward:10x HP gain.`,
+        },
+        161: {
+            name: "Give UP",
+            style:{"border-radius":"0%"},
+            done() {return hasUpgrade("f",343)},
+            tooltip: `Unlock ultra prestige.`,
+        },
+        162: {
+            name: "These Qols are too late",
+            style:{"border-radius":"0%"},
+            done() {return hasMilestone("up",0)},
+            tooltip: `Get 2 UP.`,
+        },
+        163: {
+            name: "Bot Boot Boost Booster Boostered",
+            style:{"border-radius":"0%"},
+            done() {return hasUpgrade("up",15)},
+            tooltip: `Buy "Hyper auto".`,
+        },
+        164: {
+            name: "Can I have a break???",
+            style:{"border-radius":"0%"},
+            done() {return player.p.points.gte("1.8e308")},
+            tooltip: `Get 1.8e308 prestige.`,
+        },
+        165: {
+            name: "SQ==",
+            style:{"border-radius":"0%","border-color":"rgb(65,205,225)"},
+            done() {return getBuyableAmount("p",11).gte(250)&&(!(hasUpgrade("hp",14)&&hasUpgrade("up",15)))},
+            tooltip: `Buy 250 "Point booster"s without buying "why auto" or "hyper auto".<br>reward:Keep auto prestige buyables on all resets.`,
+        },
+        171: {
+            name: "[DATA ACHEIVE]",
+            style:{"border-radius":"0%"},
+            done() {return player.points.gte("1e1000")&&player.f.ftype==4},
+            tooltip: `Get 1e1000 points in stage 4`,
+        },
+        172: {
+            name: "Welcome, builder",
+            style:{"border-radius":"0%"},
+            done() {return hasUpgrade("f",344)},
+            tooltip: `Unlock prestium.`,
+        },
+        173: {
+            name: "This build is OP",
+            style:{"border-radius":"0%"},
+            done() {return player.pt.blv[5].gte(1)},
+            tooltip: `Get 1 level of building V.`,
+        },
+        174: {
+            name: "This build is too OP",
+            style:{"border-radius":"0%"},
+            done() {return player.pt.blv[3].gte(55)},
+            tooltip: `Get 55 level of building III.`,
+        },
+        175: {
+            name: "Tg==",
+            style:{"border-radius":"0%","border-color":"rgb(65,205,225)"},
+            done() {return player.points.gte("1e100100")&&player.r.points.eq(0)&&player.f.ftype==4},
+            tooltip: `Get e100100 points with 0 rein points.<br>reward:Divide SU price by 101`,
+        },
+        181: {
+            name: "Rein force",
+            style:{"border-radius":"0%"},
+            done() {return player.r.points.gte(1)},
+            tooltip: `Do a reincarnation`,
+        },
+        182: {
+            name: "Core enabled",
+            style:{"border-radius":"0%"},
+            done() {return player.r.rngseed1!="00"},
+            tooltip: `Reach core level 1 and generate a seed.`,
+        },
+        183: {
+            name: "Yet another reference but not the first one",
+            style:{"border-radius":"0%"},
+            done() {return hasMilestone("r",4)},
+            tooltip: `Unlock reincarnation dimensions.`,
+        },
+        184: {
+            name: " TICK-TOCK-BOOM",
+            style:{"border-radius":"0%"},
+            done() {return hasMilestone("r",6)},
+            tooltip: `Unlock reincarnation challenges.`,
+        },
+        185: {
+            name: "RQ==",
+            style:{"border-radius":"0%","border-color":"rgb(65,205,225)"},
+            done() {return player.r.rngseed1=="99"||player.r.rngseed2=="99"||player.r.rngseed5=="99"},
+            tooltip: `Get a seed with at least one type is "99"(Can get this while the seeds are not unlocked yet).<br>reward:5x Rein points gain.`,
+        },
+        191: {
+            name: "Dilate didn't give you something",
+            style:{"border-radius":"0%"},
+            done() {return player.r.rc1fin},
+            tooltip: `Complete RC1`,
+        },
+        192: {
+            name: "Call a phone,pls",
+            style:{"border-radius":"0%"},
+            done() {return player.r.rc2fin},
+            tooltip: `Complete RC2`,
+        },
+        193: {
+            name: "Still waving in the lonely universe",
+            style:{"border-radius":"0%"},
+            done() {return player.r.rc3fin},
+            tooltip: `Complete RC3`,
+        },
+        194: {
+            name: "rngrngrngrngrgn....",
+            style:{"border-radius":"0%"},
+            done() {return player.r.rc4fin},
+            tooltip: `Complete RC4`,
+        },
+        195: {
+            name: "Broken chains",
+            style:{"border-radius":"0%","border-color":"rgb(65,205,225)"},
+            done() {return player.r.rc5fin},
+            tooltip: `Complete RC5.<br>reward:A congrat.`,
+        },
+        201: {
+            name: "Speedrun pro",
+            style:{"border-radius":"0%","border-color":"rgb(65,205,225)"},
+            done() {return player.r.rc5time<=120},
+            tooltip: `Complete RC5 in 2 minutes.`,
+        },
+        202: {
+            name: "Speedrun master",
+            style:{"border-radius":"0%","border-color":"rgb(65,205,225)"},
+            done() {return player.r.rc5time<=90},
+            tooltip: `Complete RC5 in 1 minute and 30 seconds.`,
+        },
+        203: {
+            name: "Here's the extreme",
+            style:{"border-radius":"0%","border-color":"rgb(65,205,225)"},
+            done() {return player.r.rc5time<=60},
+            tooltip: `Complete RC5 in 1 minute.`,
+        },
+        204: {
+            name: "I can't stop being myself",
+            style:{"border-radius":"0%","border-color":"rgb(65,205,225)"},
+            done() {return player.r.rc5time<=50},
+            tooltip: `Complete RC5 in 50 seconds.`,
+        },
+        205: {
+            name: "Master Decoder",
+            style:{"border-radius":"0%","border-color":"rgb(65,205,225)"},
+            done() {return player.f.codeac},
+            tooltip: `Input the right code.<br>reward:A permanently 10x point boost.`,
         },
         update(diff) {	// Added this section to call adjustNotificationTime every tick, to reduce notification timers
             adjustNotificationTime(diff);
@@ -8301,8 +8704,8 @@ addLayer("a", {
     },
     tabFormat: [
         "blank", 
-        ["display-text", function() { return"Achievements:"+player.a.achievements.length+"/55" }], 
-        ["display-text", function() { return`Achievements on the last column are challenging, complete them to get a bonus!(Maybe you can do them later)` }], 
+        ["display-text", function() { return"Achievements:"+player.a.achievements.length+"/100" }], 
+        ["display-text", function() { return`Achievements on the last column are challenging, complete them to get a bonus!(Maybe you can do them later but only in correct stage!)` }], 
         "blank", "blank","blank","blank",
         "achievements",
     ],

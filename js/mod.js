@@ -271,6 +271,7 @@ function getPointGen() {
 	gain=gain.plus(a)
 	gain=gain.times(m)
 	if(hasAchievement("a",35)) gain=gain.times(1.05)
+	if(hasAchievement("a",205)) gain=gain.times(10)
 	if(player.f.ftype<=2) gain=gain.pow(player.f.exp)
 	if(player.f.ftype==0) gain=gain.slog()
 	if(player.f.ftype==1) gain=Decimal.log(gain,player.f.y)
@@ -294,7 +295,7 @@ var displayThings = [
 
 // Determines when the game "ends"
 function isEndgame() {
-	return player.f.codeac
+	return player.f.code=="ACCEPTED"
 }
 
 
